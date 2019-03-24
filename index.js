@@ -799,6 +799,18 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'custom':           {
+			label: 'Custom command',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Custom command, first 80 is already in the command. only XX XX XX XX XX aloud',
+					id: 'custom',
+					regex: '/^[0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2}$/',
+					width: 6
+				}
+			]
+		},
 		'speedPset':      {
 			label: 'Preset Drive Speed',
 			options: [
@@ -924,7 +936,6 @@ instance.prototype.action = function(action) {
 			self.ptSpeed = SPEED[self.ptSpeedIndex].id
 			break;
 
-
 		case 'zoomI':
 			cmd = '\x81\x01\x04\x07\x02\xFF';
 			self.sendVISCACommand(cmd);
@@ -1032,6 +1043,14 @@ instance.prototype.action = function(action) {
 
 		case 'speedPset':
 			cmd ='\x81\x01\x7E\x01\x0B' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + String.fromCharCode(parseInt(opt.speed,16) & 0xFF) + '\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'custom':
+			cmd ='\x80';
+			var hexData = opt.custom.replace(/\s+/, '');
+			var tempBuffer = new Buffer(hexData, 'hex');
+			cmd += tempBuffer.toString('binary')
 			self.sendVISCACommand(cmd);
 			break;
 
