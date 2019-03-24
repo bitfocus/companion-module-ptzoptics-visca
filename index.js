@@ -804,9 +804,9 @@ instance.prototype.actions = function(system) {
 			options: [
 				{
 					type: 'textinput',
-					label: 'Custom command, first 80 is already in the command. only XX XX XX XX XX aloud',
+					label: 'Custom command, only 8X XX XX XX XX XX aloud',
 					id: 'custom',
-					regex: '/^[0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2}$/',
+					regex: '/^[8][0-1] [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2}$/',
 					width: 6
 				}
 			]
@@ -1047,10 +1047,9 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'custom':
-			cmd ='\x80';
 			var hexData = opt.custom.replace(/\s+/, '');
 			var tempBuffer = new Buffer(hexData, 'hex');
-			cmd += tempBuffer.toString('binary')
+			cmd = tempBuffer.toString('binary')
 			self.sendVISCACommand(cmd);
 			break;
 
