@@ -804,9 +804,9 @@ instance.prototype.actions = function(system) {
 			options: [
 				{
 					type: 'textinput',
-					label: 'Custom command, only 8X XX XX XX XX XX aloud',
+					label: 'Custom command, must start with 8',
 					id: 'custom',
-					regex: '/^[8][0-1] [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2} [0-9a-fA-F]{2}$/',
+					regex: '/^8[0-9a-fA-F]\\s*([0-9a-fA-F]\\s*)+$/',
 					width: 6
 				}
 			]
@@ -1047,10 +1047,15 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'custom':
-			var hexData = opt.custom.replace(/\s+/, '');
+			var hexData = opt.custom.replace(/\s+/g, '');
 			var tempBuffer = new Buffer(hexData, 'hex');
-			cmd = tempBuffer.toString('binary')
-			self.sendVISCACommand(cmd);
+			cmd = tempBuffer.toString('binary');
+
+			if ((tempBuffer[0] & 0xF0) === 0x80) {
+				self.sendVISCACommand(cmd);
+			} else {
+				self.log('error', 'Error, command "' + opt.custom + '" does not start with 8');
+			}
 			break;
 
 	}
