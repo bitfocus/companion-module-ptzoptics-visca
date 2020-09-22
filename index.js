@@ -799,18 +799,6 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'custom':           {
-			label: 'Custom command',
-			options: [
-				{
-					type: 'textinput',
-					label: 'Custom command, must start with 8',
-					id: 'custom',
-					regex: '/^8[0-9a-fA-F]\\s*([0-9a-fA-F]\\s*)+$/',
-					width: 6
-				}
-			]
-		},
 		'speedPset':      {
 			label: 'Preset Drive Speed',
 			options: [
@@ -825,6 +813,29 @@ instance.prototype.actions = function(system) {
 					label: 'speed setting',
 					id: 'speed',
 					choices: SPEED
+				}
+			]
+		},
+		'power': {
+			label: 'power camera',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'power on/off',
+					id: 'bool',
+					choices: [{ id: 'off', label:'off'},{ id: 'on', label:'on'}]
+				}
+			]
+		},
+		'custom':           {
+			label: 'Custom command',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Custom command, must start with 8',
+					id: 'custom',
+					regex: '/^8[0-9a-fA-F]\\s*([0-9a-fA-F]\\s*)+$/',
+					width: 6
 				}
 			]
 		}
@@ -1043,6 +1054,15 @@ instance.prototype.action = function(action) {
 
 		case 'speedPset':
 			cmd ='\x81\x01\x7E\x01\x0B' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + String.fromCharCode(parseInt(opt.speed,16) & 0xFF) + '\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+		
+		case 'power':
+			if(opt.bool == 'off') {
+				cmd = '\x81\x01\x04\x00\x03\xFF';
+			} else {
+				cmd = '\x81\x01\x04\x00\x02\xFF';
+			}
 			self.sendVISCACommand(cmd);
 			break;
 
