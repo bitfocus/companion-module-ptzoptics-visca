@@ -536,6 +536,38 @@ instance.prototype.init_presets = function () {
 			]
 		},
 		{
+			category: 'Lens',
+			label: 'Focus Lock',
+			bank: {
+				style: 'text',
+				text: 'FOCUS\\nLOCK',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'focusL',
+				}
+			]
+		},
+		{
+			category: 'Lens',
+			label: 'Focus Unlock',
+			bank: {
+				style: 'text',
+				text: 'FOCUS\\nUNLOCK',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'focusU',
+				}
+			]
+		},
+		{
 			category: 'Exposure',
 			label: 'Exposure Mode',
 			bank: {
@@ -734,6 +766,8 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'focusL':         { label: 'Focus Lock' },
+		'focusU':         { label: 'Focus Unlock' },
 		'expM':           {
 			label: 'Exposure Mode',
 			options: [
@@ -984,6 +1018,16 @@ instance.prototype.action = function(action) {
 			if (opt.bol == 1){
 				cmd = '\x81\x01\x04\x38\x03\xFF';
 			}
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'focusL':
+			cmd = '\x81\x0A\x04\x68\x02\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'focusU':
+			cmd = '\x81\x0A\x04\x68\x03\xFF';
 			self.sendVISCACommand(cmd);
 			break;
 
