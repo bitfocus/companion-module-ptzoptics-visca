@@ -832,9 +832,9 @@ instance.prototype.actions = function(system) {
 			options: [
 				{
 					type: 'textinput',
-					label: 'Custom command, must start with 8',
+					label: 'Please refer to PTZOptics VISCA over IP command document for valid commands.',
 					id: 'custom',
-					regex: '/^8[0-9a-fA-F]\\s*([0-9a-fA-F]\\s*)+$/',
+					regex: '/^81 ?([0-9a-fA-F]{2} ?){3,13}[fF][fF]$/',
 					width: 6
 				}
 			]
