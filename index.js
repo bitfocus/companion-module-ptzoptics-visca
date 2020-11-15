@@ -81,6 +81,18 @@ function hex2str(hexdata) {
 		return result;
 };
 
+
+/*
+ * Helper function to convert a binary string to a hex ASCII string
+ */
+function bin2hex(binStr) {
+
+	let strCmd = Buffer.from( binStr, 'binary' ).toString( 'hex' ).toUpperCase();
+
+	return strCmd;
+};
+
+
 function instance(system, id, config) {
 	var self = this;
 
@@ -192,6 +204,169 @@ instance.prototype.defineFeedbacks = function() {
 };
 
 
+/*
+ * Separate each byte in a hex string by spaces.
+ */
+instance.prototype.pretifyHexString = function (hexStr) {
+	return hexStr.match(/.{1,2}/g).join(' ');
+};
+
+
+/*
+ * TCP on-data callback for updating feedbacks and dynamic variables.
+ */
+instance.prototype.handleTcpData = function (data) {
+
+	// For the rest of this function we assume we have a Buffer object.
+	if ( ! (data instanceof Buffer) ) {
+		console.log("Data from PTZoptics VISCA: ", data);
+
+		return;
+	}
+
+	let resp = data.toString('hex').toUpperCase();
+
+	console.log("Data from PTZoptics VISCA: ", this.pretifyHexString( resp ) );
+
+	const cmdACK			= /^904[0-9]FF$/i;
+	const cmdComplete		= /^905[0-9]FF$/i;
+	const cmdSyntaxError	= /^906002FF$/i;
+	const cmdBufferFull		= /^906003FF$/i;
+	const cmdCanceled		= /^906[0-9]04FF$/i;
+	const cmdNoSocket		= /^906[0-9]05FF$/i;
+	const cmdNotExecutable	= /^906[0-9]41FF$/i;
+	const cmdInquiry		= /^9050[0-9A-F]+FF$/i;
+	
+	const presetResetCmds = [
+		'left',
+		'right',
+		'up',
+		'down',
+		'upLeft',
+		'upRight',
+		'downLeft',
+		'downRight',
+		'zoomI',
+		'zoomO',
+	];
+
+	// Sometimes multiple camera responses come in one tcp response, so we need to handle that.
+	responses = resp.split('FF').filter(item => item != '').map(resp => resp + 'FF');
+
+	for (let respIndex = 0; respIndex < responses.length; ++respIndex) {
+
+		if ( responses[respIndex].match(cmdACK) ) {
+			// This ACK is in response to some command, so let's pull out the oldest command
+			this.currentCommand = this.commandQueue.shift();
+
+		} else if ( this.currentCommand && responses[respIndex].match(cmdComplete) ) {
+			// We have a command and we received response back that it was complete. Let's
+			// attempt to update any variables or feedbacks.
+			if ( 'recallPset' === this.currentCommand.name ) {
+				// Save the variable as base-10 number for ease of readability
+				this.setInstanceState('active_preset', parseInt( this.currentCommand.options.val, 16 ), true);
+				this.checkFeedbacks('active_preset');
+			}
+
+			if ( presetResetCmds.find( item => item === this.currentCommand.name ) ) {
+				this.setInstanceState('active_preset', '', true);
+				this.checkFeedbacks('active_preset');
+			}
+
+			if ( 'power' === this.currentCommand.name ) {
+				this.updatePowerFeedbacks( this.currentCommand );
+			}
+
+			// Now that we've handled this command, let's clear it
+			this.currentCommand = null;
+
+		} else if ( responses[respIndex].match( cmdInquiry ) ) {
+
+			// Inquiry commands do not have the ACK followed by 'Complete' response structure.
+			// Instead, they just send back the inquiry response without either the ACK
+			// or 'Complete' response. In such a case we need to shift off our last command
+			// as it would not already been done so in an ACK response.
+
+			this.currentCommand = this.commandQueue.shift();
+
+			// TODO: Update any specific inquiry feedbacks or variables
+
+			this.log('info', `Command Name: ${ this.currentCommand.name }; Raw command: ${ this.pretifyHexString( this.currentCommand.cmd ) }; Raw response: ${ this.pretifyHexString( responses[respIndex] ) }`);
+
+			// Now that we've handled this command, let's clear it
+			this.currentCommand = null;
+
+		} else if ( responses[respIndex].match( cmdSyntaxError ) ) {
+
+			let cmd = this.commandQueue.shift();  // Remove bad command from queue
+
+			this.log('error', `Camera command contains a syntax error. (Command Name: ${ cmd.name }; Raw command: ${  this.pretifyHexString( cmd.cmd ) })`);
+
+		} else if ( responses[respIndex].match( cmdBufferFull ) ) {
+
+			let cmd = this.commandQueue.shift();  // Remove lost command from queue
+
+			this.log('error', `Camera ignored the command because its buffer was full. (Command Name: ${ cmd.name }; Raw command: ${ this.pretifyHexString( cmd.cmd ) })`);
+
+		} else if ( responses[respIndex].match( cmdCanceled ) ) {
+			// Somehow the last command was canceled. We assume we've received
+			// an ACK for it already, so it should not be shifted off the queue.
+
+			let msg = 'Camera command was canceled.';
+			if ( this.currentCommand ) {
+				msg = msg + ` (Command Name: ${ this.currentCommand.name }; Raw command: ${ this.pretifyHexString( this.currentCommand.cmd ) })`;
+			}
+
+			this.log('info', msg);
+
+		} else if ( responses[respIndex].match( cmdNoSocket ) ) {
+
+			let cmd = this.commandQueue.shift();  // Remove lost command from queue
+
+			this.log('error', `Camera command was not completed as there was no available socket. (Command Name: ${ cmd.name }; Raw command: ${ this.pretifyHexString( cmd.cmd ) })`);
+
+		} else if ( responses[respIndex].match( cmdNotExecutable ) ) {
+
+			let cmd = this.commandQueue.shift();  // Remove command from queue
+
+			if ( 'power' === cmd.name && cmd.options.bool === 'on' ) {
+				// If we sent a power on command and it's not executable we assume the camera is already on.
+				// This is necessary as there's no power inquiry command.
+				this.updatePowerFeedbacks( cmd );
+			} else {
+				this.log('error', `Camera command could not be executed. (Command Name: ${ cmd.name }; Raw command: ${ this.pretifyHexString( cmd.cmd ) })`);
+			}
+
+		} else {
+
+			// We shouldn't get here, but log if we do. We assume there's no command waiting
+			// on the queue that elicited this response.
+			this.log('warning', 'An unknown response came back from the camera.');
+
+		}
+
+	}
+
+};
+
+
+/*
+ * Update the 'power' global variable and feedbacks based on the given
+ * command object.
+ */
+instance.prototype.updatePowerFeedbacks = function(queueCmd) {
+	this.setInstanceState('power', queueCmd.options.bool, true);
+	this.checkFeedbacks('power');
+
+	// Clear active preset value when the camera is shut off.
+	if ( 'off' === queueCmd.options.bool ) {
+		// TODO: Encapsulate the variable and feedback reset logic into its own function.
+		this.setInstanceState('active_preset', '', true);
+		this.checkFeedbacks('active_preset');
+	}
+};
+
+
 instance.prototype.init_tcp = function() {
 	var self = this;
 
@@ -205,15 +380,24 @@ instance.prototype.init_tcp = function() {
 
 		self.tcp.on('status_change', function (status, message) {
 			self.status(status, message);
+
+			// pulled from the tcp library (tcp.js)
+			const TCP_STATUS_UNKNOWN = null;
+			const TCP_STATUS_OK = 0;
+			const TCP_STATUS_WARNING = 1;
+			const TCP_STATUS_ERROR = 2;
+
+			if ( status === TCP_STATUS_UNKNOWN || status === TCP_STATUS_ERROR ) {
+				// Clear the command queue if we had a TCP error. Otherwise our queue will get out of sync.
+				self.commandQueue = [];
+			}
 		});
 
 		self.tcp.on('error', function (e) {
 			debug('tcp error:', e.message);
 		});
 
-		self.tcp.on('data', function (data) {
-			console.log("Data from PTZoptics VISCA: ", data);
-		});
+		self.tcp.on('data', self.handleTcpData.bind(self));
 
 		debug(self.tcp.host + ':' + self.config.port);
 	}
@@ -226,7 +410,10 @@ instance.prototype.init = function() {
 	log = self.log;
 	self.ptSpeed = '0C';
 	self.ptSpeedIndex = 12;
+	self.commandQueue = [];
 	self.instanceState = {};
+	self.currentCommand = null;
+	self.queuePrune = setInterval( self.pruneCmdQueue.bind(self), 1000 );
 
 	self.status(self.STATUS_UNKNOWN);
 
@@ -236,6 +423,26 @@ instance.prototype.init = function() {
 	self.actions(); // export actions
 	self.init_presets();
 };
+
+
+/*
+ * Remove any stale commands from the queue in the chance that the queue
+ * gets out of sync. 
+ */
+instance.prototype.pruneCmdQueue = function() {
+	let shouldStop = false;
+	while ( shouldStop === false && this.commandQueue.length > 0 ) {
+		// Remove commands that are older than 1.5 seconds. We should have received
+		// a response from the camera well within this window of time.
+
+		if ( ( Date.now() - this.commandQueue[0].time ) > 1500 ) {
+			let cmd = this.commandQueue.shift();
+			this.log('warning', `Command queue was out of sync. Cleaning up old command. (Command Name: ${ cmd.name }; Raw command: ${ this.pretifyHexString( cmd.cmd ) })`)
+		} else {
+			shouldStop = true;
+		}
+	}
+}
 
 instance.prototype.updateConfig = function(config) {
 	var self = this;
@@ -290,6 +497,11 @@ instance.prototype.destroy = function() {
 	if (self.tcp !== undefined) {
 		self.tcp.destroy();
 	}
+
+	if (self.queuePrune) {
+		clearInterval( self.queuePrune );
+	}
+
 	debug("destroy", self.id);
 };
 
@@ -1026,12 +1238,37 @@ instance.prototype.actions = function(system) {
 
 instance.prototype.sendVISCACommand = function(str) {
 	var self = this;
+	let ret = false;
 
 	if (self.tcp !== undefined) {
 		var buf = Buffer.from(str, 'binary');
-		self.tcp.send(buf);
+		if ( self.tcp.send(buf) ) {
+			ret = true;
+		} else {
+			// For some reason our command wasn't sent, which means we won't get a
+			// response. We depend on responses for keeping our queue in sync with
+			// the actual state. So, let's pull our command off the queue to keep
+			// it in sync.
+			this.commandQueue.shift();
+		}
 	}
+
+	return ret;
 };
+
+/*
+ * Create a properly hydrated object to push onto the command queue.
+ */
+instance.prototype.pushCmdQueue = function (name, cmd, opts) {
+	let obj = {
+		name:		name,
+		cmd:		bin2hex( cmd ),
+		options:	opts,
+		time:		Date.now(),
+	}
+
+	this.commandQueue.push( obj );
+}
 
 instance.prototype.action = function(action) {
 	var self = this;
@@ -1045,51 +1282,61 @@ instance.prototype.action = function(action) {
 
 		case 'left':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'right':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'up':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x01\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'down':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'upLeft':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x01\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'upRight':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x01\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'downLeft':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'downRight':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'stop':
 			cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'home':
 			cmd = '\x81\x01\x06\x04\xFF';
+			self.pushCmdQueue( action.action, cmd, { val: 0 } );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1131,31 +1378,37 @@ instance.prototype.action = function(action) {
 
 		case 'zoomI':
 			cmd = '\x81\x01\x04\x07\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'zoomO':
 			cmd = '\x81\x01\x04\x07\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'zoomS':
 			cmd = '\x81\x01\x04\x07\x00\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'focusN':
 			cmd = '\x81\x01\x04\x08\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'focusF':
 			cmd = '\x81\x01\x04\x08\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'focusS':
 			cmd = '\x81\x01\x04\x08\x00\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1166,16 +1419,19 @@ instance.prototype.action = function(action) {
 			if (opt.bol == 1){
 				cmd = '\x81\x01\x04\x38\x03\xFF';
 			}
+			self.pushCmdQueue( action.action, cmd, { bol: opt.bol } );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'focusL':
 			cmd = '\x81\x0A\x04\x68\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'focusU':
 			cmd = '\x81\x0A\x04\x68\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1195,16 +1451,19 @@ instance.prototype.action = function(action) {
 			if (opt.val == 4){
 				cmd = '\x81\x01\x04\x39\x0D\xFF';
 			}
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'irisU':
 			cmd = '\x81\x01\x04\x0B\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'irisD':
 			cmd = '\x81\x01\x04\x0B\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1212,17 +1471,20 @@ instance.prototype.action = function(action) {
 			var cmd = Buffer.from('\x81\x01\x04\x4B\x00\x00\x00\x00\xFF', 'binary');
 			cmd.writeUInt8((parseInt(opt.val,16) & 0xF0) >> 4, 6);
 			cmd.writeUInt8(parseInt(opt.val,16) & 0x0F, 7);
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			debug('cmd=',cmd);
 			break;
 
 		case 'shutU':
 			cmd = '\x81\x01\x04\x0A\x02\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'shutD':
 			cmd = '\x81\x01\x04\x0A\x03\xFF';
+			self.pushCmdQueue( action.action, cmd );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1230,22 +1492,26 @@ instance.prototype.action = function(action) {
 			var cmd = Buffer.from('\x81\x01\x04\x4A\x00\x00\x00\x00\xFF', 'binary');
 			cmd.writeUInt8((parseInt(opt.val,16) & 0xF0) >> 4, 6);
 			cmd.writeUInt8(parseInt(opt.val,16) & 0x0F, 7);
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			debug('cmd=',cmd);
 			break;
 
 		case 'savePset':
 			cmd ='\x81\x01\x04\x3F\x01' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + '\xFF';
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'recallPset':
 			cmd ='\x81\x01\x04\x3F\x02' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + '\xFF';
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			break;
 
 		case 'speedPset':
 			cmd ='\x81\x01\x7E\x01\x0B' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + String.fromCharCode(parseInt(opt.speed,16) & 0xFF) + '\xFF';
+			self.pushCmdQueue( action.action, cmd, { val: opt.val } );
 			self.sendVISCACommand(cmd);
 			break;
 		
@@ -1255,6 +1521,7 @@ instance.prototype.action = function(action) {
 			} else {
 				cmd = '\x81\x01\x04\x00\x02\xFF';
 			}
+			self.pushCmdQueue( action.action, cmd, { bool: opt.bool } );
 			self.sendVISCACommand(cmd);
 			break;
 
@@ -1264,6 +1531,7 @@ instance.prototype.action = function(action) {
 			cmd = tempBuffer.toString('binary');
 
 			if ((tempBuffer[0] & 0xF0) === 0x80) {
+				self.pushCmdQueue( action.action, cmd, { custom: hexData } );
 				self.sendVISCACommand(cmd);
 			} else {
 				self.log('error', 'Error, command "' + opt.custom + '" does not start with 8');
