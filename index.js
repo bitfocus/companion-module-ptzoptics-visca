@@ -90,6 +90,108 @@ function instance(system, id, config) {
 	return self;
 }
 
+/**
+ * Defines the dynamic variables this module will expose. Initialize all variables to a default value.
+ */
+instance.prototype.defineDynamicVariables = function() {
+	let self = this;
+	let variables = [];
+
+	variables.push({ name: 'active_preset', label: 'The active preset' });
+	variables.push({ name: 'power', label: 'Current power status' });
+
+	self.setVariableDefinitions(variables);
+
+	// Initialize the default values for the variables
+	for (let i=0; i<variables.length; i++) {
+		self.setVariable(variables[i].name, '');
+	}
+
+};
+
+/**
+ * Updates the internal state of a variable within this module.
+ * 
+ * Optionally updates the dynamic variable with its new value.
+ */
+instance.prototype.setInstanceState = function(variable, value, isVariable) {
+	let self = this;
+
+	self.instanceState[variable] = value;
+
+	if (isVariable) {
+		self.setVariable(variable, value);
+	}
+
+};
+
+/**
+ * Defines the feedbacks this module will expose.
+ */
+instance.prototype.defineFeedbacks = function() {
+	let self = this;
+	let feedbacks = {};
+
+	feedbacks['active_preset'] = {
+		label: 'When preset is active',
+		description: "Changes the button's style when this preset is active.",
+		options: [
+			{
+				type: 'colorpicker',
+				label: 'Background color',
+				id: 'bg',
+				default: self.rgb(51, 102, 0)
+			},
+			{
+				type: 'colorpicker',
+				label: 'Foreground color',
+				id: 'fg',
+				default: self.rgb(255, 255, 255)
+			},
+			{
+				type: 'dropdown',
+				label: 'Preset',
+				id: 'val',
+				default: '01',
+				choices: PRESET
+			},
+		],
+	};
+
+	feedbacks['power'] = {
+		label: 'Camera power status',
+		description: "Changes the button's style based on the camera power.",
+		options: [
+			{
+				type: 'colorpicker',
+				label: 'Background color',
+				id: 'bg',
+				default: self.rgb(51, 102, 0)
+			},
+			{
+				type: 'colorpicker',
+				label: 'Foreground color',
+				id: 'fg',
+				default: self.rgb(255, 255, 255)
+			},
+			{
+				type: 'dropdown',
+				label: 'Power state',
+				id: 'bool',
+				default: 'off',
+				choices: [
+					{ id: 'on', label: 'on' },
+					{ id: 'off', label: 'off' }
+				]
+			},
+		],
+	};
+
+	self.setFeedbackDefinitions(feedbacks);
+
+};
+
+
 instance.prototype.init_tcp = function() {
 	var self = this;
 
@@ -124,9 +226,12 @@ instance.prototype.init = function() {
 	log = self.log;
 	self.ptSpeed = '0C';
 	self.ptSpeedIndex = 12;
+	self.instanceState = {};
 
 	self.status(self.STATUS_UNKNOWN);
 
+	self.defineDynamicVariables();
+	self.defineFeedbacks();
 	self.init_tcp();
 	self.actions(); // export actions
 	self.init_presets();
@@ -709,6 +814,49 @@ for (recall = 0; recall < 63; recall++) {
 
 	self.setPresetDefinitions(presets);
 };
+
+
+/**
+ * Returns a button's new style if feedback is appropriate.
+ */
+instance.prototype.feedback = function(feedback) {
+
+	if (this.instanceState === undefined) {
+		return;
+	}
+
+	if (feedback.type === 'active_preset')  {
+		// Active preset changed. Let's update our feedbacks.
+
+		// Since we're storing the preset as a base10 number but everything else
+		// is in base16 string format, we need to convert the base16 number to
+		// base10 so we can accurately compare them.
+		let pset = parseInt( feedback.options.val, 16 );
+
+		if (pset === this.instanceState['active_preset']) {
+
+			return {
+				color   : feedback.options.fg,
+				bgcolor : feedback.options.bg,
+			};
+
+		}
+	} else if (feedback.type === 'power')  {
+		// The power status changed. Let's update our feedbacks.
+
+		if (feedback.options.bool == this.instanceState['power']) {
+
+			return {
+				color   : feedback.options.fg,
+				bgcolor : feedback.options.bg,
+			};
+
+		}
+	}
+
+	return {};
+
+}
 
 
 instance.prototype.actions = function(system) {
