@@ -40,8 +40,8 @@ var SHUTTER = [
 ];
 
 var PRESET = [];
-for (var i = 0; i < 64; ++i) {
-	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: 'Preset ' + i });
+for (var i = 0; i < 128; ++i) {
+	PRESET.push({ id: i.toString(16).padStart(2,'0').toUpperCase(), label: 'Preset ' + i });
 }
 
 var SPEED = [
