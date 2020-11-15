@@ -1225,7 +1225,11 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'power on/off',
 					id: 'bool',
-					choices: [{ id: 'off', label:'off'},{ id: 'on', label:'on'}]
+					default: 'off',
+					choices: [
+						{ id: 'off', label:'off'},
+						{ id: 'on', label:'on'}
+					]
 				}
 			]
 		},
