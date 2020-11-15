@@ -978,51 +978,59 @@ instance.prototype.init_presets = function () {
 		}
 	];
 
-var save;
-for (save = 0; save < 63; save++) {
-	presets.push({
-		category: 'Save Preset',
-		label: 'Save Preset '+ parseInt(save+1) ,
-		bank: {
-			style: 'text',
-			text: 'SAVE\\nPSET\\n' + parseInt(save+1) ,
-			size: '14',
-			color: '16777215',
-			bgcolor: self.rgb(0,0,0),
-		},
-		actions: [
-			{
-				action: 'savePset',
-				options: {
-				val: ('0' + save.toString(16).toUpperCase()).substr(-2,2),
+	var save;
+	for (save = 0; save < 64; save++) {
+		presets.push({
+			category: 'Save Preset',
+			label: 'Save Preset '+ parseInt(save) ,
+			bank: {
+				style: 'text',
+				text: 'SAVE\\nPSET\\n' + parseInt(save) ,
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'savePset',
+					options: {
+						val: save.toString(16).padStart(2,'0').toUpperCase(),
+					}
 				}
-			}
-		]
-	});
-}
+			]
+		});
+	}
 
-var recall;
-for (recall = 0; recall < 63; recall++) {
-	presets.push({
-		category: 'Recall Preset',
-		label: 'Recall Preset '+ parseInt(recall+1) ,
-		bank: {
-			style: 'text',
-			text: 'Recall\\nPSET\\n' + parseInt(recall+1) ,
-			size: '14',
-			color: '16777215',
-			bgcolor: self.rgb(0,0,0),
-		},
-		actions: [
-			{
-				action: 'recallPset',
-				options: {
-				val: ('0' + recall.toString(16).toUpperCase()).substr(-2,2),
+	var recall;
+	for (recall = 0; recall < 64; recall++) {
+		presets.push({
+			category: 'Recall Preset',
+			label: 'Recall Preset '+ parseInt(recall) ,
+			bank: {
+				style: 'text',
+				text: 'Recall\\nPSET\\n' + parseInt(recall) ,
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'recallPset',
+					options: {
+						val: recall.toString(16).padStart(2,'0').toUpperCase(),
+					}
 				}
-			}
-		]
-	});
-}
+			],
+			feedbacks: [
+				{
+					type: 'active_preset',
+					options : {
+						val: recall.toString(16).padStart(2,'0').toUpperCase(),
+					}
+				}
+			]
+		});
+	}
 
 	self.setPresetDefinitions(presets);
 };
