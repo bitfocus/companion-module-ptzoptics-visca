@@ -1,6 +1,6 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"api_version": "1.0.0",
 	"keywords": [
 		"Protocol",
@@ -8,7 +8,6 @@
 	"manufacturer": "PTZoptics",
 	"product": "VISCA",
 	"shortname": "visca",
-	"description": "PTZoptics VISCA module",
 	"description": "Module to control PTZ cameras with PTZoptics Visca protocol over IP",
 	"main": "index.js",
 	"sponsored": [ "Arvol Dingess <adingess@toucanproductions.net>" ],

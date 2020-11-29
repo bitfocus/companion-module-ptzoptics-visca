@@ -658,6 +658,86 @@ instance.prototype.init_presets = function () {
 					action: 'shutD',
 				}
 			]
+		},
+		{
+			category: 'White balance',
+			label: 'Auto White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nAUTO',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbA',
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Indoor White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nINDOOR',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbI',
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Outdoor White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nOUT\\nDOOR',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbO',
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'One Push White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nONE PUSH',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbOP',
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Trigger One Push White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nTRIGGER\\nONE PUSH',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbOPT',
+				}
+			]
 		}
 	];
 
@@ -858,6 +938,35 @@ instance.prototype.actions = function(system) {
 					label: 'power on/off',
 					id: 'bool',
 					choices: [{ id: 'off', label:'off'},{ id: 'on', label:'on'}]
+				}
+			]
+		},
+		'wbA': {
+			label: 'White balance auto',
+		},
+		'wbI': {
+			label: 'White balance indoor',
+		},
+		'wbO': {
+			label: 'White balance outdoor',
+		},
+		'wbOP': {
+			label: 'White balance one push',
+		},
+		'wbM': {
+			label: 'White balance manual',
+		},
+		'wbOPT': {
+			label: 'White balance one push trigger',
+		},
+		'awbS':           {
+			label: 'Auto white balance sensitivity',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Sensitivity',
+					id: 'val',
+					choices: [{ id: 0, label:'High'},{ id: 1, label:'Normal'},{ id: 2, label:'Low'}]
 				}
 			]
 		},
@@ -1106,6 +1215,51 @@ instance.prototype.action = function(action) {
 				cmd = '\x81\x01\x04\x00\x03\xFF';
 			} else {
 				cmd = '\x81\x01\x04\x00\x02\xFF';
+			}
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbA':
+			cmd = '\x81\x01\x04\x35\x00\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbI':
+			cmd = '\x81\x01\x04\x35\x01\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbO':
+			cmd = '\x81\x01\x04\x35\x02\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbOP':
+			cmd = '\x81\x01\x04\x35\x03\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbM':
+			cmd = '\x81\x01\x04\x35\x05\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbOPT':
+			cmd = '\x81\x01\x04\x10\x05\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'awbS':
+			switch (opt.val) {
+				case 0:
+					cmd = '\x81\x01\x04\xA9\x00\xFF';
+					break;
+				case 1:
+					cmd = '\x81\x01\x04\xA9\x01\xFF';
+					break;
+				case 2:
+					cmd = '\x81\x01\x04\xA9\x02\xFF';
+					break;
 			}
 			self.sendVISCACommand(cmd);
 			break;
