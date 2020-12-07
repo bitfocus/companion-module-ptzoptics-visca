@@ -671,7 +671,10 @@ instance.prototype.init_presets = function () {
 			},
 			actions: [
 				{
-					action: 'wbA',
+					action: 'wb',
+					options: {
+						val: 'automatic',
+					}
 				}
 			]
 		},
@@ -687,7 +690,10 @@ instance.prototype.init_presets = function () {
 			},
 			actions: [
 				{
-					action: 'wbI',
+					action: 'wb',
+					options: {
+						val: 'indoor',
+					}
 				}
 			]
 		},
@@ -703,7 +709,10 @@ instance.prototype.init_presets = function () {
 			},
 			actions: [
 				{
-					action: 'wbO',
+					action: 'wb',
+					options: {
+						val: 'outdoor',
+					}
 				}
 			]
 		},
@@ -719,7 +728,10 @@ instance.prototype.init_presets = function () {
 			},
 			actions: [
 				{
-					action: 'wbOP',
+					action: 'wb',
+					options: {
+						val: 'onepush',
+					}
 				}
 			]
 		},
@@ -941,20 +953,22 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
-		'wbA': {
-			label: 'White balance auto',
-		},
-		'wbI': {
-			label: 'White balance indoor',
-		},
-		'wbO': {
-			label: 'White balance outdoor',
-		},
-		'wbOP': {
-			label: 'White balance one push',
-		},
-		'wbM': {
-			label: 'White balance manual',
+		'wb': {
+			label: 'White balance',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Mode',
+					id: 'val',
+					choices: [
+						{ id: 'automatic', label:'Automatic' },
+						{ id: 'indoor', label:'Indoor' },
+						{ id: 'outdoor', label:'Outdoor' },
+						{ id: 'onepush', label:'One Push' },
+						{ id: 'manual', label:'Manual' }
+					]
+				}
+			]
 		},
 		'wbOPT': {
 			label: 'White balance one push trigger',
@@ -1219,28 +1233,24 @@ instance.prototype.action = function(action) {
 			self.sendVISCACommand(cmd);
 			break;
 
-		case 'wbA':
-			cmd = '\x81\x01\x04\x35\x00\xFF';
-			self.sendVISCACommand(cmd);
-			break;
-
-		case 'wbI':
-			cmd = '\x81\x01\x04\x35\x01\xFF';
-			self.sendVISCACommand(cmd);
-			break;
-
-		case 'wbO':
-			cmd = '\x81\x01\x04\x35\x02\xFF';
-			self.sendVISCACommand(cmd);
-			break;
-
-		case 'wbOP':
-			cmd = '\x81\x01\x04\x35\x03\xFF';
-			self.sendVISCACommand(cmd);
-			break;
-
-		case 'wbM':
-			cmd = '\x81\x01\x04\x35\x05\xFF';
+		case 'wb':
+			switch (opt.val) {
+				case 'automatic':
+					cmd = '\x81\x01\x04\x35\x00\xFF';
+					break;
+				case 'indoor':
+					cmd = '\x81\x01\x04\x35\x01\xFF';
+					break;
+				case 'outdoor':
+					cmd = '\x81\x01\x04\x35\x02\xFF';
+					break;
+				case 'onepush':
+					cmd = '\x81\x01\x04\x35\x03\xFF';
+					break;
+				case 'manual':
+					cmd = '\x81\x01\x04\x35\x05\xFF';
+					break;
+			}
 			self.sendVISCACommand(cmd);
 			break;
 
