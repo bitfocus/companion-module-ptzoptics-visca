@@ -658,6 +658,98 @@ instance.prototype.init_presets = function () {
 					action: 'shutD',
 				}
 			]
+		},
+		{
+			category: 'White balance',
+			label: 'Auto White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nAUTO',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wb',
+					options: {
+						val: 'automatic',
+					}
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Indoor White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nINDOOR',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wb',
+					options: {
+						val: 'indoor',
+					}
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Outdoor White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nOUT\\nDOOR',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wb',
+					options: {
+						val: 'outdoor',
+					}
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'One Push White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nONE PUSH',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wb',
+					options: {
+						val: 'onepush',
+					}
+				}
+			]
+		},
+		{
+			category: 'White balance',
+			label: 'Trigger One Push White Balance',
+			bank: {
+				style: 'text',
+				text: 'WB\\nTRIGGER\\nONE PUSH',
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'wbOPT',
+				}
+			]
 		}
 	];
 
@@ -858,6 +950,37 @@ instance.prototype.actions = function(system) {
 					label: 'power on/off',
 					id: 'bool',
 					choices: [{ id: 'off', label:'off'},{ id: 'on', label:'on'}]
+				}
+			]
+		},
+		'wb': {
+			label: 'White balance',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Mode',
+					id: 'val',
+					choices: [
+						{ id: 'automatic', label:'Automatic' },
+						{ id: 'indoor', label:'Indoor' },
+						{ id: 'outdoor', label:'Outdoor' },
+						{ id: 'onepush', label:'One Push' },
+						{ id: 'manual', label:'Manual' }
+					]
+				}
+			]
+		},
+		'wbOPT': {
+			label: 'White balance one push trigger',
+		},
+		'awbS':           {
+			label: 'Auto white balance sensitivity',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Sensitivity',
+					id: 'val',
+					choices: [{ id: 0, label:'High'},{ id: 1, label:'Normal'},{ id: 2, label:'Low'}]
 				}
 			]
 		},
@@ -1106,6 +1229,47 @@ instance.prototype.action = function(action) {
 				cmd = '\x81\x01\x04\x00\x03\xFF';
 			} else {
 				cmd = '\x81\x01\x04\x00\x02\xFF';
+			}
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wb':
+			switch (opt.val) {
+				case 'automatic':
+					cmd = '\x81\x01\x04\x35\x00\xFF';
+					break;
+				case 'indoor':
+					cmd = '\x81\x01\x04\x35\x01\xFF';
+					break;
+				case 'outdoor':
+					cmd = '\x81\x01\x04\x35\x02\xFF';
+					break;
+				case 'onepush':
+					cmd = '\x81\x01\x04\x35\x03\xFF';
+					break;
+				case 'manual':
+					cmd = '\x81\x01\x04\x35\x05\xFF';
+					break;
+			}
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'wbOPT':
+			cmd = '\x81\x01\x04\x10\x05\xFF';
+			self.sendVISCACommand(cmd);
+			break;
+
+		case 'awbS':
+			switch (opt.val) {
+				case 0:
+					cmd = '\x81\x01\x04\xA9\x00\xFF';
+					break;
+				case 1:
+					cmd = '\x81\x01\x04\xA9\x01\xFF';
+					break;
+				case 2:
+					cmd = '\x81\x01\x04\xA9\x02\xFF';
+					break;
 			}
 			self.sendVISCACommand(cmd);
 			break;
