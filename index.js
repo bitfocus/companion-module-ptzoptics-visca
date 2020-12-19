@@ -1111,14 +1111,16 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'custom':
-			var hexData = opt.custom.replace(/\s+/g, '');
-			var tempBuffer = Buffer.from(hexData, 'hex');
-			cmd = tempBuffer.toString('binary');
+			if (typeof opt.custom === 'string' || opt.custom instanceof String) {
+				var hexData = opt.custom.replace(/\s+/g, '');
+				var tempBuffer = Buffer.from(hexData, 'hex');
+				cmd = tempBuffer.toString('binary');
 
-			if ((tempBuffer[0] & 0xF0) === 0x80) {
-				self.sendVISCACommand(cmd);
-			} else {
-				self.log('error', 'Error, command "' + opt.custom + '" does not start with 8');
+				if ((tempBuffer[0] & 0xF0) === 0x80) {
+					self.sendVISCACommand(cmd);
+				} else {
+					self.log('error', 'Error, command "' + opt.custom + '" does not start with 8');
+				}
 			}
 			break;
 
