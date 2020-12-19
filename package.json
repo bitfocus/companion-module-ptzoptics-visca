@@ -8,7 +8,6 @@
 	"manufacturer": "PTZoptics",
 	"product": "VISCA",
 	"shortname": "visca",
-	"description": "PTZoptics VISCA module",
 	"description": "Module to control PTZ cameras with PTZoptics Visca protocol over IP",
 	"main": "index.js",
 	"sponsored": [ "Arvol Dingess <adingess@toucanproductions.net>" ],

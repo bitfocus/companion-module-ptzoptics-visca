@@ -1113,7 +1113,7 @@ instance.prototype.action = function(action) {
 		case 'custom':
 			if (typeof opt.custom === 'string' || opt.custom instanceof String) {
 				var hexData = opt.custom.replace(/\s+/g, '');
-				var tempBuffer = new Buffer(hexData, 'hex');
+				var tempBuffer = Buffer.from(hexData, 'hex');
 				cmd = tempBuffer.toString('binary');
 
 				if ((tempBuffer[0] & 0xF0) === 0x80) {
