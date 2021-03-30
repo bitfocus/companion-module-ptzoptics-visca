@@ -40,8 +40,8 @@ var SHUTTER = [
 ];
 
 var PRESET = [];
-for (var i = 0; i < 64; ++i) {
-	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: 'Preset ' + i });
+for (var i = 0; i < 256; ++i) {
+	PRESET.push({ id: ('0' + i.toString(16).toUpperCase()).substr(-2,2), label: 'Preset ' + i });
 }
 
 var SPEED = [
@@ -754,13 +754,13 @@ instance.prototype.init_presets = function () {
 	];
 
 var save;
-for (save = 0; save < 63; save++) {
+for (save = 0; save < 256; save++) {
 	presets.push({
 		category: 'Save Preset',
-		label: 'Save Preset '+ parseInt(save+1) ,
+		label: 'Save Preset '+ parseInt(save) ,
 		bank: {
 			style: 'text',
-			text: 'SAVE\\nPSET\\n' + parseInt(save+1) ,
+			text: 'SAVE\\nPSET\\n' + parseInt(save) ,
 			size: '14',
 			color: '16777215',
 			bgcolor: self.rgb(0,0,0),
@@ -777,13 +777,13 @@ for (save = 0; save < 63; save++) {
 }
 
 var recall;
-for (recall = 0; recall < 63; recall++) {
+for (recall = 0; recall < 256; recall++) {
 	presets.push({
 		category: 'Recall Preset',
-		label: 'Recall Preset '+ parseInt(recall+1) ,
+		label: 'Recall Preset '+ parseInt(recall) ,
 		bank: {
 			style: 'text',
-			text: 'Recall\\nPSET\\n' + parseInt(recall+1) ,
+			text: 'Recall\\nPSET\\n' + parseInt(recall) ,
 			size: '14',
 			color: '16777215',
 			bgcolor: self.rgb(0,0,0),
