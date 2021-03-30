@@ -1220,7 +1220,7 @@ instance.prototype.action = function(action) {
 			break;
 
 		case 'speedPset':
-			cmd ='\x81\x01\x7E\x01\x0B' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + String.fromCharCode(parseInt(opt.speed,16) & 0xFF) + '\xFF';
+			cmd ='\x81\x01\x06\x01' + String.fromCharCode(parseInt(opt.val,16) & 0xFF) + String.fromCharCode(parseInt(opt.speed,16) & 0xFF) + '\xFF';
 			self.sendVISCACommand(cmd);
 			break;
 		
