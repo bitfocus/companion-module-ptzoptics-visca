@@ -41,7 +41,7 @@ var SHUTTER = [
 
 var PRESET = [];
 for (var i = 0; i < 256; ++i) {
-	PRESET.push({ id: ('0' + i.toString(16).toUpperCase()).substr(-2,2), label: 'Preset ' + i });
+	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: 'Preset ' + i });
 }
 
 var SPEED = [
@@ -769,7 +769,7 @@ for (save = 0; save < 256; save++) {
 			{
 				action: 'savePset',
 				options: {
-				val: ('0' + save.toString(16).toUpperCase()).substr(-2,2),
+				val: ('0' + save.toString(16)).substr(-2,2),
 				}
 			}
 		]
@@ -792,7 +792,7 @@ for (recall = 0; recall < 256; recall++) {
 			{
 				action: 'recallPset',
 				options: {
-				val: ('0' + recall.toString(16).toUpperCase()).substr(-2,2),
+				val: ('0' + recall.toString(16)).substr(-2,2),
 				}
 			}
 		]
