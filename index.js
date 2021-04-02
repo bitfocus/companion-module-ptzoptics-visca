@@ -41,7 +41,7 @@ var SHUTTER = [
 
 var PRESET = [];
 for (var i = 0; i < 256; ++i) {
-	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: 'Preset ' + i });
+	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: i });
 }
 
 var SPEED = [
