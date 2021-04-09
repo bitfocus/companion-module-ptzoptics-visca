@@ -757,7 +757,7 @@ instance.prototype.init_presets = function () {
 
 var save;
 for (save = 0; save < 255; save++) {
-	if (i<90 || i>99){
+	if (save<90 || save>99){
 		presets.push({
 			category: 'Save Preset',
 			label: 'Save Preset '+ parseInt(save) ,
@@ -782,7 +782,7 @@ for (save = 0; save < 255; save++) {
 
 var recall;
 for (recall = 0; recall < 255; recall++) {
-	if (i<90 || i>99){
+	if (recall<90 || recall>99){
 		presets.push({
 			category: 'Recall Preset',
 			label: 'Recall Preset '+ parseInt(recall) ,
@@ -916,7 +916,8 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				}
 			]
 		},
@@ -927,7 +928,8 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				}
 			]
 		},
@@ -938,13 +940,15 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				},
 				{
 					type: 'dropdown',
 					label: 'speed setting',
 					id: 'speed',
-					choices: SPEED
+					choices: SPEED,
+					minChoicesForSearch: 1
 				}
 			]
 		},
