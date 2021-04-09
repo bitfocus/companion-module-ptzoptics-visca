@@ -40,8 +40,10 @@ var SHUTTER = [
 ];
 
 var PRESET = [];
-for (var i = 0; i < 256; ++i) {
-	PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: i });
+for (var i = 0; i < 255; ++i) {
+	if (i<90 || i>99){
+		PRESET.push({ id: ('0' + i.toString(16)).substr(-2,2), label: i });
+	}
 }
 
 var SPEED = [
@@ -754,49 +756,53 @@ instance.prototype.init_presets = function () {
 	];
 
 var save;
-for (save = 0; save < 256; save++) {
-	presets.push({
-		category: 'Save Preset',
-		label: 'Save Preset '+ parseInt(save) ,
-		bank: {
-			style: 'text',
-			text: 'SAVE\\nPSET\\n' + parseInt(save) ,
-			size: '14',
-			color: '16777215',
-			bgcolor: self.rgb(0,0,0),
-		},
-		actions: [
-			{
-				action: 'savePset',
-				options: {
-				val: ('0' + save.toString(16)).substr(-2,2),
+for (save = 0; save < 255; save++) {
+	if (save<90 || save>99){
+		presets.push({
+			category: 'Save Preset',
+			label: 'Save Preset '+ parseInt(save) ,
+			bank: {
+				style: 'text',
+				text: 'SAVE\\nPSET\\n' + parseInt(save) ,
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'savePset',
+					options: {
+					val: ('0' + save.toString(16)).substr(-2,2),
+					}
 				}
-			}
-		]
-	});
+			]
+		});
+	}
 }
 
 var recall;
-for (recall = 0; recall < 256; recall++) {
-	presets.push({
-		category: 'Recall Preset',
-		label: 'Recall Preset '+ parseInt(recall) ,
-		bank: {
-			style: 'text',
-			text: 'Recall\\nPSET\\n' + parseInt(recall) ,
-			size: '14',
-			color: '16777215',
-			bgcolor: self.rgb(0,0,0),
-		},
-		actions: [
-			{
-				action: 'recallPset',
-				options: {
-				val: ('0' + recall.toString(16)).substr(-2,2),
+for (recall = 0; recall < 255; recall++) {
+	if (recall<90 || recall>99){
+		presets.push({
+			category: 'Recall Preset',
+			label: 'Recall Preset '+ parseInt(recall) ,
+			bank: {
+				style: 'text',
+				text: 'Recall\\nPSET\\n' + parseInt(recall) ,
+				size: '14',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,0),
+			},
+			actions: [
+				{
+					action: 'recallPset',
+					options: {
+					val: ('0' + recall.toString(16)).substr(-2,2),
+					}
 				}
-			}
-		]
-	});
+			]
+		});
+	}
 }
 
 	self.setPresetDefinitions(presets);
@@ -910,7 +916,8 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				}
 			]
 		},
@@ -921,7 +928,8 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				}
 			]
 		},
@@ -932,13 +940,15 @@ instance.prototype.actions = function(system) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: PRESET
+					choices: PRESET,
+					minChoicesForSearch: 1
 				},
 				{
 					type: 'dropdown',
 					label: 'speed setting',
 					id: 'speed',
-					choices: SPEED
+					choices: SPEED,
+					minChoicesForSearch: 1
 				}
 			]
 		},
