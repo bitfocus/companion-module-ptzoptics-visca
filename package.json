@@ -4,16 +4,27 @@
 	"api_version": "1.0.0",
 	"keywords": [
 		"Protocol",
-		"Camera" ],
+		"Camera"
+	],
 	"manufacturer": "PTZoptics",
 	"product": "VISCA",
 	"shortname": "visca",
 	"description": "Module to control PTZ cameras with PTZoptics Visca protocol over IP",
 	"main": "index.js",
-	"sponsored": [ "Arvol Dingess <adingess@toucanproductions.net>" ],
+	"sponsored": [
+		"Arvol Dingess <adingess@toucanproductions.net>"
+	],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Håkon Nessjøen <haakon@bitfocus.io>",
-	"license": "MIT"
+	"license": "MIT",
+	"homepage": "https://github.com/bitfocus/companion-module-ptzoptics-visca#readme",
+	"bugs": {
+		"url": "https://github.com/bitfocus/companion-module-ptzoptics-visca/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-ptzoptics-visca.git"
+	}
 }
