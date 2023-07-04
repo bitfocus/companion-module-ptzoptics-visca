@@ -1,15 +1,15 @@
 const choices = require('./choices')
 
 exports.getActions = function (instance) {
-	var panspeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
-	var tiltspeed = String.fromCharCode(Math.min(parseInt(instance.ptSpeed, 16), 0x14) & 0xff)
+	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
+	var tiltSpeed = String.fromCharCode(Math.min(parseInt(instance.ptSpeed, 16), 0x14) & 0xff)
 
-	var actionDefinitions = {
+	const actionDefinitions = {
 		left_action: {
 			name: 'Pan Left',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x03\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x01\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -17,7 +17,7 @@ exports.getActions = function (instance) {
 			name: 'Pan Right',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x03\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x02\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -25,7 +25,7 @@ exports.getActions = function (instance) {
 			name: 'Tilt Up',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x01\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x03\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -33,7 +33,7 @@ exports.getActions = function (instance) {
 			name: 'Tilt Down',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x02\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x03\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -41,7 +41,7 @@ exports.getActions = function (instance) {
 			name: 'Up Left',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x01\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x01\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -49,7 +49,7 @@ exports.getActions = function (instance) {
 			name: 'Up Right',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x01\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x02\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -57,7 +57,7 @@ exports.getActions = function (instance) {
 			name: 'Down Left',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x01\x02\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x01\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -65,21 +65,21 @@ exports.getActions = function (instance) {
 			name: 'Down Right',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x02\x02\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x02\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
 		stop_action: {
 			name: 'P/T Stop',
-			choices: [],
+			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x01' + panspeed + tiltspeed + '\x03\x03\xFF'
+				var cmd = '\x81\x01\x06\x01' + panSpeed + tiltSpeed + '\x03\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
 		home_action: {
 			name: 'P/T Home',
-			choices: [],
+			options: [],
 			callback: async (event) => {
 				var cmd = '\x81\x01\x06\x04\xFF'
 				instance.sendVISCACommand(cmd)
@@ -108,13 +108,11 @@ exports.getActions = function (instance) {
 				if (chosenIndex > -1) {
 					instance.ptSpeedIndex = chosenIndex
 				}
-
-				debug(instance.ptSpeed + ' == ' + instance.ptSpeedIndex)
 			},
 		},
 		speed_up_action: {
 			name: 'P/T Speed Up',
-			choices: [],
+			options: [],
 			callback: async (event) => {
 				if (instance.ptSpeedIndex == 23) {
 					instance.ptSpeedIndex = 23
@@ -126,7 +124,7 @@ exports.getActions = function (instance) {
 		},
 		speed_down_action: {
 			name: 'P/T Speed Down',
-			choices: [],
+			options: [],
 			callback: async (event) => {
 				if (instance.ptSpeedIndex == 0) {
 					instance.ptSpeedIndex = 0
@@ -289,7 +287,6 @@ exports.getActions = function (instance) {
 				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
 				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
 				instance.sendVISCACommand(cmd)
-				debug('cmd=', cmd)
 			},
 		},
 		shutter_up_action: {
@@ -323,7 +320,6 @@ exports.getActions = function (instance) {
 				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
 				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
 				instance.sendVISCACommand(cmd)
-				debug('cmd=', cmd)
 			},
 		},
 		save_preset_action: {

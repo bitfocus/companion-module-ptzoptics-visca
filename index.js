@@ -5,6 +5,10 @@ const presets = require('./presets')
 class PtzOpticsInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
+
+		// initialize speed values
+		this.ptSpeed = '0C'
+		this.ptSpeedIndex = 12
 	}
 
 	sendVISCACommand(str) {
@@ -46,7 +50,7 @@ class PtzOpticsInstance extends InstanceBase {
 		]
 	}
 
-	// When module gets deleted
+	// When the module gets deleted
 	async destroy() {
 		if (this.socket !== undefined) {
 			this.socket.destroy()
@@ -57,9 +61,6 @@ class PtzOpticsInstance extends InstanceBase {
 
 	async init(config) {
 		this.config = config
-
-		this.ptSpeed = '0C'
-		this.ptSpeedIndex = 12
 
 		// this is not called by Companion directly, so we need to call this to load the actions into Companion
 		this.updateActions()
@@ -97,11 +98,6 @@ class PtzOpticsInstance extends InstanceBase {
 			})
 
 			this.socket.on('connect', () => {
-				let cmd = Buffer.from([
-					0x55, 0xaa, 0x00, 0x00, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00,
-					0x57, 0x56,
-				])
-				this.socket.send(cmd)
 				this.log('debug', 'Connected')
 				this.updateStatus('ok')
 			})
@@ -114,7 +110,7 @@ class PtzOpticsInstance extends InstanceBase {
 
 	configUpdated(config) {
 		// handle if the connection needs to be reset (ex. if the user changes the IP address, and we need to re-connect the socket to the new address)
-		let resetConnection = false
+		var resetConnection = false
 
 		if (this.config.host != config.host) {
 			resetConnection = true

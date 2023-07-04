@@ -2,7 +2,7 @@ const { combineRgb } = require('@companion-module/base')
 const assets = require('./assets/assets')
 
 exports.getPresets = function () {
-	presets = {}
+	const presets = {}
 
 	presets['tilt_up_preset'] = {
 		type: 'button',
@@ -59,7 +59,7 @@ exports.getPresets = function () {
 				],
 			},
 		],
-		feedback: [],
+		feedbacks: [],
 	}
 
 	presets['pan_left_preset'] = {
@@ -413,7 +413,7 @@ exports.getPresets = function () {
 		feedbacks: [],
 	}
 
-	feedbacks['auto_focus_preset'] = {
+	presets['auto_focus_preset'] = {
 		type: 'button',
 		category: 'Lens',
 		name: 'Auto Focus',
@@ -752,7 +752,7 @@ exports.getPresets = function () {
 	// generates presets for saving camera presets
 	for (var save = 0; save < 255; save++) {
 		if (save < 90 || save > 99) {
-			presets.push({
+			presets['save_preset_' + save + '_preset'] = {
 				type: 'button',
 				category: 'Save Preset',
 				name: 'Save Preset ' + parseInt(save),
@@ -777,14 +777,14 @@ exports.getPresets = function () {
 					},
 				],
 				feedbacks: [],
-			})
+			}
 		}
 	}
 
 	// generates presets for recalling camera presets
 	for (var recall = 0; recall < 255; recall++) {
 		if (recall < 90 || recall > 99) {
-			presets.push({
+			presets['recall_preset_' + recall + '_preset'] = {
 				type: 'button',
 				category: 'Recall Preset',
 				name: 'Recall Preset ' + parseInt(recall),
@@ -809,7 +809,7 @@ exports.getPresets = function () {
 					},
 				],
 				feedbacks: [],
-			})
+			}
 		}
 	}
 
