@@ -34,6 +34,15 @@ exports.SHUTTER = [
 	{ id: '01', label: '1/30' },
 ]
 
+var PRESET = []
+for (var i = 0; i < 255; ++i) {
+	if (i < 90 || i > 99) {
+		PRESET.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
+	}
+}
+
+exports.PRESET = PRESET
+
 exports.SPEED = [
 	{ id: '18', label: 'Speed 24 (Fast)' },
 	{ id: '17', label: 'Speed 23' },

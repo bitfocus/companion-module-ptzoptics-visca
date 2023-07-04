@@ -178,7 +178,7 @@ exports.getPresets = function () {
 		feedbacks: [],
 	}
 
-	presets['pt_down_right_preset'] = {
+	presets['pt_down_left_preset'] = {
 		type: 'button',
 		category: 'Pan/Tilt',
 		name: 'DOWN LEFT',

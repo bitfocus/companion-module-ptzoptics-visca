@@ -22,6 +22,10 @@ class PtzOpticsInstance extends InstanceBase {
 		this.setActionDefinitions(actions.getActions(this))
 	}
 
+	updatePresets() {
+		this.setPresetDefinitions(presets.getPresets())
+	}
+
 	// Return config fields for web config of the module instance
 	getConfigFields() {
 		return [
@@ -102,10 +106,6 @@ class PtzOpticsInstance extends InstanceBase {
 				this.updateStatus('ok')
 			})
 		}
-	}
-
-	updatePresets() {
-		this.setPresetDefinitions(presets.getPresets())
 	}
 
 	configUpdated(config) {

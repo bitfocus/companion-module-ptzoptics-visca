@@ -7,16 +7,14 @@
 		"format": "prettier -w ."
 	},
 	"license": "MIT",
-	"homepage": "https://github.com/bitfocus/companion-module-ptzoptics-visca#readme",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-ptzoptics-visca/issues"
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-ptzoptics-visca.git"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.4.1",
+		"@companion-module/base": "~1.4.1"
+	},
+	"devDependencies": {
 		"@companion-module/tools": "~1.3.2"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json"
