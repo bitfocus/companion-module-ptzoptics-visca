@@ -1,1 +1,4 @@
 node_modules/
+pkg/
+pkg.tgz
+DEBUG-PACKAGED
