@@ -1,4 +1,4 @@
-const choices = require('./choices')
+import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
 
 function getPtSpeed(instance) {
 	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
@@ -7,7 +7,7 @@ function getPtSpeed(instance) {
 	return { panSpeed: panSpeed, tiltSpeed: tiltSpeed }
 }
 
-exports.getActions = function (instance) {
+export function getActions(instance) {
 	const actionDefinitions = {
 		left: {
 			name: 'Pan Left',
@@ -105,15 +105,15 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'speed setting',
 					id: 'speed',
-					choices: choices.SPEED,
+					choices: SPEED_CHOICES,
 				},
 			],
 			callback: async (event) => {
 				instance.ptSpeed = event.options.speed
 
 				var chosenIndex = -1
-				for (var i = 0; i < choices.SPEED.length; ++i) {
-					if (choices.SPEED[i].id == instance.ptSpeed) {
+				for (var i = 0; i < SPEED_CHOICES.length; ++i) {
+					if (SPEED_CHOICES[i].id == instance.ptSpeed) {
 						chosenIndex = i
 						break
 					}
@@ -133,7 +133,7 @@ exports.getActions = function (instance) {
 					// we decrement the index to speed up, because the SPEED list has the faster settings at the lower indicies
 					instance.ptSpeedIndex--
 				}
-				instance.ptSpeed = choices.SPEED[instance.ptSpeedIndex].id
+				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
 			},
 		},
 		ptSpeedD: {
@@ -146,7 +146,7 @@ exports.getActions = function (instance) {
 					// we increment the index to slow down, because the SPEED list has the slower settings at the higher indicies
 					instance.ptSpeedIndex++
 				}
-				instance.ptSpeed = choices.SPEED[instance.ptSpeedIndex].id
+				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
 			},
 		},
 		zoomI: {
@@ -294,7 +294,7 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'Iris setting',
 					id: 'val',
-					choices: choices.IRIS,
+					choices: IRIS_CHOICES,
 				},
 			],
 			callback: async (event) => {
@@ -327,7 +327,7 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'Shutter setting',
 					id: 'val',
-					choices: choices.SHUTTER,
+					choices: SHUTTER_CHOICES,
 				},
 			],
 			callback: async (event) => {
@@ -344,7 +344,7 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: choices.PRESET,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
 				},
 			],
@@ -360,7 +360,7 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: choices.PRESET,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
 				},
 			],
@@ -376,14 +376,14 @@ exports.getActions = function (instance) {
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: 'val',
-					choices: choices.PRESET,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
 				},
 				{
 					type: 'dropdown',
 					label: 'speed setting',
 					id: 'speed',
-					choices: choices.SPEED,
+					choices: SPEED_CHOICES,
 					minChoicesForSearch: 1,
 				},
 			],

@@ -1,4 +1,4 @@
-exports.IRIS = [
+export const IRIS_CHOICES = [
 	{ id: '11', label: 'F1.8' },
 	{ id: '10', label: 'F2.0' },
 	{ id: '0F', label: 'F2.4' },
@@ -14,7 +14,7 @@ exports.IRIS = [
 	{ id: '00', label: 'CLOSED' },
 ]
 
-exports.SHUTTER = [
+export const SHUTTER_CHOICES = [
 	{ id: '11', label: '1/1000000' },
 	{ id: '10', label: '1/6000' },
 	{ id: '0F', label: '1/4000' },
@@ -34,16 +34,16 @@ exports.SHUTTER = [
 	{ id: '01', label: '1/30' },
 ]
 
-var PRESET = []
+const PRESET = []
 for (var i = 0; i < 255; ++i) {
 	if (i < 90 || i > 99) {
 		PRESET.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
 	}
 }
 
-exports.PRESET = PRESET
+export const PRESET_CHOICES = PRESET
 
-exports.SPEED = [
+export const SPEED_CHOICES = [
 	{ id: '18', label: 'Speed 24 (Fast)' },
 	{ id: '17', label: 'Speed 23' },
 	{ id: '16', label: 'Speed 22' },

@@ -1,6 +1,6 @@
-const { InstanceBase, TCPHelper, runEntrypoint } = require('@companion-module/base')
-const actions = require('./actions')
-const presets = require('./presets')
+import { InstanceBase, TCPHelper, runEntrypoint } from '@companion-module/base'
+import { getActions } from './actions.js'
+import { getPresets } from './presets.js'
 
 class PtzOpticsInstance extends InstanceBase {
 	constructor(internal) {
@@ -19,11 +19,11 @@ class PtzOpticsInstance extends InstanceBase {
 	}
 
 	updateActions() {
-		this.setActionDefinitions(actions.getActions(this))
+		this.setActionDefinitions(getActions(this))
 	}
 
 	updatePresets() {
-		this.setPresetDefinitions(presets.getPresets())
+		this.setPresetDefinitions(getPresets())
 	}
 
 	// Return config fields for web config of the module instance

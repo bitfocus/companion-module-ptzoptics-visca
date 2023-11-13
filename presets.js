@@ -1,7 +1,16 @@
-const { combineRgb } = require('@companion-module/base')
-const assets = require('./assets/assets')
+import { combineRgb } from '@companion-module/base'
+import {
+	IMAGE_UP,
+	IMAGE_DOWN,
+	IMAGE_LEFT,
+	IMAGE_RIGHT,
+	IMAGE_UP_RIGHT,
+	IMAGE_UP_LEFT,
+	IMAGE_DOWN_LEFT,
+	IMAGE_DOWN_RIGHT,
+} from './assets/assets.js'
 
-exports.getPresets = function () {
+export function getPresets() {
 	const presets = {}
 
 	presets['tilt_up_preset'] = {
@@ -10,7 +19,7 @@ exports.getPresets = function () {
 		name: 'UP',
 		style: {
 			text: '',
-			png64: assets.image_up,
+			png64: IMAGE_UP,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -39,7 +48,7 @@ exports.getPresets = function () {
 		name: 'DOWN',
 		style: {
 			text: '',
-			png64: assets.image_down,
+			png64: IMAGE_DOWN,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -68,7 +77,7 @@ exports.getPresets = function () {
 		name: 'LEFT',
 		style: {
 			text: '',
-			png64: assets.image_left,
+			png64: IMAGE_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -97,7 +106,7 @@ exports.getPresets = function () {
 		name: 'RIGHT',
 		style: {
 			text: '',
-			png64: assets.image_right,
+			png64: IMAGE_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -126,7 +135,7 @@ exports.getPresets = function () {
 		name: 'UP RIGHT',
 		style: {
 			text: '',
-			png64: assets.image_up_right,
+			png64: IMAGE_UP_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -155,7 +164,7 @@ exports.getPresets = function () {
 		name: 'UP LEFT',
 		style: {
 			text: '',
-			png64: assets.image_up_left,
+			png64: IMAGE_UP_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -184,7 +193,7 @@ exports.getPresets = function () {
 		name: 'DOWN LEFT',
 		style: {
 			text: '',
-			png64: assets.image_down_left,
+			png64: IMAGE_DOWN_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
@@ -213,7 +222,7 @@ exports.getPresets = function () {
 		name: 'DOWN RIGHT',
 		style: {
 			text: '',
-			png64: assets.image_down_right,
+			png64: IMAGE_DOWN_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
 			color: '16777215',
