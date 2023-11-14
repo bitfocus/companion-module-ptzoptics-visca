@@ -22,8 +22,5 @@
 	"legacyIds": [],
 	"manufacturer": "PTZoptics",
 	"products": ["VISCA"],
-	"keywords": [
-		"Protocol",
-		"Camera"
-	]
+	"keywords": ["Protocol", "Camera"]
 }
