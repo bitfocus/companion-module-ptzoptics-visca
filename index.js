@@ -1,18 +1,19 @@
-import { InstanceBase, TCPHelper, runEntrypoint } from '@companion-module/base'
+import { InstanceBase, TCPHelper, Regex, runEntrypoint } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
 
 class PtzOpticsInstance extends InstanceBase {
+	socket = null
+
+	ptSpeed = '0C'
+	ptSpeedIndex = 12
+
 	constructor(internal) {
 		super(internal)
-
-		// initialize speed values
-		this.ptSpeed = '0C'
-		this.ptSpeedIndex = 12
 	}
 
 	sendVISCACommand(str) {
-		if (this.socket !== undefined) {
+		if (this.socket !== null) {
 			var buffer = Buffer.from(str, 'binary')
 			this.socket.send(buffer)
 		}
@@ -41,7 +42,7 @@ class PtzOpticsInstance extends InstanceBase {
 				id: 'host',
 				label: 'Camera IP',
 				width: 6,
-				regex: this.REGEX_IP,
+				regex: Regex.IP,
 			},
 			{
 				type: 'textinput',
@@ -49,15 +50,16 @@ class PtzOpticsInstance extends InstanceBase {
 				label: 'VISCA TCP port',
 				width: 6,
 				default: 5678,
-				regex: this.REGEX_PORT,
+				regex: Regex.PORT,
 			},
 		]
 	}
 
 	// When the module gets deleted
 	async destroy() {
-		if (this.socket !== undefined) {
+		if (this.socket !== null) {
 			this.socket.destroy()
+			this.socket = null
 		}
 
 		this.log('destroying module: ', this.id)
@@ -77,10 +79,11 @@ class PtzOpticsInstance extends InstanceBase {
 	}
 
 	initTCP() {
-		if (this.socket !== undefined) {
+		if (this.socket !== null) {
 			// clean up the socket and keep Companion connection status up to date in the event that the socket ceases to exist
 			this.socket.destroy()
-			delete this.socket
+			this.socket = null
+
 			this.updateStatus('disconnected')
 		}
 
@@ -118,7 +121,7 @@ class PtzOpticsInstance extends InstanceBase {
 
 		this.config = config
 
-		if (resetConnection === true || this.socket === undefined) {
+		if (resetConnection || this.socket === null) {
 			this.initTCP()
 		}
 	}
