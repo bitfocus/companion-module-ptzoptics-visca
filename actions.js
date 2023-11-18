@@ -1,5 +1,5 @@
 import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
-import { FocusMode, FocusStop } from './commands.js'
+import { FocusFarStandard, FocusMode, FocusNearStandard, FocusStop, ZoomOut, ZoomStop } from './commands.js'
 import { FocusModeOption } from './options.js'
 import { sendVISCACommand } from './visca/command.js'
 
@@ -164,32 +164,28 @@ export function getActions(instance) {
 			name: 'Zoom Out',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ZoomOut)
 			},
 		},
 		zoomS: {
 			name: 'Zoom Stop',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x00\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ZoomStop)
 			},
 		},
 		focusN: {
 			name: 'Focus Near',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusNearStandard)
 			},
 		},
 		focusF: {
 			name: 'Focus Far',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusFarStandard)
 			},
 		},
 		focusS: {
