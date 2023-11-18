@@ -1,6 +1,8 @@
 import { InstanceBase, TCPHelper, Regex, runEntrypoint } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
+import { checkCommandBytes } from './visca/command.js'
+import { prettyBytes } from './visca/utils.js'
 
 class PtzOpticsInstance extends InstanceBase {
 	socket = null
@@ -17,6 +19,28 @@ class PtzOpticsInstance extends InstanceBase {
 			var buffer = Buffer.from(str, 'binary')
 			this.socket.send(buffer)
 		}
+	}
+
+	/**
+	 * Send a VISCA command's bytes.
+	 *
+	 * @param {Array<number>} commandBytes
+	 *    An array of bytes constituting the command
+	 */
+	sendVISCACommandBytes(commandBytes) {
+		const err = checkCommandBytes(commandBytes)
+		if (err) {
+			this.log('error', err)
+			return
+		}
+
+		if (this.socket === null) {
+			this.log('error', `socket not open to send ${prettyBytes(commandBytes)}`)
+			return
+		}
+
+		const commandBuffer = Buffer.from(commandBytes)
+		this.socket.send(commandBuffer)
 	}
 
 	updateActions() {

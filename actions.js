@@ -1,4 +1,7 @@
 import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
+import { FocusMode, FocusStop } from './commands.js'
+import { FocusModeOption } from './options.js'
+import { sendVISCACommand } from './visca/command.js'
 
 function getPtSpeed(instance) {
 	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
@@ -193,8 +196,7 @@ export function getActions(instance) {
 			name: 'Focus Stop',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x00\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusStop)
 			},
 		},
 		focusM: {
@@ -203,21 +205,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Auto / Manual Focus',
-					id: 'bol',
-					choices: [
-						{ id: '0', label: 'Auto Focus' },
-						{ id: '1', label: 'Manual Focus' },
-					],
+					id: FocusModeOption.id,
+					choices: FocusModeOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.bol == 0) {
-					var cmd = '\x81\x01\x04\x38\x02\xFF'
-				}
-				if (event.options.bol == 1) {
-					var cmd = '\x81\x01\x04\x38\x03\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusMode, event.options)
 			},
 		},
 		focusL: {
