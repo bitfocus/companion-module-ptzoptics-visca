@@ -1,6 +1,15 @@
 import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
-import { FocusFarStandard, FocusMode, FocusNearStandard, FocusStop, ZoomOut, ZoomStop } from './commands.js'
-import { FocusModeOption } from './options.js'
+import {
+	CameraPower,
+	ExposureMode,
+	FocusFarStandard,
+	FocusMode,
+	FocusNearStandard,
+	FocusStop,
+	ZoomOut,
+	ZoomStop,
+} from './commands.js'
+import { CameraPowerOption, ExposureModeOption, FocusModeOption } from './options.js'
 import { sendVISCACommand } from './visca/command.js'
 
 function getPtSpeed(instance) {
@@ -231,33 +240,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Mode setting',
-					id: 'val',
-					choices: [
-						{ id: '0', label: 'Full auto' },
-						{ id: '1', label: 'Manual' },
-						{ id: '2', label: 'Shutter Pri' },
-						{ id: '3', label: 'Iris Pri' },
-						{ id: '4', label: 'Bright mode (manual)' },
-					],
+					id: ExposureModeOption.id,
+					choices: ExposureModeOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.val == 0) {
-					var cmd = '\x81\x01\x04\x39\x00\xFF'
-				}
-				if (event.options.val == 1) {
-					var cmd = '\x81\x01\x04\x39\x03\xFF'
-				}
-				if (event.options.val == 2) {
-					var cmd = '\x81\x01\x04\x39\x0A\xFF'
-				}
-				if (event.options.val == 3) {
-					var cmd = '\x81\x01\x04\x39\x0B\xFF'
-				}
-				if (event.options.val == 4) {
-					var cmd = '\x81\x01\x04\x39\x0D\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ExposureMode, event.options)
 			},
 		},
 		irisU: {
@@ -391,20 +379,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'power on/off',
-					id: 'bool',
-					choices: [
-						{ id: 'off', label: 'off' },
-						{ id: 'on', label: 'on' },
-					],
+					id: CameraPowerOption.id,
+					choices: CameraPowerOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.bool == 'off') {
-					var cmd = '\x81\x01\x04\x00\x03\xFF'
-				} else {
-					var cmd = '\x81\x01\x04\x00\x02\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, CameraPower, event.options)
 			},
 		},
 		wb: {
