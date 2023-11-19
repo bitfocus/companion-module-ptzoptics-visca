@@ -42,3 +42,5 @@ export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x
 		choiceToParam: WhiteBalanceOption.choiceToParam,
 	},
 })
+
+export const WhiteBalanceOnePushTrigger = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x10, 0x05, 0xff])
