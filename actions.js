@@ -8,6 +8,8 @@ import {
 	FocusNearStandard,
 	FocusStop,
 	FocusUnlock,
+	IrisDown,
+	IrisUp,
 	ZoomIn,
 	ZoomOut,
 	ZoomStop,
@@ -252,16 +254,14 @@ export function getActions(instance) {
 			name: 'Iris Up',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0B\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, IrisUp)
 			},
 		},
 		irisD: {
 			name: 'Iris Down',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0B\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, IrisDown)
 			},
 		},
 		irisS: {
