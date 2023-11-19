@@ -11,6 +11,7 @@ import {
 	IrisDown,
 	IrisUp,
 	WhiteBalance,
+	WhiteBalanceOnePushTrigger,
 	ZoomIn,
 	ZoomOut,
 	ZoomStop,
@@ -406,8 +407,7 @@ export function getActions(instance) {
 			name: 'White balance one push trigger',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x10\x05\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, WhiteBalanceOnePushTrigger)
 			},
 		},
 		awbS: {
