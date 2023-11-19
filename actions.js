@@ -3,9 +3,11 @@ import {
 	CameraPower,
 	ExposureMode,
 	FocusFarStandard,
+	FocusLock,
 	FocusMode,
 	FocusNearStandard,
 	FocusStop,
+	FocusUnlock,
 	ZoomOut,
 	ZoomStop,
 } from './commands.js'
@@ -222,16 +224,14 @@ export function getActions(instance) {
 			name: 'Focus Lock',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x0A\x04\x68\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusLock)
 			},
 		},
 		focusU: {
 			name: 'Focus Unlock',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x0A\x04\x68\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, FocusUnlock)
 			},
 		},
 		expM: {
