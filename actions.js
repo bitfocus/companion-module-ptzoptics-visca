@@ -10,6 +10,8 @@ import {
 	FocusUnlock,
 	IrisDown,
 	IrisUp,
+	PresetRecall,
+	PresetSave,
 	ShutterDown,
 	ShutterUp,
 	WhiteBalance,
@@ -18,7 +20,14 @@ import {
 	ZoomOut,
 	ZoomStop,
 } from './commands.js'
-import { CameraPowerOption, ExposureModeOption, FocusModeOption, WhiteBalanceOption } from './options.js'
+import {
+	CameraPowerOption,
+	ExposureModeOption,
+	FocusModeOption,
+	PresetRecallOption,
+	PresetSaveOption,
+	WhiteBalanceOption,
+} from './options.js'
 import { sendVISCACommand } from './visca/command.js'
 
 function getPtSpeed(instance) {
@@ -322,14 +331,13 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetSaveOption.id,
+					choices: PresetSaveOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x3F\x01' + String.fromCharCode(parseInt(event.options.val, 16) & 0xff) + '\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, PresetSave, event.options)
 			},
 		},
 		recallPset: {
@@ -338,14 +346,13 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetRecallOption.id,
+					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x3F\x02' + String.fromCharCode(parseInt(event.options.val, 16) & 0xff) + '\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, PresetRecall, event.options)
 			},
 		},
 		speedPset: {

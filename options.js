@@ -87,3 +87,28 @@ export const WhiteBalanceOption = {
 		}
 	},
 }
+
+const PRESET = []
+for (var i = 0; i < 255; ++i) {
+	if (i < 90 || i > 99) {
+		PRESET.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
+	}
+}
+
+export const PRESET_CHOICES = PRESET
+
+export const PresetSaveOption = {
+	id: 'val',
+	choices: PRESET_CHOICES,
+	choiceToParam: (choice) => {
+		return parseInt(choice, 16)
+	},
+}
+
+export const PresetRecallOption = {
+	id: 'val',
+	choices: PRESET_CHOICES,
+	choiceToParam: (choice) => {
+		return parseInt(choice, 16)
+	},
+}

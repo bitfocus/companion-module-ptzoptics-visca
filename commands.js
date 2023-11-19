@@ -1,4 +1,11 @@
-import { CameraPowerOption, ExposureModeOption, FocusModeOption, WhiteBalanceOption } from './options.js'
+import {
+	CameraPowerOption,
+	ExposureModeOption,
+	FocusModeOption,
+	PresetRecallOption,
+	PresetSaveOption,
+	WhiteBalanceOption,
+} from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
 
 export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x00, 0xff], {
@@ -47,3 +54,17 @@ export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x
 })
 
 export const WhiteBalanceOnePushTrigger = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x10, 0x05, 0xff])
+
+export const PresetSave = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x01, 0x00, 0xff], {
+	[PresetSaveOption.id]: {
+		nibbles: [10, 11],
+		choiceToParam: PresetSaveOption.choiceToParam,
+	},
+})
+
+export const PresetRecall = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x02, 0x00, 0xff], {
+	[PresetRecallOption.id]: {
+		nibbles: [10, 11],
+		choiceToParam: PresetRecallOption.choiceToParam,
+	},
+})
