@@ -34,14 +34,7 @@ export const SHUTTER_CHOICES = [
 	{ id: '01', label: '1/30' },
 ]
 
-const PRESET = []
-for (var i = 0; i < 255; ++i) {
-	if (i < 90 || i > 99) {
-		PRESET.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
-	}
-}
-
-export const PRESET_CHOICES = PRESET
+export { PRESET_CHOICES } from './options.js'
 
 export const SPEED_CHOICES = [
 	{ id: '18', label: 'Speed 24 (Fast)' },
