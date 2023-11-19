@@ -1,4 +1,4 @@
-import { CameraPowerOption, ExposureModeOption, FocusModeOption } from './options.js'
+import { CameraPowerOption, ExposureModeOption, FocusModeOption, WhiteBalanceOption } from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
 
 export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x00, 0xff], {
@@ -33,5 +33,12 @@ export const CameraPower = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x00, 0x0
 	[CameraPowerOption.id]: {
 		nibbles: [9],
 		choiceToParam: CameraPowerOption.choiceToParam,
+	},
+})
+
+export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x00, 0xff], {
+	[WhiteBalanceOption.id]: {
+		nibbles: [9],
+		choiceToParam: WhiteBalanceOption.choiceToParam,
 	},
 })

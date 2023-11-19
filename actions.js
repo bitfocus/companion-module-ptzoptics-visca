@@ -10,11 +10,12 @@ import {
 	FocusUnlock,
 	IrisDown,
 	IrisUp,
+	WhiteBalance,
 	ZoomIn,
 	ZoomOut,
 	ZoomStop,
 } from './commands.js'
-import { CameraPowerOption, ExposureModeOption, FocusModeOption } from './options.js'
+import { CameraPowerOption, ExposureModeOption, FocusModeOption, WhiteBalanceOption } from './options.js'
 import { sendVISCACommand } from './visca/command.js'
 
 function getPtSpeed(instance) {
@@ -393,35 +394,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Mode',
-					id: 'val',
-					choices: [
-						{ id: 'automatic', label: 'Automatic' },
-						{ id: 'indoor', label: 'Indoor' },
-						{ id: 'outdoor', label: 'Outdoor' },
-						{ id: 'onepush', label: 'One Push' },
-						{ id: 'manual', label: 'Manual' },
-					],
+					id: WhiteBalanceOption.id,
+					choices: WhiteBalanceOption.choices,
 				},
 			],
 			callback: async (event) => {
-				switch (event.options.val) {
-					case 'automatic':
-						var cmd = '\x81\x01\x04\x35\x00\xFF'
-						break
-					case 'indoor':
-						var cmd = '\x81\x01\x04\x35\x01\xFF'
-						break
-					case 'outdoor':
-						var cmd = '\x81\x01\x04\x35\x02\xFF'
-						break
-					case 'onepush':
-						var cmd = '\x81\x01\x04\x35\x03\xFF'
-						break
-					case 'manual':
-						var cmd = '\x81\x01\x04\x35\x05\xFF'
-						break
-				}
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, WhiteBalance, event.options)
 			},
 		},
 		wbOPT: {
