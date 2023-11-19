@@ -8,6 +8,7 @@ import {
 	FocusNearStandard,
 	FocusStop,
 	FocusUnlock,
+	ZoomIn,
 	ZoomOut,
 	ZoomStop,
 } from './commands.js'
@@ -167,8 +168,7 @@ export function getActions(instance) {
 			name: 'Zoom In',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ZoomIn)
 			},
 		},
 		zoomO: {
