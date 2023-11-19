@@ -10,6 +10,8 @@ import {
 	FocusUnlock,
 	IrisDown,
 	IrisUp,
+	ShutterDown,
+	ShutterUp,
 	WhiteBalance,
 	WhiteBalanceOnePushTrigger,
 	ZoomIn,
@@ -287,16 +289,14 @@ export function getActions(instance) {
 			name: 'Shutter Up',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0A\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ShutterUp)
 			},
 		},
 		shutD: {
 			name: 'Shutter Down',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0A\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ShutterDown)
 			},
 		},
 		shutS: {
