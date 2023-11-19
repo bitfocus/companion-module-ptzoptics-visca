@@ -60,3 +60,30 @@ export const CameraPowerOption = {
 		}
 	},
 }
+
+export const WhiteBalanceOption = {
+	id: 'val',
+	choices: [
+		{ id: 'automatic', label: 'Automatic' },
+		{ id: 'indoor', label: 'Indoor' },
+		{ id: 'outdoor', label: 'Outdoor' },
+		{ id: 'onepush', label: 'One Push' },
+		{ id: 'manual', label: 'Manual' },
+	],
+	choiceToParam: (choice) => {
+		switch (choice) {
+			case 'automatic':
+				return 0x0
+			case 'indoor':
+				return 0x1
+			case 'outdoor':
+				return 0x2
+			case 'onepush':
+				return 0x3
+			case 'manual':
+				return 0x5
+			default:
+				return 0x0
+		}
+	},
+}
