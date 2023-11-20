@@ -10,6 +10,7 @@ import {
 	FocusUnlock,
 	IrisDown,
 	IrisUp,
+	PanTiltHome,
 	PresetRecall,
 	PresetSave,
 	ShutterDown,
@@ -124,8 +125,7 @@ export function getActions(instance) {
 			name: 'P/T Home',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x04\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, PanTiltHome)
 			},
 		},
 		ptSpeedS: {
