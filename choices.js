@@ -1,19 +1,3 @@
-export const IRIS_CHOICES = [
-	{ id: '11', label: 'F1.8' },
-	{ id: '10', label: 'F2.0' },
-	{ id: '0F', label: 'F2.4' },
-	{ id: '0E', label: 'F2.8' },
-	{ id: '0D', label: 'F3.4' },
-	{ id: '0C', label: 'F4.0' },
-	{ id: '0B', label: 'F4.8' },
-	{ id: '0A', label: 'F5.6' },
-	{ id: '09', label: 'F6.8' },
-	{ id: '08', label: 'F8.0' },
-	{ id: '07', label: 'F9.6' },
-	{ id: '06', label: 'F11' },
-	{ id: '00', label: 'CLOSED' },
-]
-
 export const SHUTTER_CHOICES = [
 	{ id: '11', label: '1/1000000' },
 	{ id: '10', label: '1/6000' },

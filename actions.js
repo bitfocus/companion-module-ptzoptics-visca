@@ -1,4 +1,4 @@
-import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
+import { SPEED_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
 import {
 	CameraPower,
 	ExposureMode,
@@ -9,6 +9,7 @@ import {
 	FocusStop,
 	FocusUnlock,
 	IrisDown,
+	IrisSet,
 	IrisUp,
 	PanTiltHome,
 	PresetRecall,
@@ -25,6 +26,7 @@ import {
 	CameraPowerOption,
 	ExposureModeOption,
 	FocusModeOption,
+	IrisSetOption,
 	PresetRecallOption,
 	PresetSaveOption,
 	WhiteBalanceOption,
@@ -283,15 +285,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Iris setting',
-					id: 'val',
-					choices: IRIS_CHOICES,
+					id: IrisSetOption.id,
+					choices: IrisSetOption.choices,
 				},
 			],
 			callback: async (event) => {
-				var cmd = Buffer.from('\x81\x01\x04\x4B\x00\x00\x00\x00\xFF', 'binary')
-				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
-				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, IrisSet, event.options)
 			},
 		},
 		shutU: {
