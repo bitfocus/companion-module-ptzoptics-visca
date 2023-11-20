@@ -138,6 +138,18 @@ export const WhiteBalanceOption = {
 	},
 }
 
+export const AutoWhiteBalanceSensitivityOption = {
+	id: 'val',
+	choices: [
+		{ id: 0, label: 'High' },
+		{ id: 1, label: 'Normal' },
+		{ id: 2, label: 'Low' },
+	],
+	choiceToParam: (choice) => {
+		return Number(choice)
+	},
+}
+
 const PRESET_CHOICES = []
 for (var i = 0; i < 255; ++i) {
 	if (i < 90 || i > 99) {

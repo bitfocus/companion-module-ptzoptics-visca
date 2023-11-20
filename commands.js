@@ -1,4 +1,5 @@
 import {
+	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
 	FocusModeOption,
@@ -72,6 +73,13 @@ export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x
 })
 
 export const WhiteBalanceOnePushTrigger = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x10, 0x05, 0xff])
+
+export const AutoWhiteBalanceSensitivity = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0xa9, 0x00, 0xff], {
+	[AutoWhiteBalanceSensitivityOption.id]: {
+		nibbles: [9],
+		choiceToParam: AutoWhiteBalanceSensitivityOption.choiceToParam,
+	},
+})
 
 export const PresetSave = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x01, 0x00, 0xff], {
 	[PresetSaveOption.id]: {
