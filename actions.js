@@ -40,7 +40,7 @@ import {
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from './options.js'
-import { sendVISCACommand } from './visca/command.js'
+import { UserDefinedCommand, sendVISCACommand } from './visca/command.js'
 
 function getPtSpeed(instance) {
 	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
@@ -458,15 +458,14 @@ export function getActions(instance) {
 			],
 			callback: async (event) => {
 				if (typeof event.options.custom === 'string' || event.options.custom instanceof String) {
-					var hexData = event.options.custom.replace(/\s+/g, '')
-					var tempBuffer = Buffer.from(hexData, 'hex')
-					var cmd = tempBuffer.toString('binary')
-
-					if ((tempBuffer[0] & 0xf0) === 0x80) {
-						instance.sendVISCACommand(cmd)
-					} else {
-						instance.log('error', 'Error, command "' + event.options.custom + '" does not start with 8')
+					const hexData = event.options.custom.replace(/\s+/g, '')
+					const bytes = []
+					for (let i = 0; i < hexData.length; i += 2) {
+						bytes.push(parseInt(hexData.substr(i, 2), 16))
 					}
+
+					const command = new UserDefinedCommand(bytes)
+					sendVISCACommand(instance, command)
 				}
 			},
 		},
