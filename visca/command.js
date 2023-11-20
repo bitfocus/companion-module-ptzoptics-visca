@@ -44,7 +44,7 @@ function validateCommandParams(params, command) {
 export class Command {
 	#commandBytes
 	#params
-	#userDefined = false
+	#userDefined
 
 	/**
 	 * @param {number[]} commandBytes
@@ -59,13 +59,20 @@ export class Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
+	 * @param {bool} userDefined
+	 *    Whether this command was manually defined by the user, such that its
+	 *    correctness can't be presumed -- in which case errors this command
+	 *    triggers are logged but, unlike commands this module itself defines,
+	 *    will not fail the connection
 	 */
-	constructor(commandBytes, params) {
+	constructor(commandBytes, params, userDefined) {
 		checkBytes(commandBytes)
 		this.#commandBytes = commandBytes
 
 		validateCommandParams(params, commandBytes)
 		this.#params = params
+
+		this.#userDefined = userDefined
 	}
 
 	/**
@@ -147,7 +154,32 @@ export class ModuleDefinedCommand extends Command {
 	 *    nibbles.
 	 */
 	constructor(commandBytes, params = null) {
-		super(commandBytes, params)
+		super(commandBytes, params, false)
+	}
+}
+
+/**
+ * A command  defined by the user as a custom command, potentially including
+ * user-provided parameters, that's expected to complete successfully with a
+ * response containing no parameters.
+ */
+export class UserDefinedCommand extends Command {
+	/**
+	 * @param {number[]} commandBytes
+	 *    An array of byte values that constitute this command, with any
+	 *    parameter nibbles set to zero.  (For example, `81 01 04 61 0p FF` with
+	 *    `p` as a parameter would use `[0x81, 0x01, 0x04, 0x61, 0x00, 0xFF]`).
+	 * @param {?Object.<string, { nibbles: number[], choiceToParam: (choice: string) => number }>} params
+	 *    A hash defining all parameters to be filled in the bytes of this
+	 *    command.  (`null` is equivalent to an empty hash.)  Each key is the id
+	 *    of the option that encodes the parameter, and each value is an object
+	 *    specifying the zero-based offsets of the nibbles that constitute the
+	 *    parameter in `commandBytes` (from most to least significant) and a
+	 *    function converting option values to the number to store across those
+	 *    nibbles.
+	 */
+	constructor(commandBytes, params = null) {
+		super(commandBytes, params, true)
 	}
 }
 
