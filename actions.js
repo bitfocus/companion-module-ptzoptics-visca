@@ -1,5 +1,6 @@
 import { SPEED_CHOICES } from './choices.js'
 import {
+	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
 	FocusFarStandard,
@@ -25,6 +26,7 @@ import {
 	ZoomStop,
 } from './commands.js'
 import {
+	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
 	FocusModeOption,
@@ -419,27 +421,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Sensitivity',
-					id: 'val',
-					choices: [
-						{ id: 0, label: 'High' },
-						{ id: 1, label: 'Normal' },
-						{ id: 2, label: 'Low' },
-					],
+					id: AutoWhiteBalanceSensitivityOption.id,
+					choices: AutoWhiteBalanceSensitivityOption.choices,
 				},
 			],
 			callback: async (event) => {
-				switch (event.options.val) {
-					case 0:
-						var cmd = '\x81\x01\x04\xA9\x00\xFF'
-						break
-					case 1:
-						var cmd = '\x81\x01\x04\xA9\x01\xFF'
-						break
-					case 2:
-						var cmd = '\x81\x01\x04\xA9\x02\xFF'
-						break
-				}
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		autoTracking: {
