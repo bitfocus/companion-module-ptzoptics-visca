@@ -8,6 +8,8 @@ import {
 } from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
 
+export const PanTiltHome = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x04, 0xff])
+
 export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x00, 0xff], {
 	[ExposureModeOption.id]: {
 		nibbles: [9],
