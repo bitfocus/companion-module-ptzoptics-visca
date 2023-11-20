@@ -7,6 +7,7 @@ import {
 	PresetDriveSpeedOption,
 	PresetRecallOption,
 	PresetSaveOption,
+	ShutterSetOption,
 	WhiteBalanceOption,
 } from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
@@ -31,6 +32,12 @@ export const IrisSet = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x4b, 0x00, 0
 
 export const ShutterUp = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0a, 0x02, 0xff])
 export const ShutterDown = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0a, 0x03, 0xff])
+export const ShutterSet = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x4a, 0x00, 0x00, 0x00, 0x00, 0xff], {
+	[ShutterSetOption.id]: {
+		nibbles: [13, 15],
+		choiceToParam: ShutterSetOption.choiceToParam,
+	},
+})
 
 export const FocusStop = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x00, 0xff])
 export const FocusNearStandard = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x03, 0xff])

@@ -1,4 +1,4 @@
-import { SPEED_CHOICES, SHUTTER_CHOICES } from './choices.js'
+import { SPEED_CHOICES } from './choices.js'
 import {
 	CameraPower,
 	ExposureMode,
@@ -16,6 +16,7 @@ import {
 	PresetRecall,
 	PresetSave,
 	ShutterDown,
+	ShutterSet,
 	ShutterUp,
 	WhiteBalance,
 	WhiteBalanceOnePushTrigger,
@@ -32,6 +33,7 @@ import {
 	PresetDriveSpeedOption,
 	PresetRecallOption,
 	PresetSaveOption,
+	ShutterSetOption,
 	WhiteBalanceOption,
 } from './options.js'
 import { sendVISCACommand } from './visca/command.js'
@@ -316,15 +318,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Shutter setting',
-					id: 'val',
-					choices: SHUTTER_CHOICES,
+					id: ShutterSetOption.id,
+					choices: ShutterSetOption.choices,
 				},
 			],
 			callback: async (event) => {
-				var cmd = Buffer.from('\x81\x01\x04\x4A\x00\x00\x00\x00\xFF', 'binary')
-				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
-				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, ShutterSet, event.options)
 			},
 		},
 		savePset: {
