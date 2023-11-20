@@ -2,6 +2,7 @@ import {
 	CameraPowerOption,
 	ExposureModeOption,
 	FocusModeOption,
+	IrisSetOption,
 	PresetRecallOption,
 	PresetSaveOption,
 	WhiteBalanceOption,
@@ -19,6 +20,12 @@ export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x
 
 export const IrisUp = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0b, 0x02, 0xff])
 export const IrisDown = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0b, 0x03, 0xff])
+export const IrisSet = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x4b, 0x00, 0x00, 0x00, 0x00, 0xff], {
+	[IrisSetOption.id]: {
+		nibbles: [13, 15],
+		choiceToParam: IrisSetOption.choiceToParam,
+	},
+})
 
 export const ShutterUp = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0a, 0x02, 0xff])
 export const ShutterDown = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0a, 0x03, 0xff])
