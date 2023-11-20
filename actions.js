@@ -1,4 +1,3 @@
-import { SPEED_CHOICES } from './choices.js'
 import {
 	AutoTracking,
 	AutoWhiteBalanceSensitivity,
@@ -38,6 +37,7 @@ import {
 	PresetRecallOption,
 	PresetSaveOption,
 	ShutterSetOption,
+	SPEED_CHOICES,
 	WhiteBalanceOption,
 } from './options.js'
 import { UserDefinedCommand, sendVISCACommand } from './visca/command.js'
