@@ -1,4 +1,4 @@
-import { SPEED_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
+import { SPEED_CHOICES, SHUTTER_CHOICES } from './choices.js'
 import {
 	CameraPower,
 	ExposureMode,
@@ -12,6 +12,7 @@ import {
 	IrisSet,
 	IrisUp,
 	PanTiltHome,
+	PresetDriveSpeed,
 	PresetRecall,
 	PresetSave,
 	ShutterDown,
@@ -27,6 +28,8 @@ import {
 	ExposureModeOption,
 	FocusModeOption,
 	IrisSetOption,
+	PresetDriveNumberOption,
+	PresetDriveSpeedOption,
 	PresetRecallOption,
 	PresetSaveOption,
 	WhiteBalanceOption,
@@ -360,25 +363,20 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetDriveNumberOption.id,
+					choices: PresetDriveNumberOption.choices,
 					minChoicesForSearch: 1,
 				},
 				{
 					type: 'dropdown',
 					label: 'speed setting',
-					id: 'speed',
-					choices: SPEED_CHOICES,
+					id: PresetDriveSpeedOption.id,
+					choices: PresetDriveSpeedOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd =
-					'\x81\x01\x06\x01' +
-					String.fromCharCode(parseInt(event.options.val, 16) & 0xff) +
-					String.fromCharCode(parseInt(event.options.speed, 16) & 0xff) +
-					'\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, PresetDriveSpeed, event.options)
 			},
 		},
 		power: {

@@ -3,6 +3,8 @@ import {
 	ExposureModeOption,
 	FocusModeOption,
 	IrisSetOption,
+	PresetDriveNumberOption,
+	PresetDriveSpeedOption,
 	PresetRecallOption,
 	PresetSaveOption,
 	WhiteBalanceOption,
@@ -75,5 +77,16 @@ export const PresetRecall = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x
 	[PresetRecallOption.id]: {
 		nibbles: [10, 11],
 		choiceToParam: PresetRecallOption.choiceToParam,
+	},
+})
+
+export const PresetDriveSpeed = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x01, 0x0, 0x0, 0xff], {
+	[PresetDriveNumberOption.id]: {
+		nibbles: [8, 9],
+		choiceToParam: PresetDriveNumberOption.choiceToParam,
+	},
+	[PresetDriveSpeedOption.id]: {
+		nibbles: [10, 11],
+		choiceToParam: PresetDriveSpeedOption.choiceToParam,
 	},
 })
