@@ -362,7 +362,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'power on/off',
+					label: 'power on/standby',
 					id: CameraPowerOption.id,
 					choices: CameraPowerOption.choices,
 					default: CameraPowerOption.default,
