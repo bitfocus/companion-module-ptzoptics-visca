@@ -43,13 +43,6 @@ class PtzOpticsInstance extends InstanceBase {
 		super(internal)
 	}
 
-	sendVISCACommand(str) {
-		if (this.socket !== null) {
-			var buffer = Buffer.from(str, 'binary')
-			this.socket.send(buffer)
-		}
-	}
-
 	/**
 	 * Send a VISCA command's bytes.
 	 *
