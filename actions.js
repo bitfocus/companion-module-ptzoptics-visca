@@ -42,7 +42,8 @@ import {
 	SPEED_CHOICES,
 	WhiteBalanceOption,
 } from './options.js'
-import { UserDefinedCommand, sendVISCACommand } from './visca/command.js'
+import { UserDefinedCommand } from './visca/command.js'
+import { sendVISCACommand } from './visca/port.js'
 
 export function getActions(instance) {
 	function createPanTiltCallback(direction) {

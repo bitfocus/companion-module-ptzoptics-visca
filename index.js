@@ -1,11 +1,10 @@
-import { InstanceBase, TCPHelper, Regex, runEntrypoint } from '@companion-module/base'
+import { InstanceBase, Regex, runEntrypoint } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
-import { checkCommandBytes } from './visca/command.js'
-import { prettyBytes } from './visca/utils.js'
+import { VISCAPort } from './visca/port.js'
 
 class PtzOpticsInstance extends InstanceBase {
-	socket = null
+	visca
 
 	/**
 	 * The speed to be passed in the pan/tilt speed parameters of Pan Tilt Drive
@@ -41,28 +40,8 @@ class PtzOpticsInstance extends InstanceBase {
 
 	constructor(internal) {
 		super(internal)
-	}
 
-	/**
-	 * Send a VISCA command's bytes.
-	 *
-	 * @param {Array<number>} commandBytes
-	 *    An array of bytes constituting the command
-	 */
-	sendVISCACommandBytes(commandBytes) {
-		const err = checkCommandBytes(commandBytes)
-		if (err) {
-			this.log('error', err)
-			return
-		}
-
-		if (this.socket === null) {
-			this.log('error', `socket not open to send ${prettyBytes(commandBytes)}`)
-			return
-		}
-
-		const commandBuffer = Buffer.from(commandBytes)
-		this.socket.send(commandBuffer)
+		this.visca = new VISCAPort(this)
 	}
 
 	updateActions() {
@@ -103,12 +82,8 @@ class PtzOpticsInstance extends InstanceBase {
 
 	// When the module gets deleted
 	async destroy() {
-		if (this.socket !== null) {
-			this.socket.destroy()
-			this.socket = null
-		}
-
-		this.log('destroying module: ', this.id)
+		this.log('info', `destroying module: ${this.id}`)
+		this.visca.close()
 	}
 
 	async init(config) {
@@ -125,35 +100,10 @@ class PtzOpticsInstance extends InstanceBase {
 	}
 
 	initTCP() {
-		if (this.socket !== null) {
-			// clean up the socket and keep Companion connection status up to date in the event that the socket ceases to exist
-			this.socket.destroy()
-			this.socket = null
-
-			this.updateStatus('disconnected')
-		}
+		this.visca.close()
 
 		if (this.config.host) {
-			// create a TCPHelper instance to use as our TCP socket
-			this.socket = new TCPHelper(this.config.host, this.config.port)
-
-			this.updateStatus('connecting')
-
-			this.socket.on('status_change', (status, message) => {
-				this.log('debug', message)
-			})
-
-			this.socket.on('error', (err) => {
-				// make sure that we log and update Companion connection status for a network failure
-				this.log('Network error', err)
-				this.log('error', 'Network error: ' + err.message)
-				this.updateStatus('connection_failure')
-			})
-
-			this.socket.on('connect', () => {
-				this.log('debug', 'Connected')
-				this.updateStatus('ok')
-			})
+			this.visca.open(this.config.host, this.config.port)
 		}
 	}
 
@@ -167,7 +117,7 @@ class PtzOpticsInstance extends InstanceBase {
 
 		this.config = config
 
-		if (resetConnection || this.socket === null) {
+		if (resetConnection || this.visca.closed) {
 			this.initTCP()
 		}
 	}

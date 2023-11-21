@@ -221,20 +221,3 @@ export function checkCommandBytes(bytes) {
 
 	return null
 }
-
-/**
- * Send the given VISCA command.  (Bytes are sent asynchronously, so they may
- * not have hit the wire when this function returns.)
- *
- * @param {PtzOpticsInstance} instance
- *    The instance to send through.
- * @param {Command} command
- *    The command to send.
- * @param {?CompanionOptionValues} options
- *    The options to use to fill in any parameters in the command; may be
- *    omitted if the command has no parameters.
- */
-export function sendVISCACommand(instance, command, options = null) {
-	const commandBytes = command.toBytes(options)
-	instance.sendVISCACommandBytes(commandBytes)
-}
