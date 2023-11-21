@@ -7,8 +7,37 @@ import { prettyBytes } from './visca/utils.js'
 class PtzOpticsInstance extends InstanceBase {
 	socket = null
 
-	ptSpeed = '0C'
-	ptSpeedIndex = 12
+	/**
+	 * The speed to be passed in the pan/tilt speed parameters of Pan Tilt Drive
+	 * VISCA commands.  Ranges between 0x01 (low speed) and 0x18 (high speed).
+	 * However, as 0x15-0x18 are valid only for panning, tilt speed is capped at
+	 * 0x14.
+	 */
+	#speed = 0x0c
+
+	panTiltSpeed() {
+		return {
+			panSpeed: this.#speed,
+			tiltSpeed: Math.min(this.#speed, 0x14),
+		}
+	}
+
+	setPanTiltSpeed(speed) {
+		if (0x01 <= speed && speed <= 0x18) {
+			this.#speed = speed
+		} else {
+			this.log('debug', `speed ${speed} unexpectedly not in range [0x01, 0x18]`)
+			this.#speed = 0x0c
+		}
+	}
+
+	increasePanTiltSpeed() {
+		if (this.#speed < 0x18) this.#speed++
+	}
+
+	decreasePanTiltSpeed() {
+		if (this.#speed > 0x01) this.#speed--
+	}
 
 	constructor(internal) {
 		super(internal)

@@ -42,21 +42,14 @@ import {
 } from './options.js'
 import { UserDefinedCommand, sendVISCACommand } from './visca/command.js'
 
-function getPtSpeed(instance) {
-	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
-	var tiltSpeed = String.fromCharCode(Math.min(parseInt(instance.ptSpeed, 16), 0x14) & 0xff)
-
-	return { panSpeed: panSpeed, tiltSpeed: tiltSpeed }
-}
-
 export function getActions(instance) {
 	const actionDefinitions = {
 		left: {
 			name: 'Pan Left',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x03\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -64,8 +57,8 @@ export function getActions(instance) {
 			name: 'Pan Right',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x03\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -73,8 +66,8 @@ export function getActions(instance) {
 			name: 'Tilt Up',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x01\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -82,8 +75,8 @@ export function getActions(instance) {
 			name: 'Tilt Down',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x02\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -91,8 +84,8 @@ export function getActions(instance) {
 			name: 'Up Left',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x01\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -100,8 +93,8 @@ export function getActions(instance) {
 			name: 'Up Right',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x01\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x01\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -109,8 +102,8 @@ export function getActions(instance) {
 			name: 'Down Left',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x02\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -118,8 +111,8 @@ export function getActions(instance) {
 			name: 'Down Right',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x02\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x02\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -127,8 +120,8 @@ export function getActions(instance) {
 			name: 'P/T Stop',
 			options: [],
 			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x03\xFF'
+				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x03\xFF'
 				instance.sendVISCACommand(cmd)
 			},
 		},
@@ -150,44 +143,22 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				instance.ptSpeed = event.options.speed
-
-				var chosenIndex = -1
-				for (var i = 0; i < SPEED_CHOICES.length; ++i) {
-					if (SPEED_CHOICES[i].id == instance.ptSpeed) {
-						chosenIndex = i
-						break
-					}
-				}
-				if (chosenIndex > -1) {
-					instance.ptSpeedIndex = chosenIndex
-				}
+				const speed = parseInt(event.options.speed, 16)
+				instance.setPanTiltSpeed(speed)
 			},
 		},
 		ptSpeedU: {
 			name: 'P/T Speed Up',
 			options: [],
 			callback: async (event) => {
-				if (instance.ptSpeedIndex == 0) {
-					instance.ptSpeedIndex = 0
-				} else if (instance.ptSpeedIndex > 0) {
-					// we decrement the index to speed up, because the SPEED list has the faster settings at the lower indicies
-					instance.ptSpeedIndex--
-				}
-				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
+				instance.increasePanTiltSpeed()
 			},
 		},
 		ptSpeedD: {
 			name: 'P/T Speed Down',
 			options: [],
 			callback: async (event) => {
-				if (instance.ptSpeedIndex == 23) {
-					instance.ptSpeedIndex = 23
-				} else if (instance.ptSpeedIndex < 23) {
-					// we increment the index to slow down, because the SPEED list has the slower settings at the higher indicies
-					instance.ptSpeedIndex++
-				}
-				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
+				instance.decreasePanTiltSpeed()
 			},
 		},
 		zoomI: {
