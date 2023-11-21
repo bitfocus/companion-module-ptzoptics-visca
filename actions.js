@@ -12,6 +12,7 @@ import {
 	IrisDown,
 	IrisSet,
 	IrisUp,
+	PanTiltDirection,
 	PanTiltHome,
 	PresetDriveSpeed,
 	PresetRecall,
@@ -24,6 +25,7 @@ import {
 	ZoomIn,
 	ZoomOut,
 	ZoomStop,
+	sendPanTiltCommand,
 } from './commands.js'
 import {
 	AutoTrackingOption,
@@ -43,87 +45,58 @@ import {
 import { UserDefinedCommand, sendVISCACommand } from './visca/command.js'
 
 export function getActions(instance) {
+	function createPanTiltCallback(direction) {
+		return async (event) => {
+			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+			sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
+		}
+	}
+
 	const actionDefinitions = {
 		left: {
 			name: 'Pan Left',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Left),
 		},
 		right: {
 			name: 'Pan Right',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Right),
 		},
 		up: {
 			name: 'Tilt Up',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Up),
 		},
 		down: {
 			name: 'Tilt Down',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Down),
 		},
 		upLeft: {
 			name: 'Up Left',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.UpLeft),
 		},
 		upRight: {
 			name: 'Up Right',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.UpRight),
 		},
 		downLeft: {
 			name: 'Down Left',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x01\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.DownLeft),
 		},
 		downRight: {
 			name: 'Down Right',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x02\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.DownRight),
 		},
 		stop: {
 			name: 'P/T Stop',
 			options: [],
-			callback: async (event) => {
-				const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-				var cmd = '\x81\x01\x06\x01' + String.fromCharCode(panSpeed, tiltSpeed) + '\x03\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Stop),
 		},
 		home: {
 			name: 'P/T Home',

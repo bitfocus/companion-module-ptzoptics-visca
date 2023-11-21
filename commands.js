@@ -14,6 +14,23 @@ import {
 } from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
 
+export const PanTiltDirection = {
+	Up: [0x03, 0x01],
+	Down: [0x03, 0x02],
+	Left: [0x01, 0x03],
+	Right: [0x02, 0x03],
+	UpLeft: [0x01, 0x01],
+	UpRight: [0x02, 0x01],
+	DownLeft: [0x01, 0x02],
+	DownRight: [0x02, 0x02],
+	Stop: [0x03, 0x03],
+}
+
+export function sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed) {
+	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
+	instance.sendVISCACommandBytes(bytes)
+}
+
 export const PanTiltHome = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x04, 0xff])
 
 export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x00, 0xff], {
