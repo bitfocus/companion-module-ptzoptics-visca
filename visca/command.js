@@ -184,6 +184,45 @@ export class UserDefinedCommand extends Command {
 }
 
 /**
+ * Compare the bytes of `response` to the bytes of `values`.
+ *
+ * @param {number[]} response
+ *    A VISCA response
+ * @param {number[]} values
+ *    Array of values
+ * @returns bool
+ *    true if `response` and `values` have equal length and contents
+ */
+export function responseIs(response, values) {
+	if (response.length !== values.length) return false
+	for (let i = 0; i < response.length; i++) {
+		if (response[i] !== values[i]) return false
+	}
+	return true
+}
+
+/**
+ * Compare the bytes of `response` to the bytes of `values`.
+ *
+ * @param {number[]} response
+ *    A VISCA response
+ * @param {number[]} mask
+ *    Array of bit masks
+ * @param {number[]} values
+ *    Array of values
+ * @returns bool
+ *    true if `response` and `values` have the same length and for all `i`,
+ *    `(response[i] & mask[i]) === values[i]`
+ */
+export function responseMatches(response, mask, values) {
+	if (response.length !== values.length) return false
+	for (let i = 0; i < response.length; i++) {
+		if ((response[i] & mask[i]) !== values[i]) return false
+	}
+	return true
+}
+
+/**
  * Check the bytes of a VISCA command for envelope validity.
  *
  * @param {number[]} bytes

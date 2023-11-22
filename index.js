@@ -13,10 +13,16 @@ class PtzOpticsInstance extends InstanceBase {
 	 * parameters.  Null may be passed if the command contains no parameters.
 	 *
 	 * @param {Command} command
+	 *    The command to send.
 	 * @param {?CompanionOptionValues} options
+	 *    Options to use to fill in parameters in the command; may be null if
+	 *    the command has no parameters.
+	 * @returns {Promise<void>}
+	 *    A promise that resolves after the response to `command` (which may be
+	 *    an error response) has been processed.
 	 */
 	sendCommand(command, options = null) {
-		this.#visca.sendCommand(command, options)
+		return this.#visca.sendCommand(command, options)
 	}
 
 	/**
