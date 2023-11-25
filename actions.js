@@ -43,7 +43,6 @@ import {
 	WhiteBalanceOption,
 } from './options.js'
 import { UserDefinedCommand } from './visca/command.js'
-import { sendVISCACommand } from './visca/port.js'
 
 export function getActions(instance) {
 	function createPanTiltCallback(direction) {
@@ -103,7 +102,7 @@ export function getActions(instance) {
 			name: 'P/T Home',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, PanTiltHome)
+				instance.sendCommand(PanTiltHome)
 			},
 		},
 		ptSpeedS: {
@@ -139,42 +138,42 @@ export function getActions(instance) {
 			name: 'Zoom In',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, ZoomIn)
+				instance.sendCommand(ZoomIn)
 			},
 		},
 		zoomO: {
 			name: 'Zoom Out',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, ZoomOut)
+				instance.sendCommand(ZoomOut, event.options)
 			},
 		},
 		zoomS: {
 			name: 'Zoom Stop',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, ZoomStop)
+				instance.sendCommand(ZoomStop)
 			},
 		},
 		focusN: {
 			name: 'Focus Near',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusNearStandard)
+				instance.sendCommand(FocusNearStandard)
 			},
 		},
 		focusF: {
 			name: 'Focus Far',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusFarStandard)
+				instance.sendCommand(FocusFarStandard)
 			},
 		},
 		focusS: {
 			name: 'Focus Stop',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusStop)
+				instance.sendCommand(FocusStop)
 			},
 		},
 		focusM: {
@@ -188,21 +187,21 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusMode, event.options)
+				instance.sendCommand(FocusMode, event.options)
 			},
 		},
 		focusL: {
 			name: 'Focus Lock',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusLock)
+				instance.sendCommand(FocusLock)
 			},
 		},
 		focusU: {
 			name: 'Focus Unlock',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, FocusUnlock)
+				instance.sendCommand(FocusUnlock)
 			},
 		},
 		expM: {
@@ -216,21 +215,21 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, ExposureMode, event.options)
+				instance.sendCommand(ExposureMode, event.options)
 			},
 		},
 		irisU: {
 			name: 'Iris Up',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, IrisUp)
+				instance.sendCommand(IrisUp)
 			},
 		},
 		irisD: {
 			name: 'Iris Down',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, IrisDown)
+				instance.sendCommand(IrisDown)
 			},
 		},
 		irisS: {
@@ -244,21 +243,21 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, IrisSet, event.options)
+				instance.sendCommand(IrisSet, event.options)
 			},
 		},
 		shutU: {
 			name: 'Shutter Up',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, ShutterUp)
+				instance.sendCommand(ShutterUp)
 			},
 		},
 		shutD: {
 			name: 'Shutter Down',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, ShutterDown)
+				instance.sendCommand(ShutterDown)
 			},
 		},
 		shutS: {
@@ -272,7 +271,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, ShutterSet, event.options)
+				instance.sendCommand(ShutterSet, event.options)
 			},
 		},
 		savePset: {
@@ -287,7 +286,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, PresetSave, event.options)
+				instance.sendCommand(PresetSave, event.options)
 			},
 		},
 		recallPset: {
@@ -302,7 +301,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, PresetRecall, event.options)
+				instance.sendCommand(PresetRecall, event.options)
 			},
 		},
 		speedPset: {
@@ -324,7 +323,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, PresetDriveSpeed, event.options)
+				instance.sendCommand(PresetDriveSpeed, event.options)
 			},
 		},
 		power: {
@@ -338,7 +337,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, CameraPower, event.options)
+				instance.sendCommand(CameraPower, event.options)
 			},
 		},
 		wb: {
@@ -352,14 +351,14 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, WhiteBalance, event.options)
+				instance.sendCommand(WhiteBalance, event.options)
 			},
 		},
 		wbOPT: {
 			name: 'White balance one push trigger',
 			options: [],
 			callback: async (event) => {
-				sendVISCACommand(instance, WhiteBalanceOnePushTrigger)
+				instance.sendCommand(WhiteBalanceOnePushTrigger)
 			},
 		},
 		awbS: {
@@ -373,7 +372,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, AutoWhiteBalanceSensitivity, event.options)
+				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		autoTracking: {
@@ -387,7 +386,7 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				sendVISCACommand(instance, AutoTracking, event.options)
+				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
 		custom: {
@@ -410,7 +409,7 @@ export function getActions(instance) {
 					}
 
 					const command = new UserDefinedCommand(bytes)
-					sendVISCACommand(instance, command)
+					instance.sendCommand(command)
 				}
 			},
 		},
