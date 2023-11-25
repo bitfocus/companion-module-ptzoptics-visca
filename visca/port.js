@@ -56,12 +56,17 @@ export class VISCAPort {
 	}
 
 	/**
-	 * Send the bytes of a VISCA command.
+	 * Send a VISCA command.  (Bytes are sent asynchronously, so they may not
+	 * have hit the wire when this function returns.)
 	 *
-	 * @param {number[]} commandBytes
-	 *    An array of bytes constituting the command
+	 * @param {Command} command
+	 *    The command to send.
+	 * @param {?CompanionOptionValues} options
+	 *    The options to use to fill in any parameters in `command`; may be
+	 *    omitted if `command` has no parameters.
 	 */
-	sendCommand(commandBytes) {
+	sendCommand(command, options = null) {
+		const commandBytes = command.toBytes(options)
 		const err = checkCommandBytes(commandBytes)
 		if (err) {
 			this.#instance.log('error', err)
@@ -76,21 +81,4 @@ export class VISCAPort {
 		const commandBuffer = Buffer.from(commandBytes)
 		this.#socket.send(commandBuffer)
 	}
-}
-
-/**
- * Send the given VISCA command.  (Bytes are sent asynchronously, so they may
- * not have hit the wire when this function returns.)
- *
- * @param {PtzOpticsInstance} instance
- *    The instance to send through.
- * @param {Command} command
- *    The command to send.
- * @param {?CompanionOptionValues} options
- *    The options to use to fill in any parameters in the command; may be
- *    omitted if the command has no parameters.
- */
-export function sendVISCACommand(instance, command, options = null) {
-	const commandBytes = command.toBytes(options)
-	instance.visca.sendCommand(commandBytes)
 }

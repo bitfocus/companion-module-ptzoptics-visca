@@ -1,10 +1,23 @@
 import { InstanceBase, Regex, runEntrypoint } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
+import { Command } from './visca/command.js'
 import { VISCAPort } from './visca/port.js'
 
 class PtzOpticsInstance extends InstanceBase {
-	visca
+	#visca
+
+	/**
+	 * Send the given command to the camera, filling in parameters from the
+	 * specified options.  The options must be compatible with the command's
+	 * parameters.  Null may be passed if the command contains no parameters.
+	 *
+	 * @param {Command} command
+	 * @param {?CompanionOptionValues} options
+	 */
+	sendCommand(command, options = null) {
+		this.#visca.sendCommand(command, options)
+	}
 
 	/**
 	 * The speed to be passed in the pan/tilt speed parameters of Pan Tilt Drive
@@ -41,7 +54,7 @@ class PtzOpticsInstance extends InstanceBase {
 	constructor(internal) {
 		super(internal)
 
-		this.visca = new VISCAPort(this)
+		this.#visca = new VISCAPort(this)
 	}
 
 	updateActions() {
@@ -83,7 +96,7 @@ class PtzOpticsInstance extends InstanceBase {
 	// When the module gets deleted
 	async destroy() {
 		this.log('info', `destroying module: ${this.id}`)
-		this.visca.close()
+		this.#visca.close()
 	}
 
 	async init(config) {
@@ -100,10 +113,10 @@ class PtzOpticsInstance extends InstanceBase {
 	}
 
 	initTCP() {
-		this.visca.close()
+		this.#visca.close()
 
 		if (this.config.host) {
-			this.visca.open(this.config.host, this.config.port)
+			this.#visca.open(this.config.host, this.config.port)
 		}
 	}
 
@@ -117,7 +130,7 @@ class PtzOpticsInstance extends InstanceBase {
 
 		this.config = config
 
-		if (resetConnection || this.visca.closed) {
+		if (resetConnection || this.#visca.closed) {
 			this.initTCP()
 		}
 	}

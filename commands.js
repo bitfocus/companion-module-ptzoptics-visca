@@ -28,7 +28,8 @@ export const PanTiltDirection = {
 
 export function sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed) {
 	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
-	instance.visca.sendCommand(bytes)
+	const command = new ModuleDefinedCommand(bytes)
+	instance.sendCommand(command)
 }
 
 export const PanTiltHome = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x04, 0xff])
