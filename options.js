@@ -14,6 +14,16 @@ export const FocusModeOption = {
 				return 2
 		}
 	},
+	paramToChoice: (param) => {
+		switch (param) {
+			case 2:
+				return '0'
+			case 3:
+				return '1'
+			default:
+				return '0'
+		}
+	},
 }
 
 export const ExposureModeOption = {
