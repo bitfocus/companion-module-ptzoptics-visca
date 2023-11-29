@@ -7,6 +7,7 @@ import {
 	FocusFarStandard,
 	FocusLock,
 	FocusMode,
+	FocusModeInquiry,
 	FocusNearStandard,
 	FocusStop,
 	FocusUnlock,
@@ -189,6 +190,11 @@ export function getActions(instance) {
 			],
 			callback: async (event) => {
 				instance.sendCommand(FocusMode, event.options)
+			},
+			learn: async (event) => {
+				const opts = await instance.sendCommand(FocusModeInquiry)
+				if (opts === null) return undefined
+				return { ...opts }
 			},
 		},
 		focusL: {

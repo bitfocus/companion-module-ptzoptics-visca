@@ -83,6 +83,19 @@ export const FocusMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x38, 0x00,
 	},
 })
 
+export const FocusModeInquiry = new ModuleDefinedCommand([0x81, 0x09, 0x04, 0x38, 0xff], null, [
+	{
+		value: [0x90, 0x50, 0x00, 0xff],
+		mask: [0xff, 0xff, 0xf0, 0xff],
+		params: {
+			[FocusModeOption.id]: {
+				nibbles: [5],
+				paramToChoice: FocusModeOption.paramToChoice,
+			},
+		},
+	},
+])
+
 export const FocusLock = new ModuleDefinedCommand([0x81, 0x0a, 0x04, 0x68, 0x02, 0xff])
 export const FocusUnlock = new ModuleDefinedCommand([0x81, 0x0a, 0x04, 0x68, 0x03, 0xff])
 
