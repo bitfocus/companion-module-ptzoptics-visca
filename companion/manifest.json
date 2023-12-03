@@ -3,7 +3,7 @@
 	"name": "PTZOptics Visca",
 	"shortname": "visca",
 	"description": "Module to control PTZ cameras with PTZoptics Visca protocol over IP",
-	"version": "0.0.0",
+	"version": "3.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-ptzoptics-visca.git",
 	"bugs": "https://github.com/bitfocus/companion-module-ptzoptics-visca/issues",
