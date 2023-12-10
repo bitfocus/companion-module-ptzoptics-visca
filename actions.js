@@ -1,5 +1,6 @@
 import { SPEED_CHOICES } from './choices.js'
 import {
+	AutoTracking,
 	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
@@ -26,6 +27,7 @@ import {
 	ZoomStop,
 } from './commands.js'
 import {
+	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
@@ -435,19 +437,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Auto Tracking (PTZ Optics G3 model required)',
-					id: 'tracking',
-					choices: [
-						{ id: 'off', label: 'Off' },
-						{ id: 'on', label: 'On' },
-					],
+					id: AutoTrackingOption.id,
+					choices: AutoTrackingOption.choices,
 				},
 			],
 			callback: async (event) => {
-				// PTZOptics G3 VISCA over IP Commands, 10/27/2023:
-				// 81 0A 11 54 0p FF, p: 0x2=On, 0x3=Off
-				const b = event.options.tracking === 'on' ? '\x02' : '\x03'
-				const cmd = '\x81\x0A\x11\x54' + b + '\xFF'
-				instance.sendVISCACommand(cmd)
+				sendVISCACommand(instance, AutoTracking, event.options)
 			},
 		},
 		custom: {
