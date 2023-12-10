@@ -758,6 +758,58 @@ export function getPresets() {
 		feedbacks: [],
 	}
 
+	presets['auto_tracking_on'] = {
+		type: 'button',
+		category: 'Auto Tracking',
+		name: 'Auto Tracking On',
+		style: {
+			text: 'Auto\\nTracking\\nOn',
+			size: '14',
+			color: '16777215',
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'autoTracking',
+						options: {
+							tracking: 'on',
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
+	presets['auto_tracking_off'] = {
+		type: 'button',
+		category: 'Auto Tracking',
+		name: 'Auto Tracking Off',
+		style: {
+			text: 'Auto\\nTracking\\nOff',
+			size: '14',
+			color: '16777215',
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'autoTracking',
+						options: {
+							tracking: 'off',
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
 	// generates presets for saving camera presets
 	for (var save = 0; save < 255; save++) {
 		if (save < 90 || save > 99) {
