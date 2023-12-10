@@ -215,3 +215,21 @@ export const PresetDriveSpeedOption = {
 		return parseInt(choice, 16)
 	},
 }
+
+export const AutoTrackingOption = {
+	id: 'tracking',
+	choices: [
+		{ id: 'off', label: 'Off' },
+		{ id: 'on', label: 'On' },
+	],
+	choiceToParam: (choice) => {
+		switch (choice) {
+			case 'on':
+				return 0x2
+			case 'off':
+				return 0x3
+			default:
+				return 0x2
+		}
+	},
+}

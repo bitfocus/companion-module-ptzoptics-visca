@@ -1,4 +1,5 @@
 import {
+	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
@@ -103,5 +104,14 @@ export const PresetDriveSpeed = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x01
 	[PresetDriveSpeedOption.id]: {
 		nibbles: [10, 11],
 		choiceToParam: PresetDriveSpeedOption.choiceToParam,
+	},
+})
+
+// PTZOptics G3 VISCA over IP Commands, 10/27/2023:
+// 81 0A 11 54 0p FF, p: 0x2=On, 0x3=Off
+export const AutoTracking = new ModuleDefinedCommand([0x81, 0x0a, 0x11, 0x54, 0x00, 0xff], {
+	[AutoTrackingOption.id]: {
+		nibbles: [9],
+		choiceToParam: AutoTrackingOption.choiceToParam,
 	},
 })
