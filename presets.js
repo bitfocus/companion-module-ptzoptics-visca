@@ -9,6 +9,7 @@ import {
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
+import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from './options.js'
 
 export function getPresets() {
 	const presets = {}
@@ -802,6 +803,115 @@ export function getPresets() {
 						options: {
 							tracking: 'off',
 						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
+	presets['osd_toggle'] = {
+		type: 'button',
+		category: 'OSD Menu',
+		name: 'OSD Menu',
+		style: {
+			text: 'OSD\\nOpen/Close',
+			size: 12,
+			color: combineRgb(0xff, 0xff, 0xff),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'onScreenDisplay',
+						options: {
+							[OnScreenDisplayOption.id]: 'toggle',
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
+	for (const [DIRECTION, IMAGE] of [
+		['up', IMAGE_UP],
+		['right', IMAGE_RIGHT],
+		['down', IMAGE_DOWN],
+		['left', IMAGE_LEFT],
+	]) {
+		presets['osd_navigate_' + DIRECTION] = {
+			type: 'button',
+			category: 'OSD Menu',
+			name: 'OSD Navigate',
+			style: {
+				text: '',
+				png64: IMAGE,
+				pngalignment: 'center:center',
+				size: '18',
+				color: combineRgb(0xff, 0xff, 0xff),
+				bgcolor: combineRgb(0, 0, 0),
+			},
+			steps: [
+				{
+					down: [
+						{
+							actionId: 'onScreenDisplayNavigate',
+							options: {
+								[OnScreenDisplayNavigateOption.id]: DIRECTION,
+							},
+						},
+					],
+					up: [],
+				},
+			],
+			feedbacks: [],
+		}
+	}
+
+	presets['osd_enter'] = {
+		type: 'button',
+		category: 'OSD Menu',
+		name: 'OSD Enter',
+		style: {
+			text: 'OSD\\nEnter',
+			size: '18',
+			color: combineRgb(0xff, 0xff, 0xff),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'onScreenDisplayEnter',
+						options: {},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
+	presets['osd_back'] = {
+		type: 'button',
+		category: 'OSD Menu',
+		name: 'OSD Back',
+		style: {
+			text: 'OSD\\nBack',
+			size: '18',
+			color: combineRgb(0xff, 0xff, 0xff),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'onScreenDisplayBack',
+						options: {},
 					},
 				],
 				up: [],
