@@ -14,6 +14,12 @@ import {
 	IrisDown,
 	IrisSet,
 	IrisUp,
+	OnScreenDisplayBack,
+	OnScreenDisplayClose,
+	OnScreenDisplayEnter,
+	OnScreenDisplayInquiry,
+	OnScreenDisplayNavigate,
+	OnScreenDisplayToggle,
 	PanTiltDirection,
 	PanTiltHome,
 	PresetDriveSpeed,
@@ -36,6 +42,8 @@ import {
 	ExposureModeOption,
 	FocusModeOption,
 	IrisSetOption,
+	OnScreenDisplayNavigateOption,
+	OnScreenDisplayOption,
 	PresetDriveNumberOption,
 	PresetDriveSpeedOption,
 	PresetRecallOption,
@@ -352,6 +360,71 @@ export function getActions(instance) {
 			],
 			callback: async (event) => {
 				instance.sendCommand(CameraPower, event.options)
+			},
+		},
+		onScreenDisplay: {
+			name: 'OSD Open/Close',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Activate OSD menu',
+					id: OnScreenDisplayOption.id,
+					choices: [...OnScreenDisplayOption.choices, { id: 'toggle', label: 'toggle' }],
+					default: 'toggle',
+				},
+			],
+			callback: async ({ options }) => {
+				let shouldToggle
+				switch (options[OnScreenDisplayOption.id]) {
+					case 'close':
+						instance.sendCommand(OnScreenDisplayClose)
+						return
+					case 'toggle':
+						shouldToggle = true
+						break
+					case 'open':
+						const opts = await instance.sendCommand(OnScreenDisplayInquiry)
+						if (opts === null) return
+						shouldToggle = opts[OnScreenDisplayOption.id] !== 'open'
+				}
+
+				if (shouldToggle) {
+					instance.sendCommand(OnScreenDisplayToggle)
+				}
+			},
+			learn: async (event) => {
+				const opts = await instance.sendCommand(OnScreenDisplayInquiry)
+				if (opts === null) return undefined
+				return { ...opts }
+			},
+		},
+		onScreenDisplayNavigate: {
+			name: 'Navigate OSD Camera menu',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Direction',
+					id: OnScreenDisplayNavigateOption.id,
+					choices: OnScreenDisplayNavigateOption.choices,
+					default: 'down',
+				},
+			],
+			callback: async (event) => {
+				instance.sendCommand(OnScreenDisplayNavigate, event.options)
+			},
+		},
+		onScreenDisplayEnter: {
+			name: 'OSD Enter',
+			options: [],
+			callback: async (event) => {
+				instance.sendCommand(OnScreenDisplayEnter)
+			},
+		},
+		onScreenDisplayBack: {
+			name: 'OSD Back',
+			options: [],
+			callback: async (event) => {
+				instance.sendCommand(OnScreenDisplayBack)
 			},
 		},
 		wb: {

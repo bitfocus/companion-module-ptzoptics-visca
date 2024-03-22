@@ -5,6 +5,8 @@ import {
 	ExposureModeOption,
 	FocusModeOption,
 	IrisSetOption,
+	OnScreenDisplayNavigateOption,
+	OnScreenDisplayOption,
 	PresetDriveNumberOption,
 	PresetDriveSpeedOption,
 	PresetRecallOption,
@@ -109,6 +111,35 @@ export const CameraPower = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x00, 0x0
 		choiceToParam: CameraPowerOption.choiceToParam,
 	},
 })
+
+export const OnScreenDisplayToggle = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x02, 0x5f, 0xff])
+export const OnScreenDisplayClose = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x03, 0xff])
+
+export const OnScreenDisplayInquiry = new ModuleDefinedCommand([0x81, 0x09, 0x06, 0x06, 0xff], null, [
+	{
+		value: [0x90, 0x50, 0x00, 0xff],
+		mask: [0xff, 0xff, 0xf0, 0xff],
+		params: {
+			[OnScreenDisplayOption.id]: {
+				nibbles: [5],
+				paramToChoice: OnScreenDisplayOption.paramToChoice,
+			},
+		},
+	},
+])
+
+export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
+	[0x81, 0x01, 0x06, 0x01, 0x0e, 0x0e, 0x00, 0x00, 0xff],
+	{
+		[OnScreenDisplayNavigateOption.id]: {
+			nibbles: [13, 15],
+			choiceToParam: OnScreenDisplayNavigateOption.choiceToParam,
+		},
+	},
+)
+
+export const OnScreenDisplayEnter = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x05, 0xff])
+export const OnScreenDisplayBack = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x04, 0xff])
 
 export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x00, 0xff], {
 	[WhiteBalanceOption.id]: {

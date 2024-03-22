@@ -135,6 +135,58 @@ export const CameraPowerOption = {
 	},
 }
 
+export const OnScreenDisplayOption = {
+	id: 'state',
+	choices: [
+		{ id: 'open', label: 'open' },
+		{ id: 'close', label: 'close' },
+	],
+	choiceToParam: (choice) => {
+		switch (choice) {
+			case 'open':
+				return 0x2
+			case 'close':
+				return 0x3
+			default:
+				return 0x3
+		}
+	},
+	paramToChoice: (param) => {
+		switch (param) {
+			case 0x2:
+				return 'open'
+			case 0x3:
+				return 'close'
+			default:
+				return 'close'
+		}
+	},
+}
+
+export const OnScreenDisplayNavigateOption = {
+	id: 'direction',
+	choices: [
+		{ id: 'up', label: 'up' },
+		{ id: 'right', label: 'right' },
+		{ id: 'down', label: 'down' },
+		{ id: 'left', label: 'left' },
+	],
+	choiceToParam: (choice) => {
+		switch (choice) {
+			case 'up':
+				return 0x31
+			case 'right':
+				return 0x23
+			case 'down':
+				return 0x32
+			case 'left':
+				return 0x13
+			default:
+				return 0x32
+		}
+	},
+}
+
 export const WhiteBalanceOption = {
 	id: 'val',
 	choices: [
