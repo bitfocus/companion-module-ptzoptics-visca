@@ -1,3 +1,5 @@
+import type { CompanionOptionValues } from '@companion-module/base'
+import type { MockInstance } from './mock-instance.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -16,22 +18,39 @@ import {
 } from './options.js'
 import { ModuleDefinedCommand } from './visca/command.js'
 
-export const PanTiltDirection = {
-	Up: [0x03, 0x01],
-	Down: [0x03, 0x02],
-	Left: [0x01, 0x03],
-	Right: [0x02, 0x03],
-	UpLeft: [0x01, 0x01],
-	UpRight: [0x02, 0x01],
-	DownLeft: [0x01, 0x02],
-	DownRight: [0x02, 0x02],
-	Stop: [0x03, 0x03],
+export enum PanTiltAction {
+	Up,
+	Down,
+	Left,
+	Right,
+	UpLeft,
+	UpRight,
+	DownLeft,
+	DownRight,
+	Stop,
 }
 
-export function sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed) {
+export const PanTiltDirection: { readonly [key in PanTiltAction]: readonly [number, number] } = {
+	[PanTiltAction.Up]: [0x03, 0x01],
+	[PanTiltAction.Down]: [0x03, 0x02],
+	[PanTiltAction.Left]: [0x01, 0x03],
+	[PanTiltAction.Right]: [0x02, 0x03],
+	[PanTiltAction.UpLeft]: [0x01, 0x01],
+	[PanTiltAction.UpRight]: [0x02, 0x01],
+	[PanTiltAction.DownLeft]: [0x01, 0x02],
+	[PanTiltAction.DownRight]: [0x02, 0x02],
+	[PanTiltAction.Stop]: [0x03, 0x03],
+}
+
+export async function sendPanTiltCommand(
+	instance: MockInstance,
+	direction: readonly [number, number],
+	panSpeed: number,
+	tiltSpeed: number
+): Promise<CompanionOptionValues | null> {
 	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
 	const command = new ModuleDefinedCommand(bytes)
-	instance.sendCommand(command)
+	return instance.sendCommand(command)
 }
 
 export const PanTiltHome = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x04, 0xff])
@@ -135,7 +154,7 @@ export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
 			nibbles: [13, 15],
 			choiceToParam: OnScreenDisplayNavigateOption.choiceToParam,
 		},
-	},
+	}
 )
 
 export const OnScreenDisplayEnter = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x05, 0xff])
