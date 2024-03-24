@@ -1,11 +1,9 @@
-import { InstanceBase, Regex, runEntrypoint } from '@companion-module/base'
+import { InstanceBase, Regex } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
-import { UpgradeScripts } from './upgrades.js'
-import { Command } from './visca/command.js'
 import { VISCAPort } from './visca/port.js'
 
-class PtzOpticsInstance extends InstanceBase {
+export class PtzOpticsInstance extends InstanceBase {
 	#visca
 
 	/**
@@ -146,5 +144,3 @@ class PtzOpticsInstance extends InstanceBase {
 		}
 	}
 }
-
-runEntrypoint(PtzOpticsInstance, UpgradeScripts)
