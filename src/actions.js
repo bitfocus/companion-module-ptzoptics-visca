@@ -1,3 +1,4 @@
+import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	AutoTracking,
 	AutoWhiteBalanceSensitivity,
@@ -54,8 +55,6 @@ import {
 } from './options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 
-export const CustomCommandActionId = 'custom'
-
 export function getActions(instance) {
 	function createPanTiltCallback(direction) {
 		return async (event) => {
@@ -65,59 +64,59 @@ export function getActions(instance) {
 	}
 
 	const actionDefinitions = {
-		left: {
+		[PtzOpticsActionId.PanTiltLeft]: {
 			name: 'Pan Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.Left),
 		},
-		right: {
+		[PtzOpticsActionId.PanTiltRight]: {
 			name: 'Pan Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.Right),
 		},
-		up: {
+		[PtzOpticsActionId.PanTiltUp]: {
 			name: 'Tilt Up',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.Up),
 		},
-		down: {
+		[PtzOpticsActionId.PanTiltDown]: {
 			name: 'Tilt Down',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.Down),
 		},
-		upLeft: {
+		[PtzOpticsActionId.PanTiltUpLeft]: {
 			name: 'Up Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.UpLeft),
 		},
-		upRight: {
+		[PtzOpticsActionId.PanTiltUpRight]: {
 			name: 'Up Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.UpRight),
 		},
-		downLeft: {
+		[PtzOpticsActionId.PanTiltDownLeft]: {
 			name: 'Down Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.DownLeft),
 		},
-		downRight: {
+		[PtzOpticsActionId.PanTiltDownRight]: {
 			name: 'Down Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.DownRight),
 		},
-		stop: {
+		[PtzOpticsActionId.PanTiltStop]: {
 			name: 'P/T Stop',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection.Stop),
 		},
-		home: {
+		[PtzOpticsActionId.PanTiltHome]: {
 			name: 'P/T Home',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(PanTiltHome)
 			},
 		},
-		ptSpeedS: {
+		[PtzOpticsActionId.PanTiltSetSpeed]: {
 			name: 'P/T Speed',
 			options: [
 				{
@@ -132,63 +131,63 @@ export function getActions(instance) {
 				instance.setPanTiltSpeed(speed)
 			},
 		},
-		ptSpeedU: {
+		[PtzOpticsActionId.PanTiltSpeedUp]: {
 			name: 'P/T Speed Up',
 			options: [],
 			callback: async (event) => {
 				instance.increasePanTiltSpeed()
 			},
 		},
-		ptSpeedD: {
+		[PtzOpticsActionId.PanTiltSpeedDown]: {
 			name: 'P/T Speed Down',
 			options: [],
 			callback: async (event) => {
 				instance.decreasePanTiltSpeed()
 			},
 		},
-		zoomI: {
+		[PtzOpticsActionId.StartZoomIn]: {
 			name: 'Zoom In',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(ZoomIn)
 			},
 		},
-		zoomO: {
+		[PtzOpticsActionId.StartZoomOut]: {
 			name: 'Zoom Out',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(ZoomOut, event.options)
 			},
 		},
-		zoomS: {
+		[PtzOpticsActionId.StopZoom]: {
 			name: 'Zoom Stop',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(ZoomStop)
 			},
 		},
-		focusN: {
+		[PtzOpticsActionId.StartFocusNearer]: {
 			name: 'Focus Near',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(FocusNearStandard)
 			},
 		},
-		focusF: {
+		[PtzOpticsActionId.StartFocusFarther]: {
 			name: 'Focus Far',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(FocusFarStandard)
 			},
 		},
-		focusS: {
+		[PtzOpticsActionId.StopFocus]: {
 			name: 'Focus Stop',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(FocusStop)
 			},
 		},
-		focusM: {
+		[PtzOpticsActionId.SelectFocusMode]: {
 			name: 'Focus Mode',
 			options: [
 				{
@@ -207,21 +206,21 @@ export function getActions(instance) {
 				return { ...opts }
 			},
 		},
-		focusL: {
+		[PtzOpticsActionId.LockFocus]: {
 			name: 'Focus Lock',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(FocusLock)
 			},
 		},
-		focusU: {
+		[PtzOpticsActionId.UnlockFocus]: {
 			name: 'Focus Unlock',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(FocusUnlock)
 			},
 		},
-		expM: {
+		[PtzOpticsActionId.SelectExposureMode]: {
 			name: 'Exposure Mode',
 			options: [
 				{
@@ -240,21 +239,21 @@ export function getActions(instance) {
 				return { ...opts }
 			},
 		},
-		irisU: {
+		[PtzOpticsActionId.IrisUp]: {
 			name: 'Iris Up',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(IrisUp)
 			},
 		},
-		irisD: {
+		[PtzOpticsActionId.IrisDown]: {
 			name: 'Iris Down',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(IrisDown)
 			},
 		},
-		irisS: {
+		[PtzOpticsActionId.SetIris]: {
 			name: 'Set Iris',
 			options: [
 				{
@@ -268,21 +267,21 @@ export function getActions(instance) {
 				instance.sendCommand(IrisSet, event.options)
 			},
 		},
-		shutU: {
+		[PtzOpticsActionId.ShutterUp]: {
 			name: 'Shutter Up',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(ShutterUp)
 			},
 		},
-		shutD: {
+		[PtzOpticsActionId.ShutterDown]: {
 			name: 'Shutter Down',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(ShutterDown)
 			},
 		},
-		shutS: {
+		[PtzOpticsActionId.SetShutter]: {
 			name: 'Set Shutter',
 			options: [
 				{
@@ -296,7 +295,7 @@ export function getActions(instance) {
 				instance.sendCommand(ShutterSet, event.options)
 			},
 		},
-		savePset: {
+		[PtzOpticsActionId.SetPreset]: {
 			name: 'Save Preset',
 			options: [
 				{
@@ -311,7 +310,7 @@ export function getActions(instance) {
 				instance.sendCommand(PresetSave, event.options)
 			},
 		},
-		recallPset: {
+		[PtzOpticsActionId.RecallPreset]: {
 			name: 'Recall Preset',
 			options: [
 				{
@@ -326,7 +325,7 @@ export function getActions(instance) {
 				instance.sendCommand(PresetRecall, event.options)
 			},
 		},
-		speedPset: {
+		[PtzOpticsActionId.SetPresetDriveSpeed]: {
 			name: 'Preset Drive Speed',
 			options: [
 				{
@@ -348,7 +347,7 @@ export function getActions(instance) {
 				instance.sendCommand(PresetDriveSpeed, event.options)
 			},
 		},
-		power: {
+		[PtzOpticsActionId.CameraPowerState]: {
 			name: 'Power Camera',
 			options: [
 				{
@@ -362,7 +361,7 @@ export function getActions(instance) {
 				instance.sendCommand(CameraPower, event.options)
 			},
 		},
-		onScreenDisplay: {
+		[PtzOpticsActionId.OSD]: {
 			name: 'OSD Open/Close',
 			options: [
 				{
@@ -398,7 +397,7 @@ export function getActions(instance) {
 				return { ...opts }
 			},
 		},
-		onScreenDisplayNavigate: {
+		[PtzOpticsActionId.OSDNavigate]: {
 			name: 'Navigate OSD Camera menu',
 			options: [
 				{
@@ -413,21 +412,21 @@ export function getActions(instance) {
 				instance.sendCommand(OnScreenDisplayNavigate, event.options)
 			},
 		},
-		onScreenDisplayEnter: {
+		[PtzOpticsActionId.OSDEnter]: {
 			name: 'OSD Enter',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(OnScreenDisplayEnter)
 			},
 		},
-		onScreenDisplayBack: {
+		[PtzOpticsActionId.OSDBack]: {
 			name: 'OSD Back',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(OnScreenDisplayBack)
 			},
 		},
-		wb: {
+		[PtzOpticsActionId.SelectWhiteBalance]: {
 			name: 'White balance',
 			options: [
 				{
@@ -441,14 +440,14 @@ export function getActions(instance) {
 				instance.sendCommand(WhiteBalance, event.options)
 			},
 		},
-		wbOPT: {
+		[PtzOpticsActionId.WhiteBalanceOnePushTrigger]: {
 			name: 'White balance one push trigger',
 			options: [],
 			callback: async (event) => {
 				instance.sendCommand(WhiteBalanceOnePushTrigger)
 			},
 		},
-		awbS: {
+		[PtzOpticsActionId.SelectAutoWhiteBalanceSensitivity]: {
 			name: 'Auto white balance sensitivity',
 			options: [
 				{
@@ -462,7 +461,7 @@ export function getActions(instance) {
 				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
-		autoTracking: {
+		[PtzOpticsActionId.AutoTracking]: {
 			name: 'Auto Tracking',
 			options: [
 				{
@@ -476,7 +475,7 @@ export function getActions(instance) {
 				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
-		[CustomCommandActionId]: generateCustomCommandAction(instance),
+		[PtzOpticsActionId.SendCustomCommand]: generateCustomCommandAction(instance),
 	}
 
 	return actionDefinitions
