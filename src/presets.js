@@ -1,4 +1,5 @@
 import { combineRgb } from '@companion-module/base'
+import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
@@ -30,12 +31,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'up',
+						actionId: PtzOpticsActionId.PanTiltUp,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -59,12 +60,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'down',
+						actionId: PtzOpticsActionId.PanTiltDown,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -88,12 +89,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'left',
+						actionId: PtzOpticsActionId.PanTiltLeft,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -117,12 +118,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'right',
+						actionId: PtzOpticsActionId.PanTiltRight,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -146,12 +147,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'upRight',
+						actionId: PtzOpticsActionId.PanTiltUpRight,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -175,12 +176,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'upLeft',
+						actionId: PtzOpticsActionId.PanTiltUpLeft,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -204,12 +205,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'downLeft',
+						actionId: PtzOpticsActionId.PanTiltDownLeft,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -233,12 +234,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'downRight',
+						actionId: PtzOpticsActionId.PanTiltDownRight,
 					},
 				],
 				up: [
 					{
-						actionId: 'stop',
+						actionId: PtzOpticsActionId.PanTiltStop,
 					},
 				],
 			},
@@ -260,7 +261,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'home',
+						actionId: PtzOpticsActionId.PanTiltHome,
 					},
 				],
 				up: [],
@@ -283,7 +284,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'ptSpeedU',
+						actionId: PtzOpticsActionId.PanTiltSpeedUp,
 					},
 				],
 				up: [],
@@ -306,7 +307,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'ptSpeedD',
+						actionId: PtzOpticsActionId.PanTiltSpeedDown,
 					},
 				],
 				up: [],
@@ -329,12 +330,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'zoomI',
+						actionId: PtzOpticsActionId.StartZoomIn,
 					},
 				],
 				up: [
 					{
-						actionId: 'zoomS',
+						actionId: PtzOpticsActionId.StopZoom,
 					},
 				],
 			},
@@ -356,12 +357,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'zoomO',
+						actionId: PtzOpticsActionId.StartZoomOut,
 					},
 				],
 				up: [
 					{
-						actionId: 'zoomS',
+						actionId: PtzOpticsActionId.StopZoom,
 					},
 				],
 			},
@@ -383,12 +384,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'focusN',
+						actionId: PtzOpticsActionId.StartFocusNearer,
 					},
 				],
 				up: [
 					{
-						actionId: 'focusS',
+						actionId: PtzOpticsActionId.StopFocus,
 					},
 				],
 			},
@@ -410,12 +411,12 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'focusF',
+						actionId: PtzOpticsActionId.StartFocusFarther,
 					},
 				],
 				up: [
 					{
-						actionId: 'focusS',
+						actionId: PtzOpticsActionId.StopFocus,
 					},
 				],
 			},
@@ -438,7 +439,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'focusM',
+						actionId: PtzOpticsActionId.SelectFocusMode,
 						options: {
 							bol: 0,
 						},
@@ -446,7 +447,7 @@ export function getPresets() {
 				],
 				up: [
 					{
-						actionId: 'focusM',
+						actionId: PtzOpticsActionId.SelectFocusMode,
 						options: {
 							bol: 1,
 						},
@@ -471,7 +472,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'focusL',
+						actionId: PtzOpticsActionId.LockFocus,
 					},
 				],
 				up: [],
@@ -494,7 +495,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'focusU',
+						actionId: PtzOpticsActionId.UnlockFocus,
 					},
 				],
 				up: [],
@@ -517,7 +518,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'expM',
+						actionId: PtzOpticsActionId.SelectExposureMode,
 						options: {
 							bol: 0,
 						},
@@ -528,7 +529,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'expM',
+						actionId: PtzOpticsActionId.SelectExposureMode,
 						options: {
 							bol: 1,
 						},
@@ -554,7 +555,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'irisU',
+						actionId: PtzOpticsActionId.IrisUp,
 					},
 				],
 				up: [],
@@ -577,7 +578,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'irisD',
+						actionId: PtzOpticsActionId.IrisDown,
 					},
 				],
 				up: [],
@@ -600,7 +601,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'shutU',
+						actionId: PtzOpticsActionId.ShutterUp,
 					},
 				],
 				up: [],
@@ -623,7 +624,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'shutD',
+						actionId: PtzOpticsActionId.ShutterDown,
 					},
 				],
 				up: [],
@@ -646,7 +647,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'wb',
+						actionId: PtzOpticsActionId.SelectWhiteBalance,
 						options: {
 							val: 'automatic',
 						},
@@ -672,7 +673,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'wb',
+						actionId: PtzOpticsActionId.SelectWhiteBalance,
 						options: {
 							val: 'indoor',
 						},
@@ -698,7 +699,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'wb',
+						actionId: PtzOpticsActionId.SelectWhiteBalance,
 						options: {
 							val: 'outdoor',
 						},
@@ -724,7 +725,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'wb',
+						actionId: PtzOpticsActionId.SelectWhiteBalance,
 						options: {
 							val: 'onepush',
 						},
@@ -750,7 +751,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'wbOPT',
+						actionId: PtzOpticsActionId.WhiteBalanceOnePushTrigger,
 					},
 				],
 				up: [],
@@ -773,7 +774,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'autoTracking',
+						actionId: PtzOpticsActionId.AutoTracking,
 						options: {
 							tracking: 'on',
 						},
@@ -799,7 +800,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'autoTracking',
+						actionId: PtzOpticsActionId.AutoTracking,
 						options: {
 							tracking: 'off',
 						},
@@ -825,7 +826,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'onScreenDisplay',
+						actionId: PtzOpticsActionId.OSD,
 						options: {
 							[OnScreenDisplayOption.id]: 'toggle',
 						},
@@ -859,7 +860,7 @@ export function getPresets() {
 				{
 					down: [
 						{
-							actionId: 'onScreenDisplayNavigate',
+							actionId: PtzOpticsActionId.OSDNavigate,
 							options: {
 								[OnScreenDisplayNavigateOption.id]: DIRECTION,
 							},
@@ -886,7 +887,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'onScreenDisplayEnter',
+						actionId: PtzOpticsActionId.OSDEnter,
 						options: {},
 					},
 				],
@@ -910,7 +911,7 @@ export function getPresets() {
 			{
 				down: [
 					{
-						actionId: 'onScreenDisplayBack',
+						actionId: PtzOpticsActionId.OSDBack,
 						options: {},
 					},
 				],
@@ -938,7 +939,7 @@ export function getPresets() {
 					{
 						down: [
 							{
-								actionId: 'savePset',
+								actionId: PtzOpticsActionId.SetPreset,
 								options: {
 									val: ('0' + save.toString(16)).slice(-2),
 								},
@@ -970,7 +971,7 @@ export function getPresets() {
 					{
 						down: [
 							{
-								actionId: 'recallPset',
+								actionId: PtzOpticsActionId.RecallPreset,
 								options: {
 									val: ('0' + recall.toString(16)).slice(-2),
 								},

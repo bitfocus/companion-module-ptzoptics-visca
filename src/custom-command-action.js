@@ -1,4 +1,4 @@
-import { CustomCommandActionId } from './actions.js'
+import { PtzOpticsActionId } from './actions-enum.js'
 import { UserDefinedCommand } from './visca/command.js'
 
 /**
@@ -193,7 +193,7 @@ function addResponseDefaults(options) {
 }
 
 export function isCustomCommandMissingCommandParametersAndResponse(action) {
-	return action.actionId === CustomCommandActionId && !(CommandParametersOptionId in action.options)
+	return action.actionId === PtzOpticsActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
 }
 
 /**
