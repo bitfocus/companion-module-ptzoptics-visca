@@ -1,5 +1,6 @@
-import { InstanceBase, Regex } from '@companion-module/base'
+import { InstanceBase } from '@companion-module/base'
 import { getActions } from './actions.js'
+import { getConfigFields } from './config.js'
 import { getPresets } from './presets.js'
 import { VISCAPort } from './visca/port.js'
 
@@ -76,30 +77,7 @@ export class PtzOpticsInstance extends InstanceBase {
 
 	// Return config fields for web config of the module instance
 	getConfigFields() {
-		return [
-			{
-				type: 'static-text',
-				id: 'info',
-				width: 12,
-				label: 'Information',
-				value: 'This module controls PTZ cameras with VISCA over IP protocol',
-			},
-			{
-				type: 'textinput',
-				id: 'host',
-				label: 'Camera IP',
-				width: 6,
-				regex: Regex.IP,
-			},
-			{
-				type: 'textinput',
-				id: 'port',
-				label: 'VISCA TCP port',
-				width: 6,
-				default: 5678,
-				regex: Regex.PORT,
-			},
-		]
+		return getConfigFields()
 	}
 
 	// When the module gets deleted
@@ -124,8 +102,8 @@ export class PtzOpticsInstance extends InstanceBase {
 	initTCP() {
 		this.#visca.close()
 
-		if (this.config.host) {
-			this.#visca.open(this.config.host, this.config.port)
+		if (this.config.host !== '') {
+			this.#visca.open(this.config.host, Number(this.config.port))
 		}
 	}
 
