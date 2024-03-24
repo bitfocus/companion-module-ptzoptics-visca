@@ -387,7 +387,7 @@ export class VISCAPort {
 			const leadingBytes = receivedData.slice(0, 8)
 			throw this.#errorWhileHandlingCommand(
 				'Error at start of camera response: response not starting with 0x90',
-				leadingBytes,
+				leadingBytes
 			)
 		}
 
