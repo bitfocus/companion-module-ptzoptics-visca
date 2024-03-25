@@ -1,12 +1,15 @@
+import type {
+	CompanionActionDefinition,
+	CompanionActionInfo,
+	CompanionInputFieldTextInput,
+	CompanionOptionValues,
+} from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
-import { UserDefinedCommand } from './visca/command.js'
+import type { MockInstance } from './mock-instance.js'
+import { UserDefinedCommand, type CommandParams, type PartialCommandParams, type Response } from './visca/command.js'
 
-/**
- * Parse a VISCA message string into an array of byte values.
- * @param {string} msg
- * @returns {number[]}
- */
-function parseMessage(msg) {
+/** Parse a VISCA message string into an array of byte values. */
+function parseMessage(msg: string): readonly number[] {
 	const hexData = msg.replace(/\s+/g, '')
 	const command = []
 	for (let i = 0; i < hexData.length; i += 2) {
@@ -18,12 +21,9 @@ function parseMessage(msg) {
 /**
  * The isVisible callback for inputs that correspond to parameters in the
  * command.
- * @param {CompanionOptionValues} options
- * @param {number} i
- * @returns {bool}
  */
-function commandParameterInputIsVisible(options, i) {
-	const commandParams = options.command_parameters
+function commandParameterInputIsVisible(options: CompanionOptionValues, i: number): boolean {
+	const commandParams = String(options['command_parameters'])
 	if (commandParams === '') {
 		return false
 	}
@@ -45,10 +45,9 @@ const CommandParameterDefault = ''
 /**
  * Generate text inputs corresponding to values to set in parameters of the
  * command.
- * @returns {CompanionInputFieldTextInput[]}
  */
-function generateInputsForCommandParameters() {
-	const inputs = []
+function generateInputsForCommandParameters(): CompanionInputFieldTextInput[] {
+	const inputs: CompanionInputFieldTextInput[] = []
 	for (let i = 0; i < MAX_PARAMETERS_IN_COMMAND; i++) {
 		inputs.push({
 			type: 'textinput',
@@ -66,10 +65,8 @@ function generateInputsForCommandParameters() {
 /**
  * Add option values for command parameters to "Custom command" action options
  * that lack them.
- *
- * @param {import('@companion-module/base').CompanionOptionValues} options
  */
-function addCommandParameterDefaults(options) {
+function addCommandParameterDefaults(options: CompanionOptionValues): void {
 	for (let i = 0; i < MAX_PARAMETERS_IN_COMMAND; i++) {
 		options[`parameter${i}`] = CommandParameterDefault
 	}
@@ -92,15 +89,14 @@ const NIBBLES_SPLITTER = /, ?/g
  * an array of parameters, each of which is an array of half-byte offsets into a
  * VISCA message.
  *
- * @param {number[]} command
+ * @param command
  *    The message to which the parameters information is being applied
- * @param {string} parametersString
+ * @param parametersString
  *    A parameters string: a semicolon-separated list of comma-separated lists
  *    of nibble offsets, all nibble offsets being unique and referring to
  *    nibbles in `command` that are zero.
- * @returns {number[][]}
  */
-function parseParameters(command, parametersString) {
+function parseParameters(command: readonly number[], parametersString: string): readonly number[][] {
 	if (parametersString === '') return []
 
 	const params = parametersString.split(PARAMETERS_SPLITTER)
@@ -111,7 +107,7 @@ function parseParameters(command, parametersString) {
 	})
 
 	// Validate.
-	const seen = new Set()
+	const seen = new Set<number>()
 	for (const nibbles of parameters) {
 		for (const nibble of nibbles) {
 			if (nibble < 2 || 2 * command.length - 2 <= nibble) {
@@ -134,22 +130,15 @@ function parseParameters(command, parametersString) {
 	return parameters
 }
 
-function identity(x) {
-	return x
-}
-
 /**
  * Parse response options info into response/parameters info to pass to
  * `UserDefinedCommand`.
- *
- * @param {CompanionOptionValues} options
- * @returns {{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]}
  */
-function parseResponses(options) {
-	/** @type {{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- need to figure out how to sync up options object with response parameters
+function parseResponses(options: any /* CompanionOptionValues */): Response[] {
 	const responses = []
 
-	const responseCount = options.response_count
+	const responseCount = Number(options['response_count'])
 	for (let i = 0; i < responseCount; i++) {
 		const valueBytes = parseMessage(options[`response${i}_bytes`])
 		const maskBytes = parseMessage(options[`response${i}_mask`])
@@ -172,9 +161,16 @@ const STANDARD_RESPONSE = [
 	{ bytes: '90 50 FF', mask: 'FF F0 FF' },
 ]
 
-function getResponseOptionDefault(i, field) {
+type ResponseField = keyof (typeof STANDARD_RESPONSE)[0]
+
+/**
+ * Get the value of the given custom-command option for the `i`th return message
+ * in a custom command's default response.
+ */
+function getResponseOptionDefault(i: number, field: ResponseField): string {
 	if (i < STANDARD_RESPONSE.length) {
-		return STANDARD_RESPONSE[i][field]
+		const resp = STANDARD_RESPONSE[i]
+		return resp[field]
 	}
 	return ''
 }
@@ -185,14 +181,19 @@ const CommandParametersDefault = ''
 const ResponseCountOptionId = 'response_count'
 const ResponseCountDefault = STANDARD_RESPONSE.length
 
-function addResponseDefaults(options) {
+function addResponseDefaults(options: CompanionOptionValues): void {
 	for (let i = 0; i < MAX_MESSAGES_IN_RESPONSE; i++) {
 		options[`response${i}_bytes`] = getResponseOptionDefault(i, 'bytes')
 		options[`response${i}_mask`] = getResponseOptionDefault(i, 'mask')
 	}
 }
 
-export function isCustomCommandMissingCommandParametersAndResponse(action) {
+/**
+ * Determine whether the given action information corresponds to a "Custom
+ * command" action consisting only of a byte sequence, missing any information
+ * about parameters within it or the expected response to it.
+ */
+export function isCustomCommandMissingCommandParametersAndResponse(action: CompanionActionInfo): boolean {
 	return action.actionId === PtzOpticsActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
 }
 
@@ -206,10 +207,8 @@ export function isCustomCommandMissingCommandParametersAndResponse(action) {
  *
  * Add plausible default values for all those new option ids to old-school
  * `options` that lack them.
- *
- * @param {import('@companion-module/base').CompanionOptionValues} options
  */
-export function addCommandParametersAndResponseToCustomCommandOptions(options) {
+export function addCommandParametersAndResponseToCustomCommandOptions(options: CompanionOptionValues): void {
 	options[CommandParametersOptionId] = CommandParametersDefault
 	addCommandParameterDefaults(options)
 	options[ResponseCountOptionId] = ResponseCountDefault
@@ -218,11 +217,8 @@ export function addCommandParametersAndResponseToCustomCommandOptions(options) {
 
 /**
  * Generate an action definition for the "Custom command" action.
- *
- * @param {PtzOpticsInstance} instance
- * @returns {CompanionActionDefinition}
  */
-export function generateCustomCommandAction(instance) {
+export function generateCustomCommandAction(instance: MockInstance): CompanionActionDefinition {
 	const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 	const PARAMETER_LIST_REGEX = '/^(?:[0-9]+(?:, ?[0-9]+)*(?:; ?[0-9]+(?:, ?[0-9]+)*)*|)$/'
 
@@ -241,7 +237,6 @@ export function generateCustomCommandAction(instance) {
 				label: 'Bytes of command (set half-bytes in any parameters to zeroes)',
 				id: 'custom',
 				regex: COMMAND_REGEX,
-				width: 6,
 			},
 			{
 				type: 'textinput',
@@ -272,11 +267,11 @@ export function generateCustomCommandAction(instance) {
 				// (2 to 15) + 1
 				const RESPONSE_MASK_REGEX = '/(?:[0-9a-fA-F]{2} ?){2,15}[fF][fF]$/'
 
-				const allResponseFields = []
+				const allResponseFields: CompanionInputFieldTextInput[] = []
 				for (let i = 0; i < MAX_MESSAGES_IN_RESPONSE; i++) {
-					const isVisible = (options, i) => i < options.response_count
+					const isVisible = (options: CompanionOptionValues, i: number) => i < Number(options['response_count'])
 
-					const responseFields = [
+					const responseFields: CompanionInputFieldTextInput[] = [
 						{
 							type: 'textinput',
 							label: `Bytes of expected response #${i + 1} (set half-bytes in any parameters to zeroes)`,
@@ -304,19 +299,21 @@ export function generateCustomCommandAction(instance) {
 			})(),
 		],
 		callback: async ({ options }, context) => {
-			const commandBytes = parseMessage(options.custom)
+			const commandBytes = parseMessage(String(options['custom']))
 
-			const commandParams = parseParameters(commandBytes, options.command_parameters).reduce((acc, nibbles, i) => {
-				acc[`param_${i}`] = {
-					nibbles,
-					choiceToParam: identity,
-				}
+			const commandParams: CommandParams = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
+				(acc, nibbles, i) => {
+					acc[`param_${i}`] = {
+						nibbles,
+						choiceToParam: Number,
+					}
 
-				return acc
-			}, {})
+					return acc
+				},
+				{} as PartialCommandParams
+			)
 
-			/** @type {{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} */
-			const responseMessages = parseResponses(options).map(({ value, mask }) => {
+			const responseMessages: Response[] = parseResponses(options).map(({ value, mask }) => {
 				return {
 					value,
 					mask,
@@ -326,13 +323,13 @@ export function generateCustomCommandAction(instance) {
 
 			const command = new UserDefinedCommand(commandBytes, commandParams, responseMessages)
 
-			const commandOpts = {}
-			for (let i = 0; i < commandParams.length; i++) {
-				const val = await context.parseVariablesInString(options[`parameter${i}`])
-				commandOpts[`param_${i}`] = Number(val)
+			const commandOpts: { [key: string]: number | undefined } = {}
+			for (const key of Object.keys(commandParams)) {
+				const val = await context.parseVariablesInString(String(options[`parameter${key}`]))
+				commandOpts[`param_${key}`] = Number(val)
 			}
 
-			instance.sendCommand(command, commandOpts)
+			void instance.sendCommand(command, commandOpts)
 		},
 	}
 }
