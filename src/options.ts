@@ -4,7 +4,7 @@ export const FocusModeOption = {
 		{ id: '0', label: 'Auto Focus' },
 		{ id: '1', label: 'Manual Focus' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case '0':
 				return 2
@@ -14,7 +14,7 @@ export const FocusModeOption = {
 				return 2
 		}
 	},
-	paramToChoice: (param) => {
+	paramToChoice: (param: number): string => {
 		switch (param) {
 			case 2:
 				return '0'
@@ -35,7 +35,7 @@ export const ExposureModeOption = {
 		{ id: '3', label: 'Iris Pri' },
 		{ id: '4', label: 'Bright mode (manual)' }, // Not in latest API doc: remove?
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case '0':
 				return 0x0
@@ -51,7 +51,7 @@ export const ExposureModeOption = {
 				return 0x0
 		}
 	},
-	paramToChoice: (param) => {
+	paramToChoice: (param: number): string => {
 		switch (param) {
 			case 0x0:
 				return '0'
@@ -86,7 +86,7 @@ export const IRIS_CHOICES = [
 export const IrisSetOption = {
 	id: 'val',
 	choices: IRIS_CHOICES,
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -112,7 +112,7 @@ export const ShutterSetOption = {
 		{ id: '02', label: '1/60' },
 		{ id: '01', label: '1/30' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -123,7 +123,7 @@ export const CameraPowerOption = {
 		{ id: 'off', label: 'off' },
 		{ id: 'on', label: 'on' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'off':
 				return 0x3
@@ -141,7 +141,7 @@ export const OnScreenDisplayOption = {
 		{ id: 'open', label: 'open' },
 		{ id: 'close', label: 'close' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'open':
 				return 0x2
@@ -151,7 +151,7 @@ export const OnScreenDisplayOption = {
 				return 0x3
 		}
 	},
-	paramToChoice: (param) => {
+	paramToChoice: (param: number): string => {
 		switch (param) {
 			case 0x2:
 				return 'open'
@@ -171,7 +171,7 @@ export const OnScreenDisplayNavigateOption = {
 		{ id: 'down', label: 'down' },
 		{ id: 'left', label: 'left' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'up':
 				return 0x31
@@ -196,7 +196,7 @@ export const WhiteBalanceOption = {
 		{ id: 'onepush', label: 'One Push' },
 		{ id: 'manual', label: 'Manual' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'automatic':
 				return 0x0
@@ -221,13 +221,13 @@ export const AutoWhiteBalanceSensitivityOption = {
 		{ id: 1, label: 'Normal' },
 		{ id: 2, label: 'Low' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return Number(choice)
 	},
 }
 
 const PRESET_CHOICES = []
-for (var i = 0; i < 255; ++i) {
+for (let i = 0; i < 255; ++i) {
 	if (i < 90 || i > 99) {
 		PRESET_CHOICES.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
 	}
@@ -236,7 +236,7 @@ for (var i = 0; i < 255; ++i) {
 export const PresetSaveOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -244,7 +244,7 @@ export const PresetSaveOption = {
 export const PresetRecallOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -252,7 +252,7 @@ export const PresetRecallOption = {
 export const PresetDriveNumberOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -287,7 +287,7 @@ export const SPEED_CHOICES = [
 export const PresetDriveSpeedOption = {
 	id: 'speed',
 	choices: SPEED_CHOICES,
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
@@ -298,7 +298,7 @@ export const AutoTrackingOption = {
 		{ id: 'off', label: 'Off' },
 		{ id: 'on', label: 'On' },
 	],
-	choiceToParam: (choice) => {
+	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'on':
 				return 0x2
