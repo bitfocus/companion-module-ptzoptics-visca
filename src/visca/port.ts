@@ -1,5 +1,6 @@
-import { InstanceStatus, TCPHelper } from '@companion-module/base'
-import { checkCommandBytes, responseIs, responseMatches } from './command.js'
+import { InstanceStatus, TCPHelper, type CompanionOptionValues } from '@companion-module/base'
+import { checkCommandBytes, type Response, responseIs, responseMatches, Command } from './command.js'
+import type { MockInstance } from '../mock-instance.js'
 import { prettyBytes } from './utils.js'
 
 const ResponseSyntaxError = [0x90, 0x60, 0x02, 0xff]
@@ -21,10 +22,8 @@ const ResponseCommandNotExecutableValues = [0x90, 0x60, 0x41, 0xff]
  * 20231027 PTZOptics VISCA over IP Commands document.  (It's definitely the
  * format of the response to every command this module sends.)  Inquiries use a
  * different response format, but this module doesn't support any yet.
- *
- * @type {{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]}
  */
-const StandardResponse = [
+const StandardResponse: Response[] = [
 	{ value: ResponseACKValues, mask: ResponseACKMask, params: {} },
 	{ value: ResponseCompletionValues, mask: ResponseCompletionMask, params: {} },
 ]
@@ -40,15 +39,11 @@ const BLAME_MODULE =
 export class VISCAPort {
 	/**
 	 * The TCP socket through which commands are sent and responses received.
-	 * @type {?TCPHelper}
 	 */
-	#socket = null
+	#socket: any = null
 
-	/**
-	 * The instance that created this port.
-	 * @type {PtzOpticsInstance}
-	 */
-	#instance
+	/** The instance that created this port. */
+	#instance: MockInstance
 
 	/**
 	 * A count of how many commands' responses are still waiting to be read.
@@ -58,9 +53,8 @@ export class VISCAPort {
 
 	/**
 	 * Bytes of data received that have not yet been parsed as full responses.
-	 * @type {number[]}
 	 */
-	#receivedData = []
+	#receivedData: number[] = []
 
 	/**
 	 * A promise that resolves when the response to the previous command (which
@@ -71,9 +65,8 @@ export class VISCAPort {
 	 * response was an error, the promise resolves null.  Otherwise it resolves
 	 * an object whose properties are choices corresponding to the parameters in
 	 * the response.
-	 * @type {Promise<?CompanionOptionValues>}
 	 */
-	#lastResponsePromise = Promise.resolve(null)
+	#lastResponsePromise: Promise<CompanionOptionValues | null> = Promise.resolve(null)
 
 	/**
 	 * A promise to wait upon for `this.#receivedData` to be extended with more
@@ -83,17 +76,14 @@ export class VISCAPort {
 	 * received.  The promise is resolved with no value, so awaiting an earlier
 	 * promise here will expose a `this.#receivedData` containing received data
 	 * corresponding to later-in-time promises written here.
-	 * @type {?Promise<void>}
 	 */
-	#moreDataAvailable = null
+	#moreDataAvailable: Promise<void> = Promise.resolve()
 
 	/**
 	 * Create a VISCAPort associated with the provided instance.  The port is
 	 * initially closed and must be opened to be used.
-	 *
-	 * @param {PtzOpticsInstance} instance
 	 */
-	constructor(instance) {
+	constructor(instance: MockInstance) {
 		this.#instance = instance
 		this.#reset()
 	}
@@ -108,16 +98,11 @@ export class VISCAPort {
 		this.#pending = 0
 		this.#receivedData.length = 0
 		this.#lastResponsePromise = Promise.resolve(null)
-		this.#moreDataAvailable = null
+		this.#moreDataAvailable = Promise.resolve()
 	}
 
-	/**
-	 * Open this port connecting to the given host:port.
-	 *
-	 * @param {string} host
-	 * @param {number} port
-	 */
-	open(host, port) {
+	/** Open this port connecting to the given host:port. */
+	open(host: string, port: number): void {
 		const socket = (this.#socket = new TCPHelper(host, port))
 
 		const instance = this.#instance
@@ -129,7 +114,7 @@ export class VISCAPort {
 			instance.updateStatus(InstanceStatus.Ok)
 		})
 		socket.on('status_change', (_status, message) => {
-			instance.log('debug', message)
+			instance.log('debug', `Status change: ${message}`)
 		})
 		socket.on('error', (err) => {
 			// Make sure that we log and update Companion connection status for
@@ -157,12 +142,12 @@ export class VISCAPort {
 	}
 
 	/** True iff this port is currently closed. */
-	get closed() {
+	get closed(): boolean {
 		return this.#socket === null
 	}
 
 	/** Close this port if it's currently open. */
-	close() {
+	close(): void {
 		this.#reset()
 		this.#instance.updateStatus(InstanceStatus.Disconnected)
 	}
@@ -171,15 +156,15 @@ export class VISCAPort {
 	 * Create an error to throw during command/response processing whose
 	 * message contains `msg` and a representation of `bytes` if provided.
 	 *
-	 * @param {string} msg
+	 * @param msg
 	 *    An error message describing the error
-	 * @param {Buffer|Array<number>|null} bytes
+	 * @param bytes
 	 *    Optional bytes to include in the error.  (These may be from a command
 	 *    or a response, depending how `msg` is written.)
-	 * @throws {Error}
+	 * @returns
 	 *    An error containing the message and pretty-printed `bytes`
 	 */
-	#errorWhileHandlingCommand(msg, bytes = null) {
+	#errorWhileHandlingCommand(msg: string, bytes: readonly number[]): Error {
 		const message = `${msg}${bytes ? ` (VISCA bytes ${prettyBytes(bytes)})` : ''}`
 		return new Error(message)
 	}
@@ -194,18 +179,21 @@ export class VISCAPort {
 	 * (for example, recalling a different preset because someone fat-fingered
 	 * the wrong button) during that time.
 	 *
-	 * @param {Command} command
+	 * @param command
 	 *    The command to send.
-	 * @param {CompanionOptionValues} options
+	 * @param options
 	 *    Compatible options to use to fill in any parameters in `command`; may
-	 *    be omitted if `command` has no parameters.
+	 *    be omitted or null if `command` has no parameters.
 	 * @returns {Promise<?CompanionOptionValues>}
 	 *    A promise that resolves after the response to `command` (which may be
 	 *    an error response) has been processed.  The promise presently always
 	 *    resolves null, except that a response containing a parameter causes it
 	 *    to reject.
 	 */
-	async sendCommand(command, options = null) {
+	async sendCommand(
+		command: Command,
+		options: CompanionOptionValues | null = null
+	): Promise<CompanionOptionValues | null> {
 		const commandBytes = command.toBytes(options)
 		const err = checkCommandBytes(commandBytes)
 		if (err) {
@@ -216,7 +204,7 @@ export class VISCAPort {
 			return null
 		}
 
-		if (this.closed) {
+		if (this.#socket === null) {
 			this.#instance.log('error', `Socket not open to send ${prettyBytes(commandBytes)}`)
 			return null
 		}
@@ -248,11 +236,11 @@ export class VISCAPort {
 	 * Process the full response (which may comprise multiple return messages)
 	 * to the given command.
 	 *
-	 * @param {Command} command
+	 * @param command
 	 *    The command whose response is being processed.
-	 * @param {Buffer} commandBytes
+	 * @param commandBytes
 	 *    The bytes of `command` that were sent.
-	 * @returns {Promise<?CompanionOptionValues>}
+	 * @returns
 	 *    A promise that resolves after the response to `command` (which may be
 	 *    an error response) has been processed.  If `command`'s expected
 	 *    response contains no parameters, or the response was an error, the
@@ -260,7 +248,7 @@ export class VISCAPort {
 	 *    properties are choices corresponding to the parameters in the
 	 *    response.
 	 */
-	async #processResponse(command, commandBuffer) {
+	async #processResponse(command: Command, commandBuffer: Buffer): Promise<CompanionOptionValues | null> {
 		let response
 		for (;;) {
 			response = await this.#readOneReturnMessage()
