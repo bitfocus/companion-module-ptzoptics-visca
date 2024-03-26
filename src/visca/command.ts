@@ -7,10 +7,8 @@ import { checkBytes, prettyBytes } from './utils.js'
 /**
  * Verify that the provided command bytes have the expected start byte and
  * terminator byte and contain no other terminator byte.
- *
- * @param {number[]} command
  */
-function validateCommand(command) {
+function validateCommand(command: readonly number[]): void {
 	checkBytes(command)
 
 	const err = checkCommandBytes(command)
@@ -20,19 +18,38 @@ function validateCommand(command) {
 }
 
 /**
+ * A parameter in a VISCA command to be filled in from a user-specified option,
+ * consisting of the id of the option, the sequence of nibbles that constitute
+ * it, and the conversion from user-specified option value to numeric value to
+ * store in the VISCA command bytes.
+ */
+export type CommandParam = {
+	readonly nibbles: readonly number[]
+	readonly choiceToParam: (choice: string) => number
+}
+
+/**
+ * A hash of (option id) => nibbles it's stored in and a way to convert that
+ * option value to a number to store in the parameter.
+ */
+export type PartialCommandParams = { [key: string]: CommandParam }
+
+/**
+ * A hash of (option id) => nibbles it's stored in and a way to convert that
+ * option value to a number to store in the parameter.
+ */
+export type CommandParams = Readonly<PartialCommandParams>
+
+/**
  * Verify that the given parameters are internally consistent and consistent
  * against the given command.
- *
- * @param {?Object.<string, { nibbles: number[], choiceToParam: (choice: string) => number }>} params
- * @param {number[]} command
  */
-function validateCommandParams(params, command) {
+function validateCommandParams(params: CommandParams | null, command: readonly number[]): void {
 	if (params === null) {
 		return
 	}
 
-	/** @type {Set<number>} */
-	const seen = new Set()
+	const seen = new Set<number>()
 	for (const { nibbles } of Object.values(params)) {
 		if (nibbles.length === 0) {
 			throw new RangeError("can't use zero nibbles to encode a parameter")
@@ -52,12 +69,8 @@ function validateCommandParams(params, command) {
 	}
 }
 
-/**
- * Verify that a return message has valid format.
- *
- * @param {number[]} command
- */
-function validateReturn(command) {
+/** Verify that a return message has valid format. */
+function validateReturn(command: readonly number[]): void {
 	checkBytes(command)
 	if (command[0] !== 0x90) {
 		throw new RangeError('return message must start with 0x90')
@@ -68,23 +81,50 @@ function validateReturn(command) {
 }
 
 /**
+ * A parameter found in a response to a VISCA command, constructed from the
+ * values of the specified nibbles, corresponding to a human-understandable
+ * choice value by the specified function..
+ */
+export type ResponseParam = {
+	readonly nibbles: readonly number[]
+	readonly paramToChoice: (param: number) => string
+}
+
+/**
+ * A hash of all parameters in a single return message.  Each key is an option
+ * id, while each value identifies the nibbles that store the parameter and
+ * provides a function to convert numeric parameter value to option value.
+ */
+export type ResponseParams = {
+	[key: string]: ResponseParam
+}
+
+/**
+ * A single return message found within the full response to a VISCA command,
+ * consisting of the given masked nibble values, with the remaining zeroed
+ * nibbles corresponding to the provided list of parameters.
+ */
+export type Response = {
+	readonly value: readonly number[]
+	readonly mask: readonly number[]
+	readonly params: ResponseParams
+}
+
+/**
  * Verify that the provided response is valid.  (Null corresponds to the
  * standard ACK and Completion response and so is inherently valid.)
- *
- * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
  */
-function validateResponse(response) {
+function validateResponse(response: readonly Response[] | null): void {
 	if (response === null) return
 
 	for (const { value, mask, params } of response) {
 		if (value.length !== mask.length) {
-			throw new RangeError('vals and masks must have equal length')
+			throw new RangeError('value and mask must have equal length')
 		}
 		validateReturn(value)
 		checkBytes(mask)
 
-		/** @type {Set<number>} */
-		const seen = new Set()
+		const seen = new Set<number>()
 		for (const { nibbles } of Object.values(params)) {
 			for (const nibble of nibbles) {
 				if (nibble < 2 || value.length * 2 - 2 <= nibble) {
@@ -111,17 +151,17 @@ function validateResponse(response) {
  * each return message within it potentially including parameters.
  */
 export class Command {
-	#commandBytes
-	#params
-	#response
-	#userDefined
+	readonly #commandBytes: readonly number[]
+	readonly #params: CommandParams | null
+	readonly #response: readonly Response[] | null
+	readonly #userDefined: boolean
 
 	/**
-	 * @param {number[]} commandBytes
+	 * @param commandBytes
 	 *    An array of byte values that constitute this command, with any
 	 *    parameter nibbles set to zero.  (For example, `81 01 04 61 0p FF` with
 	 *    `p` as a parameter would use `[0x81, 0x01, 0x04, 0x61, 0x00, 0xFF]`).
-	 * @param {?Object.<string, { nibbles: number[], choiceToParam: (choice: string) => number }>} params
+	 * @param params
 	 *    A hash defining all parameters to be filled in the bytes of this
 	 *    command.  (`null` is equivalent to an empty hash.)  Each key is the id
 	 *    of the option that encodes the parameter, and each value is an object
@@ -129,7 +169,7 @@ export class Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 * @param response
 	 *    If null, indicates that the command expects the standard ACK followed
 	 *    by a Completion response.  Otherwise an array defining the expected
 	 *    order and structure of one or more response messages constituting a
@@ -142,13 +182,18 @@ export class Command {
 	 *    name the parameters in the message and whose values define the nibbles
 	 *    constituting it and the manner of converting parameter numeric values
 	 *    to the values of options corresponding to that key.
-	 * @param {bool} userDefined
+	 * @param userDefined
 	 *    Whether this command was manually defined by the user, such that its
 	 *    correctness can't be presumed -- in which case errors this command
 	 *    triggers are logged but, unlike commands this module itself defines,
 	 *    will not fail the connection
 	 */
-	constructor(commandBytes, params, response, userDefined) {
+	constructor(
+		commandBytes: readonly number[],
+		params: CommandParams | null,
+		response: readonly Response[] | null,
+		userDefined: boolean
+	) {
 		validateCommand(commandBytes)
 		this.#commandBytes = commandBytes
 
@@ -165,22 +210,23 @@ export class Command {
 	 * Compute the bytes that constitute this command, filling in parameters
 	 * according to the supplied option values.
 	 *
-	 * @param {?CompanionOptionValues} options
+	 * @param options
 	 *    An options object with properties compatible with the params used to
 	 *    construct this.  `null` is permitted when this command has no
 	 *    parameters.
-	 * @returns {number[]}
+	 * @returns
 	 *    Bytes representing this command, with parameters filled according to
 	 *    the provided options.  The returned array must not be modified.
 	 */
-	toBytes(options) {
+	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- need to figure out how to sync up options object with command parameters
+	toBytes(options: any /* CompanionOptionValues | null */): readonly number[] {
 		const commandBytes = this.#commandBytes
 		const params = this.#params
 		if (params === null) {
 			return commandBytes
 		}
 
-		let bytes = commandBytes.slice()
+		const bytes = commandBytes.slice()
 		for (const [id, { nibbles, choiceToParam }] of Object.entries(params)) {
 			let val = choiceToParam(options[id])
 
@@ -206,10 +252,8 @@ export class Command {
 	/**
 	 * Characteristics of the expected response to this command, or null if the
 	 * expected response is an ACK followed by a Completion.
-	 *
-	 * @returns {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
 	 */
-	response() {
+	response(): readonly Response[] | null {
 		return this.#response
 	}
 
@@ -220,10 +264,8 @@ export class Command {
 	 * into failure state because of user mistake -- whereas for errors with
 	 * commands defined by this module, we fail the connection so that bugs will
 	 * be discovered and reported as quickly as possible.
-	 *
-	 * @returns {bool}
 	 */
-	isUserDefined() {
+	isUserDefined(): boolean {
 		return this.#userDefined
 	}
 }
@@ -237,11 +279,11 @@ export class Command {
  */
 export class ModuleDefinedCommand extends Command {
 	/**
-	 * @param {number[]} commandBytes
+	 * @param commandBytes
 	 *    An array of byte values that constitute this command, with any
 	 *    parameter nibbles set to zero.  (For example, `81 01 04 61 0p FF` with
 	 *    `p` as a parameter would use `[0x81, 0x01, 0x04, 0x61, 0x00, 0xFF]`).
-	 * @param {?Object.<string, { nibbles: number[], choiceToParam: (choice: string) => number }>} params
+	 * @param params
 	 *    A hash defining all parameters to be filled in the bytes of this
 	 *    command.  (`null` is equivalent to an empty hash.)  Each key is the id
 	 *    of the option that encodes the parameter, and each value is an object
@@ -249,7 +291,7 @@ export class ModuleDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 * @param response
 	 *    If null, indicates that the command expects the standard ACK followed
 	 *    by a Completion response.  Otherwise an array defining the expected
 	 *    order and structure of one or more response messages constituting a
@@ -263,7 +305,11 @@ export class ModuleDefinedCommand extends Command {
 	 *    constituting it and the manner of converting parameter numeric values
 	 *    to the values of options corresponding to that key.
 	 */
-	constructor(commandBytes, params = null, response = null) {
+	constructor(
+		commandBytes: readonly number[],
+		params: CommandParams | null = null,
+		response: readonly Response[] | null = null
+	) {
 		super(commandBytes, params, response, false)
 	}
 }
@@ -276,11 +322,11 @@ export class ModuleDefinedCommand extends Command {
  */
 export class UserDefinedCommand extends Command {
 	/**
-	 * @param {number[]} commandBytes
+	 * @param commandBytes
 	 *    An array of byte values that constitute this command, with any
 	 *    parameter nibbles set to zero.  (For example, `81 01 04 61 0p FF` with
 	 *    `p` as a parameter would use `[0x81, 0x01, 0x04, 0x61, 0x00, 0xFF]`).
-	 * @param {?Object.<string, { nibbles: number[], choiceToParam: (choice: string) => number }>} params
+	 * @param params
 	 *    A hash defining all parameters to be filled in the bytes of this
 	 *    command.  (`null` is equivalent to an empty hash.)  Each key is the id
 	 *    of the option that encodes the parameter, and each value is an object
@@ -288,7 +334,7 @@ export class UserDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 * @param response
 	 *    If null, indicates that the command expects the standard ACK followed
 	 *    by a Completion response.  Otherwise an array defining the expected
 	 *    order and structure of one or more response messages constituting a
@@ -302,22 +348,19 @@ export class UserDefinedCommand extends Command {
 	 *    constituting it and the manner of converting parameter numeric values
 	 *    to the values of options corresponding to that key.
 	 */
-	constructor(commandBytes, params = null, response = null) {
+	constructor(
+		commandBytes: readonly number[],
+		params: CommandParams | null = null,
+		response: readonly Response[] | null = null
+	) {
 		super(commandBytes, params, response, true)
 	}
 }
 
 /**
- * Compare the bytes of `response` to the bytes of `values`.
- *
- * @param {number[]} response
- *    A VISCA response
- * @param {number[]} values
- *    Array of values
- * @returns bool
- *    true if `response` and `values` have equal length and contents
+ * Check whether the bytes of VISCA response `response` are equal to `values`.
  */
-export function responseIs(response, values) {
+export function responseIs(response: readonly number[], values: readonly number[]): boolean {
 	if (response.length !== values.length) return false
 	for (let i = 0; i < response.length; i++) {
 		if (response[i] !== values[i]) return false
@@ -326,19 +369,14 @@ export function responseIs(response, values) {
 }
 
 /**
- * Compare the bytes of `response` to the bytes of `values`.
- *
- * @param {number[]} response
- *    A VISCA response
- * @param {number[]} mask
- *    Array of bit masks
- * @param {number[]} values
- *    Array of values
- * @returns bool
- *    true if `response` and `values` have the same length and for all `i`,
- *    `(response[i] & mask[i]) === values[i]`
+ * Check whether the bytes of VISCA response `response`, when masked, equal
+ * those of `values`.
  */
-export function responseMatches(response, mask, values) {
+export function responseMatches(
+	response: readonly number[],
+	mask: readonly number[],
+	values: readonly number[]
+): boolean {
 	if (response.length !== values.length) return false
 	for (let i = 0; i < response.length; i++) {
 		if ((response[i] & mask[i]) !== values[i]) return false
@@ -349,12 +387,9 @@ export function responseMatches(response, mask, values) {
 /**
  * Check the bytes of a VISCA command for envelope validity.
  *
- * @param {number[]} bytes
- *    The full byte sequence of the command
- * @returns {?string}
- *    null if the bytes are valid, an error message string if not
+ * @returns null if the bytes are valid, an error message string if not
  */
-export function checkCommandBytes(bytes) {
+export function checkCommandBytes(bytes: readonly number[]): string | null {
 	if (bytes.length === 0) {
 		return 'command must not be empty'
 	}
