@@ -29,7 +29,6 @@
 		"src/actions.js",
 		"src/commands.js",
 		"src/custom-command-action.js",
-		"src/instance.js",
 		"dist/**/*.js",
 		"pkg/**/*.js"
 	],
