@@ -1,6 +1,6 @@
 import { InstanceStatus, TCPHelper, type CompanionOptionValues } from '@companion-module/base'
 import { checkCommandBytes, type Response, responseIs, responseMatches, Command } from './command.js'
-import type { MockInstance } from '../mock-instance.js'
+import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
 
 const ResponseSyntaxError = [0x90, 0x60, 0x02, 0xff]
@@ -43,7 +43,7 @@ export class VISCAPort {
 	#socket: any = null
 
 	/** The instance that created this port. */
-	#instance: MockInstance
+	#instance: PtzOpticsInstance
 
 	/**
 	 * A count of how many commands' responses are still waiting to be read.
@@ -83,7 +83,7 @@ export class VISCAPort {
 	 * Create a VISCAPort associated with the provided instance.  The port is
 	 * initially closed and must be opened to be used.
 	 */
-	constructor(instance: MockInstance) {
+	constructor(instance: PtzOpticsInstance) {
 		this.#instance = instance
 		this.#reset()
 	}

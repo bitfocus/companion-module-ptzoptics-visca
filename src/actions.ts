@@ -39,7 +39,7 @@ import {
 	sendPanTiltCommand,
 } from './commands.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
-import type { MockInstance } from './mock-instance.js'
+import type { PtzOpticsInstance } from './instance.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -58,7 +58,7 @@ import {
 	WhiteBalanceOption,
 } from './options.js'
 
-export function getActions(instance: MockInstance): CompanionActionDefinitions {
+export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {
 		return async (_event: CompanionActionEvent) => {
 			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
