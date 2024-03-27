@@ -41,6 +41,20 @@ export const ExposureModeOption = {
 				return 0x0
 		}
 	},
+	paramToChoice: (param) => {
+		switch (param) {
+			case 0x0:
+				return '0'
+			case 0x3:
+				return '1'
+			case 0xa:
+				return '2'
+			case 0xb:
+				return '3'
+			default:
+				return '0'
+		}
+	},
 }
 
 export const IRIS_CHOICES = [
