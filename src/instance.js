@@ -5,6 +5,7 @@ import { getPresets } from './presets.js'
 import { VISCAPort } from './visca/port.js'
 
 export class PtzOpticsInstance extends InstanceBase {
+	#config
 	#visca
 
 	/**
@@ -87,7 +88,7 @@ export class PtzOpticsInstance extends InstanceBase {
 	}
 
 	async init(config) {
-		this.config = config
+		this.#config = config
 
 		// this is not called by Companion directly, so we need to call this to load the actions into Companion
 		this.updateActions()
@@ -102,8 +103,8 @@ export class PtzOpticsInstance extends InstanceBase {
 	initTCP() {
 		this.#visca.close()
 
-		if (this.config.host !== '') {
-			this.#visca.open(this.config.host, Number(this.config.port))
+		if (this.#config.host !== '') {
+			this.#visca.open(this.#config.host, Number(this.#config.port))
 		}
 	}
 
@@ -111,11 +112,11 @@ export class PtzOpticsInstance extends InstanceBase {
 		// handle if the connection needs to be reset (ex. if the user changes the IP address, and we need to re-connect the socket to the new address)
 		var resetConnection = false
 
-		if (this.config.host != config.host) {
+		if (this.#config.host !== config.host) {
 			resetConnection = true
 		}
 
-		this.config = config
+		this.#config = config
 
 		if (resetConnection || this.#visca.closed) {
 			this.initTCP()
