@@ -1,5 +1,5 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import type { MockInstance } from './mock-instance.js'
+import type { PtzOpticsInstance } from './instance.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -43,7 +43,7 @@ export const PanTiltDirection: { readonly [key in PanTiltAction]: readonly [numb
 }
 
 export async function sendPanTiltCommand(
-	instance: MockInstance,
+	instance: PtzOpticsInstance,
 	direction: readonly [number, number],
 	panSpeed: number,
 	tiltSpeed: number

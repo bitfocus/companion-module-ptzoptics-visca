@@ -1,11 +1,15 @@
-import { InstanceBase } from '@companion-module/base'
+import { InstanceBase, type CompanionOptionValues, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions.js'
-import { getConfigFields } from './config.js'
+import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
+import type { Command } from './visca/command.js'
 import { VISCAPort } from './visca/port.js'
 
-export class PtzOpticsInstance extends InstanceBase {
-	#config
+export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
+	#config: PtzOpticsConfig = {
+		host: '',
+		port: '5678',
+	}
 	#visca
 
 	/**
@@ -13,12 +17,12 @@ export class PtzOpticsInstance extends InstanceBase {
 	 * specified options.  The options must be compatible with the command's
 	 * parameters.  Null may be passed if the command contains no parameters.
 	 *
-	 * @param {Command} command
+	 * @param command
 	 *    The command to send.
-	 * @param {?CompanionOptionValues} options
+	 * @param options
 	 *    Compatible options to use to fill in any parameters in `command`; may
 	 *    be null if `command` has no parameters.
-	 * @returns {Promise<?CompanionOptionValues>}
+	 * @returns
 	 *    A promise that resolves after the response to `command` (which may be
 	 *    an error response) has been processed.  If `command`'s expected
 	 *    response contains no parameters, or the response was an error, the
@@ -26,7 +30,10 @@ export class PtzOpticsInstance extends InstanceBase {
 	 *    properties are choices corresponding to the parameters in the
 	 *    response.
 	 */
-	sendCommand(command, options = null) {
+	async sendCommand(
+		command: Command,
+		options: CompanionOptionValues | null = null
+	): Promise<CompanionOptionValues | null> {
 		return this.#visca.sendCommand(command, options)
 	}
 
@@ -38,14 +45,14 @@ export class PtzOpticsInstance extends InstanceBase {
 	 */
 	#speed = 0x0c
 
-	panTiltSpeed() {
+	panTiltSpeed(): { panSpeed: number; tiltSpeed: number } {
 		return {
 			panSpeed: this.#speed,
 			tiltSpeed: Math.min(this.#speed, 0x14),
 		}
 	}
 
-	setPanTiltSpeed(speed) {
+	setPanTiltSpeed(speed: number): void {
 		if (0x01 <= speed && speed <= 0x18) {
 			this.#speed = speed
 		} else {
@@ -54,53 +61,42 @@ export class PtzOpticsInstance extends InstanceBase {
 		}
 	}
 
-	increasePanTiltSpeed() {
+	increasePanTiltSpeed(): void {
 		if (this.#speed < 0x18) this.#speed++
 	}
 
-	decreasePanTiltSpeed() {
+	decreasePanTiltSpeed(): void {
 		if (this.#speed > 0x01) this.#speed--
 	}
 
-	constructor(internal) {
+	constructor(internal: unknown) {
 		super(internal)
 
 		this.#visca = new VISCAPort(this)
 	}
 
-	updateActions() {
-		this.setActionDefinitions(getActions(this))
-	}
-
-	updatePresets() {
-		this.setPresetDefinitions(getPresets())
-	}
-
 	// Return config fields for web config of the module instance
-	getConfigFields() {
+	getConfigFields(): SomeCompanionConfigField[] {
 		return getConfigFields()
 	}
 
 	// When the module gets deleted
-	async destroy() {
+	async destroy(): Promise<void> {
 		this.log('info', `destroying module: ${this.id}`)
 		this.#visca.close()
 	}
 
-	async init(config) {
+	async init(config: PtzOpticsConfig): Promise<void> {
 		this.#config = config
 
-		// this is not called by Companion directly, so we need to call this to load the actions into Companion
-		this.updateActions()
-
-		// this is not called by Companion directly, so we need to call this to load the presets into Companion
-		this.updatePresets()
+		this.setActionDefinitions(getActions(this))
+		this.setPresetDefinitions(getPresets())
 
 		// start up the TCP socket and attmept to get connected to the PTZOptics device
-		this.initTCP()
+		this.#initTCP()
 	}
 
-	initTCP() {
+	#initTCP(): void {
 		this.#visca.close()
 
 		if (this.#config.host !== '') {
@@ -108,18 +104,14 @@ export class PtzOpticsInstance extends InstanceBase {
 		}
 	}
 
-	configUpdated(config) {
+	async configUpdated(config: PtzOpticsConfig): Promise<void> {
 		// handle if the connection needs to be reset (ex. if the user changes the IP address, and we need to re-connect the socket to the new address)
-		var resetConnection = false
-
-		if (this.#config.host !== config.host) {
-			resetConnection = true
-		}
+		const resetConnection = this.#visca.closed || this.#config.host !== config.host || this.#config.port !== config.port
 
 		this.#config = config
 
-		if (resetConnection || this.#visca.closed) {
-			this.initTCP()
+		if (resetConnection) {
+			this.#initTCP()
 		}
 	}
 }

@@ -5,7 +5,7 @@ import type {
 	CompanionOptionValues,
 } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
-import type { MockInstance } from './mock-instance.js'
+import type { PtzOpticsInstance } from './instance.js'
 import { UserDefinedCommand, type CommandParams, type PartialCommandParams, type Response } from './visca/command.js'
 
 /** Parse a VISCA message string into an array of byte values. */
@@ -218,7 +218,7 @@ export function addCommandParametersAndResponseToCustomCommandOptions(options: C
 /**
  * Generate an action definition for the "Custom command" action.
  */
-export function generateCustomCommandAction(instance: MockInstance): CompanionActionDefinition {
+export function generateCustomCommandAction(instance: PtzOpticsInstance): CompanionActionDefinition {
 	const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 	const PARAMETER_LIST_REGEX = '/^(?:[0-9]+(?:, ?[0-9]+)*(?:; ?[0-9]+(?:, ?[0-9]+)*)*|)$/'
 
