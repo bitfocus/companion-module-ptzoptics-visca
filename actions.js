@@ -3,6 +3,7 @@ import {
 	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
+	ExposureModeInquiry,
 	FocusFarStandard,
 	FocusLock,
 	FocusMode,
@@ -216,6 +217,11 @@ export function getActions(instance) {
 			],
 			callback: async (event) => {
 				instance.sendCommand(ExposureMode, event.options)
+			},
+			learn: async (action) => {
+				const opts = await instance.sendCommand(ExposureModeInquiry)
+				if (opts === null) return undefined
+				return { ...opts }
 			},
 		},
 		irisU: {
