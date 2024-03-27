@@ -14,6 +14,21 @@ const ResponseCompletionValues = [0x90, 0x50, 0xff]
 const ResponseCommandNotExecutableMask = [0xff, 0xf0, 0xff, 0xff]
 const ResponseCommandNotExecutableValues = [0x90, 0x60, 0x41, 0xff]
 
+/**
+ * A response that consists of ACK followed by Completion.
+ *
+ * This is appears to be the format of the response to every command in the
+ * 20231027 PTZOptics VISCA over IP Commands document.  (It's definitely the
+ * format of the response to every command this module sends.)  Inquiries use a
+ * different response format, but this module doesn't support any yet.
+ *
+ * @type {{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]}
+ */
+const StandardResponse = [
+	{ value: ResponseACKValues, mask: ResponseACKMask, params: {} },
+	{ value: ResponseCompletionValues, mask: ResponseCompletionMask, params: {} },
+]
+
 const BLAME_MODULE =
 	'This is likely a bug in the ptzoptics-visca Companion module.  Please ' +
 	"click the bug icon by any camera instance in the table in Companion's " +
@@ -48,11 +63,17 @@ export class VISCAPort {
 	#receivedData = []
 
 	/**
-	 * A promise that resolves once all previous command responses have been
-	 * processed, overwritten every time a new command is sent.
-	 * @type {Promise<void>}
+	 * A promise that resolves when the response to the previous command (which
+	 * may be an error response) has been processed, overwritten every time a
+	 * new command is sent.
+	 *
+	 * If the command's expected response contains no parameters, or the
+	 * response was an error, the promise resolves null.  Otherwise it resolves
+	 * an object whose properties are choices corresponding to the parameters in
+	 * the response.
+	 * @type {Promise<?CompanionOptionValues>}
 	 */
-	#lastResponsePromise = Promise.resolve()
+	#lastResponsePromise = Promise.resolve(null)
 
 	/**
 	 * A promise to wait upon for `this.#receivedData` to be extended with more
@@ -86,7 +107,7 @@ export class VISCAPort {
 
 		this.#pending = 0
 		this.#receivedData.length = 0
-		this.#lastResponsePromise = Promise.resolve()
+		this.#lastResponsePromise = Promise.resolve(null)
 		this.#moreDataAvailable = null
 	}
 
@@ -175,14 +196,16 @@ export class VISCAPort {
 	 *
 	 * @param {Command} command
 	 *    The command to send.
-	 * @param {?CompanionOptionValues} options
-	 *    The options to use to fill in any parameters in `command`; may be
-	 *    omitted if `command` has no parameters.
-	 * @returns {Promise<void>}
+	 * @param {CompanionOptionValues} options
+	 *    Compatible options to use to fill in any parameters in `command`; may
+	 *    be omitted if `command` has no parameters.
+	 * @returns {Promise<?CompanionOptionValues>}
 	 *    A promise that resolves after the response to `command` (which may be
-	 *    an error response) has been processed
+	 *    an error response) has been processed.  The promise presently always
+	 *    resolves null, except that a response containing a parameter causes it
+	 *    to reject.
 	 */
-	sendCommand(command, options = null) {
+	async sendCommand(command, options = null) {
 		const commandBytes = command.toBytes(options)
 		const err = checkCommandBytes(commandBytes)
 		if (err) {
@@ -190,12 +213,12 @@ export class VISCAPort {
 			if (!command.isUserDefined()) {
 				this.#instance.log('error', BLAME_MODULE)
 			}
-			return
+			return null
 		}
 
 		if (this.closed) {
 			this.#instance.log('error', `Socket not open to send ${prettyBytes(commandBytes)}`)
-			return
+			return null
 		}
 
 		const commandBuffer = Buffer.from(commandBytes)
@@ -206,7 +229,7 @@ export class VISCAPort {
 		const p = this.#lastResponsePromise
 			.then(async () => {
 				try {
-					await this.#processResponse(command, commandBuffer)
+					return await this.#processResponse(command, commandBuffer)
 				} finally {
 					this.#pending--
 				}
@@ -215,6 +238,7 @@ export class VISCAPort {
 				this.close()
 				this.#instance.log('error', `Error processing response: ${err.message}`)
 				this.#instance.updateStatus(InstanceStatus.ConnectionFailure)
+				throw err
 			})
 		this.#lastResponsePromise = p
 		return p
@@ -228,9 +252,13 @@ export class VISCAPort {
 	 *    The command whose response is being processed.
 	 * @param {Buffer} commandBytes
 	 *    The bytes of `command` that were sent.
-	 * @returns {Promise<void>}
-	 *    A promise that resolves/rejects when the full response has been
-	 *    processed.
+	 * @returns {Promise<?CompanionOptionValues>}
+	 *    A promise that resolves after the response to `command` (which may be
+	 *    an error response) has been processed.  If `command`'s expected
+	 *    response contains no parameters, or the response was an error, the
+	 *    promise resolves null.  Otherwise it resolves an object whose
+	 *    properties are choices corresponding to the parameters in the
+	 *    response.
 	 */
 	async #processResponse(command, commandBuffer) {
 		let response
@@ -247,7 +275,7 @@ export class VISCAPort {
 			if (this.#pending > 1) {
 				const msg = `Command buffer full: ${prettyBytes(commandBuffer)} was not executed`
 				this.#instance.log('error', msg)
-				return
+				return null
 			}
 
 			// But if this is the only pending command, we can just resend it
@@ -258,24 +286,23 @@ export class VISCAPort {
 			this.#socket.send(commandBuffer)
 		}
 
-		// Skip over a single ACK.
-		if (responseMatches(response, ResponseACKMask, ResponseACKValues)) {
-			response = await this.#readOneReturnMessage()
+		// Check for various errors specifically before processing the response
+		// according to the prescribed instructions.  (This assumes that no
+		// command *intentionally* returns such an error as the first message in
+		// its expected response.)
+
+		// Command Not Executable
+		if (responseMatches(response, ResponseCommandNotExecutableMask, ResponseCommandNotExecutableValues)) {
+			const msg =
+				`The command ${prettyBytes(commandBuffer)} can't be executed now.  ` +
+				'This is likely because the command alters a setting that ' +
+				"doesn't pertain to a current camera mode; activate the " +
+				'relevant camera mode before executing this command.'
+			this.#instance.log('error', msg)
+			return null
 		}
 
-		// A Completion response completes the reply process.
-		if (responseMatches(response, ResponseCompletionMask, ResponseCompletionValues)) {
-			return
-		}
-
-		// Otherwise (until we implement inquiries, whose return packages have a
-		// variety of formats and contain output parameters) we hit an error:
-		// the camera replied with unexpected bytes, a command was sent outside
-		// of its operating mode -- or there's a bug in our handling of the
-		// command and its response.
-
-		// Explicitly check for various specific errors to most clearly report
-		// their occurrence to the attentive Companion operator.
+		// Syntax Error
 		if (responseIs(response, ResponseSyntaxError)) {
 			const userDefined = command.isUserDefined()
 			const blame = userDefined ? 'Double-check the syntax of the command.' : BLAME_MODULE
@@ -296,25 +323,51 @@ export class VISCAPort {
 			// 0. https://ptzoptics.imagerelay.com/share/PTZOptics-G2-VISCA-over-IP-Commands
 			// 1. https://ptzoptics.imagerelay.com/share/PTZOptics-G3-VISCA-over-IP-Commands
 			this.#instance.log('error', msg)
-			return
+			return null
 		}
 
-		if (responseMatches(response, ResponseCommandNotExecutableMask, ResponseCommandNotExecutableValues)) {
-			const msg =
-				`The command ${prettyBytes(commandBuffer)} can't be executed ` +
-				'now.  This is likely because the command alters a setting ' +
-				"that doesn't pertain to the current camera mode; activate " +
-				'the relevant camera mode before executing this command.'
-			this.#instance.log('info', msg)
-			return
+		let i = 0
+		let out = null
+		const expectedResponse = command.response() || StandardResponse
+		for (; i < expectedResponse.length; i++) {
+			if (i > 0) {
+				response = await this.#readOneReturnMessage()
+			}
+
+			const { value, mask, params } = expectedResponse[i]
+			if (!responseMatches(response, mask, value)) {
+				const blame = command.isUserDefined() ? 'Double-check the syntax of your command.' : BLAME_MODULE
+				const msg =
+					`The command ${prettyBytes(commandBuffer)} received an ` +
+					`unrecognized response ${prettyBytes(response)} that ` +
+					'will be treated as the end of the overall response.  ' +
+					`(${blame})  If this assumption is inaccurate, this ` +
+					'camera instance will likely be unstable.  Proceed with ' +
+					'caution!'
+				this.#instance.log('info', msg)
+				return null
+			}
+
+			for (const [id, { nibbles, paramToChoice }] of Object.entries(params)) {
+				if (out === null) {
+					out = Object.create(null)
+				}
+
+				let param = 0
+				for (const nibble of nibbles) {
+					const byteOffset = nibble >> 1
+					const isLower = nibble % 2 == 1
+
+					const byte = response[byteOffset]
+					const contrib = isLower ? byte & 0xf : byte >> 4
+					param = (param << 4) | contrib
+				}
+
+				out[id] = paramToChoice(param)
+			}
 		}
 
-		const msg =
-			`The command ${prettyBytes(commandBuffer)} received the ` +
-			`unrecognized response ${prettyBytes(response)}.  The instance ` +
-			"will probably keep working, but you'll have to verify the " +
-			'camera is in a desirable state yourself.  Proceed with caution!'
-		this.#instance.log('info', msg)
+		return out
 	}
 
 	/**

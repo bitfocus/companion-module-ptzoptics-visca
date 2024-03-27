@@ -5,6 +5,21 @@ import { checkBytes, prettyBytes } from './utils.js'
 // nibble.  VISCA commands encode parameter values in one or more nibbles.
 
 /**
+ * Verify that the provided command bytes have the expected start byte and
+ * terminator byte and contain no other terminator byte.
+ *
+ * @param {number[]} command
+ */
+function validateCommand(command) {
+	checkBytes(command)
+
+	const err = checkCommandBytes(command)
+	if (err !== null) {
+		throw new RangeError(err)
+	}
+}
+
+/**
  * Verify that the given parameters are internally consistent and consistent
  * against the given command.
  *
@@ -38,12 +53,67 @@ function validateCommandParams(params, command) {
 }
 
 /**
+ * Verify that a return message has valid format.
+ *
+ * @param {number[]} command
+ */
+function validateReturn(command) {
+	checkBytes(command)
+	if (command[0] !== 0x90) {
+		throw new RangeError('return message must start with 0x90')
+	}
+	if (command.indexOf(0xff, 1) !== command.length - 1) {
+		throw new RangeError('only 0xFF in message must be its final byte')
+	}
+}
+
+/**
+ * Verify that the provided response is valid.  (Null corresponds to the
+ * standard ACK and Completion response and so is inherently valid.)
+ *
+ * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+ */
+function validateResponse(response) {
+	if (response === null) return
+
+	for (const { value, mask, params } of response) {
+		if (value.length !== mask.length) {
+			throw new RangeError('vals and masks must have equal length')
+		}
+		validateReturn(value)
+		checkBytes(mask)
+
+		/** @type {Set<number>} */
+		const seen = new Set()
+		for (const { nibbles } of Object.values(params)) {
+			for (const nibble of nibbles) {
+				if (nibble < 2 || value.length * 2 - 2 <= nibble) {
+					throw new RangeError('nibble offset is out of range')
+				}
+				if ((value[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
+					throw new RangeError('nibble in value is nonzero')
+				}
+				if ((mask[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
+					throw new RangeError('nibble in mask is nonzero')
+				}
+				if (seen.has(nibble)) {
+					throw new RangeError('nibble appearing more than once in params')
+				}
+				seen.add(nibble)
+			}
+		}
+	}
+}
+
+/**
  * A command, potentially including user-provided parameters, that's expected to
- * complete successfully with a response containing no parameters.
+ * complete successfully, returning a response having the indicated structure,
+ * each return message within it potentially including parameters.
  */
 export class Command {
 	#commandBytes
 	#params
+	#response
 	#userDefined
 
 	/**
@@ -59,18 +129,34 @@ export class Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
+	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 *    If null, indicates that the command expects the standard ACK followed
+	 *    by a Completion response.  Otherwise an array defining the expected
+	 *    order and structure of one or more response messages constituting a
+	 *    complete response to this command.  Each array element corresponds to
+	 *    a command in the overall response.  The 'value' property is an array
+	 *    of byte values for the command, with variable bits set to zero.  The
+	 *    'mask' property' is an array of byte masks equal in length to the
+	 *    'value' array, with bits set corresponding to the bits in the 'value'
+	 *    array that cannot vary.  The 'params' property is a hash whose keys
+	 *    name the parameters in the message and whose values define the nibbles
+	 *    constituting it and the manner of converting parameter numeric values
+	 *    to the values of options corresponding to that key.
 	 * @param {bool} userDefined
 	 *    Whether this command was manually defined by the user, such that its
 	 *    correctness can't be presumed -- in which case errors this command
 	 *    triggers are logged but, unlike commands this module itself defines,
 	 *    will not fail the connection
 	 */
-	constructor(commandBytes, params, userDefined) {
-		checkBytes(commandBytes)
+	constructor(commandBytes, params, response, userDefined) {
+		validateCommand(commandBytes)
 		this.#commandBytes = commandBytes
 
 		validateCommandParams(params, commandBytes)
 		this.#params = params
+
+		validateResponse(response)
+		this.#response = response
 
 		this.#userDefined = userDefined
 	}
@@ -118,6 +204,16 @@ export class Command {
 	}
 
 	/**
+	 * Characteristics of the expected response to this command, or null if the
+	 * expected response is an ACK followed by a Completion.
+	 *
+	 * @returns {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 */
+	response() {
+		return this.#response
+	}
+
+	/**
 	 * Whether this command was defined by the user, such that we can't expect
 	 * it to execute without syntax errors, unexpected responses, and the like.
 	 * Errors in user-defined commands are logged, but the connection isn't put
@@ -135,8 +231,9 @@ export class Command {
 /**
  * A command defined wholly within this module (as opposed to a command that's
  * defined by the user as a custom command), potentially including user-provided
- * parameters, that's expected to complete successfully with a response
- * containing no parameters.
+ * parameters, that's expected to complete successfully, returning a response
+ * having the indicated structure, each return message within it potentially
+ * including parameters.
  */
 export class ModuleDefinedCommand extends Command {
 	/**
@@ -152,16 +249,30 @@ export class ModuleDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
+	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 *    If null, indicates that the command expects the standard ACK followed
+	 *    by a Completion response.  Otherwise an array defining the expected
+	 *    order and structure of one or more response messages constituting a
+	 *    complete response to this command.  Each array element corresponds to
+	 *    a command in the overall response.  The 'value' property is an array
+	 *    of byte values for the command, with variable bits set to zero.  The
+	 *    'mask' property' is an array of byte masks equal in length to the
+	 *    'value' array, with bits set corresponding to the bits in the 'value'
+	 *    array that cannot vary.  The 'params' property is a hash whose keys
+	 *    name the parameters in the message and whose values define the nibbles
+	 *    constituting it and the manner of converting parameter numeric values
+	 *    to the values of options corresponding to that key.
 	 */
-	constructor(commandBytes, params = null) {
-		super(commandBytes, params, false)
+	constructor(commandBytes, params = null, response = null) {
+		super(commandBytes, params, response, false)
 	}
 }
 
 /**
  * A command  defined by the user as a custom command, potentially including
- * user-provided parameters, that's expected to complete successfully with a
- * response containing no parameters.
+ * user-provided parameters, that's expected to complete successfully, returning
+ * a response having the indicated structure, each return message within it
+ * potentially including parameters.
  */
 export class UserDefinedCommand extends Command {
 	/**
@@ -177,9 +288,22 @@ export class UserDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
+	 * @param {?{ value: number[], mask: number[], params: Object.<string, { nibbles: number[], paramToChoice: (param: number) => string }> }[]} response
+	 *    If null, indicates that the command expects the standard ACK followed
+	 *    by a Completion response.  Otherwise an array defining the expected
+	 *    order and structure of one or more response messages constituting a
+	 *    complete response to this command.  Each array element corresponds to
+	 *    a command in the overall response.  The 'value' property is an array
+	 *    of byte values for the command, with variable bits set to zero.  The
+	 *    'mask' property' is an array of byte masks equal in length to the
+	 *    'value' array, with bits set corresponding to the bits in the 'value'
+	 *    array that cannot vary.  The 'params' property is a hash whose keys
+	 *    name the parameters in the message and whose values define the nibbles
+	 *    constituting it and the manner of converting parameter numeric values
+	 *    to the values of options corresponding to that key.
 	 */
-	constructor(commandBytes, params = null) {
-		super(commandBytes, params, true)
+	constructor(commandBytes, params = null, response = null) {
+		super(commandBytes, params, response, true)
 	}
 }
 
