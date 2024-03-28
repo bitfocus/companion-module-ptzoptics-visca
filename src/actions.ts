@@ -1,3 +1,4 @@
+import type { CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	AutoTracking,
@@ -37,6 +38,8 @@ import {
 	ZoomStop,
 	sendPanTiltCommand,
 } from './commands.js'
+import { generateCustomCommandAction } from './custom-command-action.js'
+import type { MockInstance } from './mock-instance.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -46,25 +49,24 @@ import {
 	IrisSetOption,
 	OnScreenDisplayNavigateOption,
 	OnScreenDisplayOption,
+	PanTiltSetSpeedOption,
 	PresetDriveNumberOption,
 	PresetDriveSpeedOption,
 	PresetRecallOption,
 	PresetSaveOption,
 	ShutterSetOption,
-	SPEED_CHOICES,
 	WhiteBalanceOption,
 } from './options.js'
-import { generateCustomCommandAction } from './custom-command-action.js'
 
-export function getActions(instance) {
-	function createPanTiltCallback(direction) {
-		return async (event) => {
+export function getActions(instance: MockInstance): CompanionActionDefinitions {
+	function createPanTiltCallback(direction: readonly [number, number]) {
+		return async (_event: CompanionActionEvent) => {
 			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-			sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
+			void sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
 		}
 	}
 
-	const actionDefinitions = {
+	const actionDefinitions: CompanionActionDefinitions = {
 		[PtzOpticsActionId.PanTiltLeft]: {
 			name: 'Pan Left',
 			options: [],
@@ -113,8 +115,8 @@ export function getActions(instance) {
 		[PtzOpticsActionId.PanTiltHome]: {
 			name: 'P/T Home',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(PanTiltHome)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(PanTiltHome)
 			},
 		},
 		[PtzOpticsActionId.PanTiltSetSpeed]: {
@@ -123,69 +125,70 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'speed setting',
-					id: 'speed',
-					choices: SPEED_CHOICES,
+					id: PanTiltSetSpeedOption.id,
+					choices: PanTiltSetSpeedOption.choices,
+					default: PanTiltSetSpeedOption.default,
 				},
 			],
-			callback: async (event) => {
-				const speed = parseInt(event.options.speed, 16)
+			callback: async (event: CompanionActionEvent) => {
+				const speed = parseInt(String(event.options['speed']), 16)
 				instance.setPanTiltSpeed(speed)
 			},
 		},
 		[PtzOpticsActionId.PanTiltSpeedUp]: {
 			name: 'P/T Speed Up',
 			options: [],
-			callback: async (event) => {
+			callback: async (_event: CompanionActionEvent) => {
 				instance.increasePanTiltSpeed()
 			},
 		},
 		[PtzOpticsActionId.PanTiltSpeedDown]: {
 			name: 'P/T Speed Down',
 			options: [],
-			callback: async (event) => {
+			callback: async (_event: CompanionActionEvent) => {
 				instance.decreasePanTiltSpeed()
 			},
 		},
 		[PtzOpticsActionId.StartZoomIn]: {
 			name: 'Zoom In',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(ZoomIn)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(ZoomIn)
 			},
 		},
 		[PtzOpticsActionId.StartZoomOut]: {
 			name: 'Zoom Out',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(ZoomOut, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(ZoomOut, event.options)
 			},
 		},
 		[PtzOpticsActionId.StopZoom]: {
 			name: 'Zoom Stop',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(ZoomStop)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(ZoomStop)
 			},
 		},
 		[PtzOpticsActionId.StartFocusNearer]: {
 			name: 'Focus Near',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(FocusNearStandard)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusNearStandard)
 			},
 		},
 		[PtzOpticsActionId.StartFocusFarther]: {
 			name: 'Focus Far',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(FocusFarStandard)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusFarStandard)
 			},
 		},
 		[PtzOpticsActionId.StopFocus]: {
 			name: 'Focus Stop',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(FocusStop)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusStop)
 			},
 		},
 		[PtzOpticsActionId.SelectFocusMode]: {
@@ -196,12 +199,13 @@ export function getActions(instance) {
 					label: 'Auto / Manual Focus',
 					id: FocusModeOption.id,
 					choices: FocusModeOption.choices,
+					default: FocusModeOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(FocusMode, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusMode, event.options)
 			},
-			learn: async (event) => {
+			learn: async (_event: CompanionActionEvent) => {
 				const opts = await instance.sendCommand(FocusModeInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
@@ -210,15 +214,15 @@ export function getActions(instance) {
 		[PtzOpticsActionId.LockFocus]: {
 			name: 'Focus Lock',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(FocusLock)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusLock)
 			},
 		},
 		[PtzOpticsActionId.UnlockFocus]: {
 			name: 'Focus Unlock',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(FocusUnlock)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(FocusUnlock)
 			},
 		},
 		[PtzOpticsActionId.SelectExposureMode]: {
@@ -229,12 +233,13 @@ export function getActions(instance) {
 					label: 'Mode setting',
 					id: ExposureModeOption.id,
 					choices: ExposureModeOption.choices,
+					default: ExposureModeOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(ExposureMode, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(ExposureMode, event.options)
 			},
-			learn: async (action) => {
+			learn: async (_event: CompanionActionEvent) => {
 				const opts = await instance.sendCommand(ExposureModeInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
@@ -243,15 +248,15 @@ export function getActions(instance) {
 		[PtzOpticsActionId.IrisUp]: {
 			name: 'Iris Up',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(IrisUp)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(IrisUp)
 			},
 		},
 		[PtzOpticsActionId.IrisDown]: {
 			name: 'Iris Down',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(IrisDown)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(IrisDown)
 			},
 		},
 		[PtzOpticsActionId.SetIris]: {
@@ -262,24 +267,25 @@ export function getActions(instance) {
 					label: 'Iris setting',
 					id: IrisSetOption.id,
 					choices: IrisSetOption.choices,
+					default: IrisSetOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(IrisSet, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(IrisSet, event.options)
 			},
 		},
 		[PtzOpticsActionId.ShutterUp]: {
 			name: 'Shutter Up',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(ShutterUp)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(ShutterUp)
 			},
 		},
 		[PtzOpticsActionId.ShutterDown]: {
 			name: 'Shutter Down',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(ShutterDown)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(ShutterDown)
 			},
 		},
 		[PtzOpticsActionId.SetShutter]: {
@@ -290,10 +296,11 @@ export function getActions(instance) {
 					label: 'Shutter setting',
 					id: ShutterSetOption.id,
 					choices: ShutterSetOption.choices,
+					default: ShutterSetOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(ShutterSet, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(ShutterSet, event.options)
 			},
 		},
 		[PtzOpticsActionId.SetPreset]: {
@@ -305,10 +312,11 @@ export function getActions(instance) {
 					id: PresetSaveOption.id,
 					choices: PresetSaveOption.choices,
 					minChoicesForSearch: 1,
+					default: PresetSaveOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(PresetSave, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(PresetSave, event.options)
 			},
 		},
 		[PtzOpticsActionId.RecallPreset]: {
@@ -320,10 +328,11 @@ export function getActions(instance) {
 					id: PresetRecallOption.id,
 					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
+					default: PresetRecallOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(PresetRecall, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(PresetRecall, event.options)
 			},
 		},
 		[PtzOpticsActionId.SetPresetDriveSpeed]: {
@@ -335,6 +344,7 @@ export function getActions(instance) {
 					id: PresetDriveNumberOption.id,
 					choices: PresetDriveNumberOption.choices,
 					minChoicesForSearch: 1,
+					default: PresetDriveNumberOption.default,
 				},
 				{
 					type: 'dropdown',
@@ -342,10 +352,11 @@ export function getActions(instance) {
 					id: PresetDriveSpeedOption.id,
 					choices: PresetDriveSpeedOption.choices,
 					minChoicesForSearch: 1,
+					default: PresetDriveSpeedOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(PresetDriveSpeed, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(PresetDriveSpeed, event.options)
 			},
 		},
 		[PtzOpticsActionId.CameraPowerState]: {
@@ -356,10 +367,11 @@ export function getActions(instance) {
 					label: 'power on/off',
 					id: CameraPowerOption.id,
 					choices: CameraPowerOption.choices,
+					default: CameraPowerOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(CameraPower, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(CameraPower, event.options)
 			},
 		},
 		[PtzOpticsActionId.OSD]: {
@@ -377,22 +389,23 @@ export function getActions(instance) {
 				let shouldToggle
 				switch (options[OnScreenDisplayOption.id]) {
 					case 'close':
-						instance.sendCommand(OnScreenDisplayClose)
+						void instance.sendCommand(OnScreenDisplayClose)
 						return
 					case 'toggle':
 						shouldToggle = true
 						break
-					case 'open':
+					case 'open': {
 						const opts = await instance.sendCommand(OnScreenDisplayInquiry)
 						if (opts === null) return
 						shouldToggle = opts[OnScreenDisplayOption.id] !== 'open'
+					}
 				}
 
 				if (shouldToggle) {
-					instance.sendCommand(OnScreenDisplayToggle)
+					void instance.sendCommand(OnScreenDisplayToggle)
 				}
 			},
-			learn: async (event) => {
+			learn: async (_event: CompanionActionEvent) => {
 				const opts = await instance.sendCommand(OnScreenDisplayInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
@@ -409,22 +422,22 @@ export function getActions(instance) {
 					default: 'down',
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(OnScreenDisplayNavigate, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(OnScreenDisplayNavigate, event.options)
 			},
 		},
 		[PtzOpticsActionId.OSDEnter]: {
 			name: 'OSD Enter',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(OnScreenDisplayEnter)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(OnScreenDisplayEnter)
 			},
 		},
 		[PtzOpticsActionId.OSDBack]: {
 			name: 'OSD Back',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(OnScreenDisplayBack)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(OnScreenDisplayBack)
 			},
 		},
 		[PtzOpticsActionId.SelectWhiteBalance]: {
@@ -435,17 +448,18 @@ export function getActions(instance) {
 					label: 'Mode',
 					id: WhiteBalanceOption.id,
 					choices: WhiteBalanceOption.choices,
+					default: WhiteBalanceOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(WhiteBalance, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(WhiteBalance, event.options)
 			},
 		},
 		[PtzOpticsActionId.WhiteBalanceOnePushTrigger]: {
 			name: 'White balance one push trigger',
 			options: [],
-			callback: async (event) => {
-				instance.sendCommand(WhiteBalanceOnePushTrigger)
+			callback: async (_event: CompanionActionEvent) => {
+				void instance.sendCommand(WhiteBalanceOnePushTrigger)
 			},
 		},
 		[PtzOpticsActionId.SelectAutoWhiteBalanceSensitivity]: {
@@ -456,10 +470,11 @@ export function getActions(instance) {
 					label: 'Sensitivity',
 					id: AutoWhiteBalanceSensitivityOption.id,
 					choices: AutoWhiteBalanceSensitivityOption.choices,
+					default: AutoWhiteBalanceSensitivityOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		[PtzOpticsActionId.AutoTracking]: {
@@ -470,10 +485,11 @@ export function getActions(instance) {
 					label: 'Auto Tracking (PTZ Optics G3 model required)',
 					id: AutoTrackingOption.id,
 					choices: AutoTrackingOption.choices,
+					default: AutoTrackingOption.default,
 				},
 			],
-			callback: async (event) => {
-				instance.sendCommand(AutoTracking, event.options)
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(AutoTracking, event.options)
 			},
 		},
 		[PtzOpticsActionId.SendCustomCommand]: generateCustomCommandAction(instance),

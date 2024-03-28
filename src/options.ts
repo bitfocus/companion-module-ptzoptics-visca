@@ -1,9 +1,44 @@
+const SPEED_CHOICES = [
+	{ id: '18', label: 'Speed 24 (Fast)' },
+	{ id: '17', label: 'Speed 23' },
+	{ id: '16', label: 'Speed 22' },
+	{ id: '15', label: 'Speed 21' },
+	{ id: '14', label: 'Speed 20' },
+	{ id: '13', label: 'Speed 19' },
+	{ id: '12', label: 'Speed 18' },
+	{ id: '11', label: 'Speed 17' },
+	{ id: '10', label: 'Speed 16' },
+	{ id: '0F', label: 'Speed 15' },
+	{ id: '0E', label: 'Speed 14' },
+	{ id: '0D', label: 'Speed 13' },
+	{ id: '0C', label: 'Speed 12' },
+	{ id: '0B', label: 'Speed 11' },
+	{ id: '0A', label: 'Speed 10' },
+	{ id: '09', label: 'Speed 09' },
+	{ id: '08', label: 'Speed 08' },
+	{ id: '07', label: 'Speed 07' },
+	{ id: '06', label: 'Speed 06' },
+	{ id: '05', label: 'Speed 05' },
+	{ id: '04', label: 'Speed 04' },
+	{ id: '03', label: 'Speed 03' },
+	{ id: '02', label: 'Speed 02' },
+	{ id: '01', label: 'Speed 01 (Slow)' },
+]
+const DefaultSpeedChoice = '0C'
+
+export const PanTiltSetSpeedOption = {
+	id: 'speed',
+	choices: SPEED_CHOICES,
+	default: DefaultSpeedChoice,
+}
+
 export const FocusModeOption = {
 	id: 'bol',
 	choices: [
 		{ id: '0', label: 'Auto Focus' },
 		{ id: '1', label: 'Manual Focus' },
 	],
+	default: '0',
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case '0':
@@ -35,6 +70,7 @@ export const ExposureModeOption = {
 		{ id: '3', label: 'Iris Pri' },
 		{ id: '4', label: 'Bright mode (manual)' }, // Not in latest API doc: remove?
 	],
+	default: '0',
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case '0':
@@ -67,25 +103,24 @@ export const ExposureModeOption = {
 	},
 }
 
-export const IRIS_CHOICES = [
-	{ id: '11', label: 'F1.8' },
-	{ id: '10', label: 'F2.0' },
-	{ id: '0F', label: 'F2.4' },
-	{ id: '0E', label: 'F2.8' },
-	{ id: '0D', label: 'F3.4' },
-	{ id: '0C', label: 'F4.0' },
-	{ id: '0B', label: 'F4.8' },
-	{ id: '0A', label: 'F5.6' },
-	{ id: '09', label: 'F6.8' },
-	{ id: '08', label: 'F8.0' },
-	{ id: '07', label: 'F9.6' },
-	{ id: '06', label: 'F11' },
-	{ id: '00', label: 'CLOSED' },
-]
-
 export const IrisSetOption = {
 	id: 'val',
-	choices: IRIS_CHOICES,
+	choices: [
+		{ id: '11', label: 'F1.8' },
+		{ id: '10', label: 'F2.0' },
+		{ id: '0F', label: 'F2.4' },
+		{ id: '0E', label: 'F2.8' },
+		{ id: '0D', label: 'F3.4' },
+		{ id: '0C', label: 'F4.0' },
+		{ id: '0B', label: 'F4.8' },
+		{ id: '0A', label: 'F5.6' },
+		{ id: '09', label: 'F6.8' },
+		{ id: '08', label: 'F8.0' },
+		{ id: '07', label: 'F9.6' },
+		{ id: '06', label: 'F11' },
+		{ id: '00', label: 'CLOSED' },
+	],
+	default: '0C',
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
@@ -112,6 +147,7 @@ export const ShutterSetOption = {
 		{ id: '02', label: '1/60' },
 		{ id: '01', label: '1/30' },
 	],
+	default: '04',
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
@@ -123,6 +159,7 @@ export const CameraPowerOption = {
 		{ id: 'off', label: 'off' },
 		{ id: 'on', label: 'on' },
 	],
+	default: 'on',
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'off':
@@ -196,6 +233,7 @@ export const WhiteBalanceOption = {
 		{ id: 'onepush', label: 'One Push' },
 		{ id: 'manual', label: 'Manual' },
 	],
+	default: 'automatic',
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'automatic':
@@ -221,6 +259,7 @@ export const AutoWhiteBalanceSensitivityOption = {
 		{ id: 1, label: 'Normal' },
 		{ id: 2, label: 'Low' },
 	],
+	default: 1,
 	choiceToParam: (choice: string): number => {
 		return Number(choice)
 	},
@@ -229,13 +268,14 @@ export const AutoWhiteBalanceSensitivityOption = {
 const PRESET_CHOICES = []
 for (let i = 0; i < 255; ++i) {
 	if (i < 90 || i > 99) {
-		PRESET_CHOICES.push({ id: ('0' + i.toString(16)).slice(-2), label: i })
+		PRESET_CHOICES.push({ id: ('0' + i.toString(16)).slice(-2), label: String(i) })
 	}
 }
 
 export const PresetSaveOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
+	default: 'FD', // preset 253 is likely unused so is as safe a default as any
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
@@ -244,6 +284,7 @@ export const PresetSaveOption = {
 export const PresetRecallOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
+	default: '00', // preset 0 recalls the home setting
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
@@ -252,41 +293,16 @@ export const PresetRecallOption = {
 export const PresetDriveNumberOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
+	default: '01',
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
 
-export const SPEED_CHOICES = [
-	{ id: '18', label: 'Speed 24 (Fast)' },
-	{ id: '17', label: 'Speed 23' },
-	{ id: '16', label: 'Speed 22' },
-	{ id: '15', label: 'Speed 21' },
-	{ id: '14', label: 'Speed 20' },
-	{ id: '13', label: 'Speed 19' },
-	{ id: '12', label: 'Speed 18' },
-	{ id: '11', label: 'Speed 17' },
-	{ id: '10', label: 'Speed 16' },
-	{ id: '0F', label: 'Speed 15' },
-	{ id: '0E', label: 'Speed 14' },
-	{ id: '0D', label: 'Speed 13' },
-	{ id: '0C', label: 'Speed 12' },
-	{ id: '0B', label: 'Speed 11' },
-	{ id: '0A', label: 'Speed 10' },
-	{ id: '09', label: 'Speed 09' },
-	{ id: '08', label: 'Speed 08' },
-	{ id: '07', label: 'Speed 07' },
-	{ id: '06', label: 'Speed 06' },
-	{ id: '05', label: 'Speed 05' },
-	{ id: '04', label: 'Speed 04' },
-	{ id: '03', label: 'Speed 03' },
-	{ id: '02', label: 'Speed 02' },
-	{ id: '01', label: 'Speed 01 (Slow)' },
-]
-
 export const PresetDriveSpeedOption = {
 	id: 'speed',
 	choices: SPEED_CHOICES,
+	default: DefaultSpeedChoice,
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
@@ -298,6 +314,7 @@ export const AutoTrackingOption = {
 		{ id: 'off', label: 'Off' },
 		{ id: 'on', label: 'On' },
 	],
+	default: 'off',
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
 			case 'on':

@@ -26,7 +26,6 @@
 		}
 	},
 	"eslintIgnore": [
-		"src/actions.js",
 		"dist/**/*.js",
 		"pkg/**/*.js"
 	],
