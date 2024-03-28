@@ -1,4 +1,4 @@
-import { combineRgb } from '@companion-module/base'
+import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	IMAGE_UP,
@@ -12,8 +12,8 @@ import {
 } from './assets/assets.js'
 import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from './options.js'
 
-export function getPresets() {
-	const presets = {}
+export function getPresets(): CompanionPresetDefinitions {
+	const presets: CompanionPresetDefinitions = {}
 
 	presets['tilt_up_preset'] = {
 		type: 'button',
@@ -24,7 +24,7 @@ export function getPresets() {
 			png64: IMAGE_UP,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 255),
 		},
 		steps: [
@@ -32,11 +32,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltUp,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -53,7 +55,7 @@ export function getPresets() {
 			png64: IMAGE_DOWN,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -61,11 +63,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltDown,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -82,7 +86,7 @@ export function getPresets() {
 			png64: IMAGE_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -90,11 +94,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltLeft,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -111,7 +117,7 @@ export function getPresets() {
 			png64: IMAGE_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -119,11 +125,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltRight,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -140,7 +148,7 @@ export function getPresets() {
 			png64: IMAGE_UP_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -148,11 +156,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltUpRight,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -169,7 +179,7 @@ export function getPresets() {
 			png64: IMAGE_UP_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -177,11 +187,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltUpLeft,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -198,7 +210,7 @@ export function getPresets() {
 			png64: IMAGE_DOWN_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -206,11 +218,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltDownLeft,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -227,7 +241,7 @@ export function getPresets() {
 			png64: IMAGE_DOWN_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -235,11 +249,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltDownRight,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.PanTiltStop,
+						options: {},
 					},
 				],
 			},
@@ -254,7 +270,7 @@ export function getPresets() {
 		style: {
 			text: 'HOME',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -262,6 +278,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltHome,
+						options: {},
 					},
 				],
 				up: [],
@@ -277,7 +294,7 @@ export function getPresets() {
 		style: {
 			text: 'SPEED\\nUP',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -285,6 +302,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltSpeedUp,
+						options: {},
 					},
 				],
 				up: [],
@@ -300,7 +318,7 @@ export function getPresets() {
 		style: {
 			text: 'SPEED\\nDOWN',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -308,6 +326,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.PanTiltSpeedDown,
+						options: {},
 					},
 				],
 				up: [],
@@ -323,7 +342,7 @@ export function getPresets() {
 		style: {
 			text: 'ZOOM\\nIN',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -331,11 +350,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.StartZoomIn,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.StopZoom,
+						options: {},
 					},
 				],
 			},
@@ -350,7 +371,7 @@ export function getPresets() {
 		style: {
 			text: 'ZOOM\\nOUT',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -358,11 +379,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.StartZoomOut,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.StopZoom,
+						options: {},
 					},
 				],
 			},
@@ -377,7 +400,7 @@ export function getPresets() {
 		style: {
 			text: 'FOCUS\\nNEAR',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -385,11 +408,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.StartFocusNearer,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.StopFocus,
+						options: {},
 					},
 				],
 			},
@@ -404,7 +429,7 @@ export function getPresets() {
 		style: {
 			text: 'FOCUS\\nFAR',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -412,11 +437,13 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.StartFocusFarther,
+						options: {},
 					},
 				],
 				up: [
 					{
 						actionId: PtzOpticsActionId.StopFocus,
+						options: {},
 					},
 				],
 			},
@@ -431,9 +458,8 @@ export function getPresets() {
 		style: {
 			text: 'AUTO\\nFOCUS',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
-			latch: true,
 		},
 		steps: [
 			{
@@ -465,7 +491,7 @@ export function getPresets() {
 		style: {
 			text: 'FOCUS\\nLOCK',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -473,6 +499,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.LockFocus,
+						options: {},
 					},
 				],
 				up: [],
@@ -488,7 +515,7 @@ export function getPresets() {
 		style: {
 			text: 'FOCUS\\nUNLOCK',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -496,6 +523,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.UnlockFocus,
+						options: {},
 					},
 				],
 				up: [],
@@ -511,7 +539,7 @@ export function getPresets() {
 		style: {
 			text: 'EXP\\nMODE',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -548,7 +576,7 @@ export function getPresets() {
 		style: {
 			text: 'IRIS\\nUP',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -556,6 +584,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.IrisUp,
+						options: {},
 					},
 				],
 				up: [],
@@ -571,7 +600,7 @@ export function getPresets() {
 		style: {
 			text: 'IRIS\\nDOWN',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -579,6 +608,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.IrisDown,
+						options: {},
 					},
 				],
 				up: [],
@@ -594,7 +624,7 @@ export function getPresets() {
 		style: {
 			text: 'Shut\\nUP',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -602,6 +632,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.ShutterUp,
+						options: {},
 					},
 				],
 				up: [],
@@ -617,7 +648,7 @@ export function getPresets() {
 		style: {
 			text: 'Shut\\nDOWN',
 			size: '18',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -625,6 +656,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.ShutterDown,
+						options: {},
 					},
 				],
 				up: [],
@@ -640,7 +672,7 @@ export function getPresets() {
 		style: {
 			text: 'WB\\nAUTO',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -666,7 +698,7 @@ export function getPresets() {
 		style: {
 			text: 'WB\\nINDOOR',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -692,7 +724,7 @@ export function getPresets() {
 		style: {
 			text: 'WB\\nOUT\\nDOOR',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -718,7 +750,7 @@ export function getPresets() {
 		style: {
 			text: 'WB\\nONE PUSH',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -744,7 +776,7 @@ export function getPresets() {
 		style: {
 			text: 'WB\\nTRIGGER\\nONE PUSH',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -752,6 +784,7 @@ export function getPresets() {
 				down: [
 					{
 						actionId: PtzOpticsActionId.WhiteBalanceOnePushTrigger,
+						options: {},
 					},
 				],
 				up: [],
@@ -767,7 +800,7 @@ export function getPresets() {
 		style: {
 			text: 'Auto\\nTracking\\nOn',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -793,7 +826,7 @@ export function getPresets() {
 		style: {
 			text: 'Auto\\nTracking\\nOff',
 			size: '14',
-			color: '16777215',
+			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
 		},
 		steps: [
@@ -922,17 +955,16 @@ export function getPresets() {
 	}
 
 	// generates presets for saving camera presets
-	for (var save = 0; save < 255; save++) {
+	for (let save = 0; save < 255; save++) {
 		if (save < 90 || save > 99) {
 			presets['save_preset_' + save + '_preset'] = {
 				type: 'button',
 				category: 'Save Preset',
-				name: 'Save Preset ' + parseInt(save),
+				name: `Save Preset ${save}`,
 				style: {
-					style: 'text',
-					text: 'SAVE\\nPSET\\n' + parseInt(save),
+					text: `SAVE\\nPSET\\n' + ${save}`,
 					size: '14',
-					color: '16777215',
+					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
 				},
 				steps: [
@@ -954,17 +986,16 @@ export function getPresets() {
 	}
 
 	// generates presets for recalling camera presets
-	for (var recall = 0; recall < 255; recall++) {
+	for (let recall = 0; recall < 255; recall++) {
 		if (recall < 90 || recall > 99) {
 			presets['recall_preset_' + recall + '_preset'] = {
 				type: 'button',
 				category: 'Recall Preset',
-				name: 'Recall Preset ' + parseInt(recall),
+				name: `Recall Preset ${recall}`,
 				style: {
-					style: 'text',
-					text: 'Recall\\nPSET\\n' + parseInt(recall),
+					text: `Recall\\nPSET\\n${recall}`,
 					size: '14',
-					color: '16777215',
+					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
 				},
 				steps: [
