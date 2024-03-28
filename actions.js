@@ -1,101 +1,110 @@
-import { SPEED_CHOICES, IRIS_CHOICES, SHUTTER_CHOICES, PRESET_CHOICES } from './choices.js'
-
-function getPtSpeed(instance) {
-	var panSpeed = String.fromCharCode(parseInt(instance.ptSpeed, 16) & 0xff)
-	var tiltSpeed = String.fromCharCode(Math.min(parseInt(instance.ptSpeed, 16), 0x14) & 0xff)
-
-	return { panSpeed: panSpeed, tiltSpeed: tiltSpeed }
-}
+import {
+	AutoTracking,
+	AutoWhiteBalanceSensitivity,
+	CameraPower,
+	ExposureMode,
+	ExposureModeInquiry,
+	FocusFarStandard,
+	FocusLock,
+	FocusMode,
+	FocusModeInquiry,
+	FocusNearStandard,
+	FocusStop,
+	FocusUnlock,
+	IrisDown,
+	IrisSet,
+	IrisUp,
+	PanTiltDirection,
+	PanTiltHome,
+	PresetDriveSpeed,
+	PresetRecall,
+	PresetSave,
+	ShutterDown,
+	ShutterSet,
+	ShutterUp,
+	WhiteBalance,
+	WhiteBalanceOnePushTrigger,
+	ZoomIn,
+	ZoomOut,
+	ZoomStop,
+	sendPanTiltCommand,
+} from './commands.js'
+import {
+	AutoTrackingOption,
+	AutoWhiteBalanceSensitivityOption,
+	CameraPowerOption,
+	ExposureModeOption,
+	FocusModeOption,
+	IrisSetOption,
+	PresetDriveNumberOption,
+	PresetDriveSpeedOption,
+	PresetRecallOption,
+	PresetSaveOption,
+	ShutterSetOption,
+	SPEED_CHOICES,
+	WhiteBalanceOption,
+} from './options.js'
+import { generateCustomCommandAction } from './custom-command-action.js'
 
 export function getActions(instance) {
+	function createPanTiltCallback(direction) {
+		return async (event) => {
+			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
+			sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
+		}
+	}
+
 	const actionDefinitions = {
 		left: {
 			name: 'Pan Left',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Left),
 		},
 		right: {
 			name: 'Pan Right',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Right),
 		},
 		up: {
 			name: 'Tilt Up',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Up),
 		},
 		down: {
 			name: 'Tilt Down',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Down),
 		},
 		upLeft: {
 			name: 'Up Left',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.UpLeft),
 		},
 		upRight: {
 			name: 'Up Right',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x01\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.UpRight),
 		},
 		downLeft: {
 			name: 'Down Left',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x01\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.DownLeft),
 		},
 		downRight: {
 			name: 'Down Right',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x02\x02\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.DownRight),
 		},
 		stop: {
 			name: 'P/T Stop',
 			options: [],
-			callback: async (event) => {
-				var speeds = getPtSpeed(instance)
-				var cmd = '\x81\x01\x06\x01' + speeds.panSpeed + speeds.tiltSpeed + '\x03\x03\xFF'
-				instance.sendVISCACommand(cmd)
-			},
+			callback: createPanTiltCallback(PanTiltDirection.Stop),
 		},
 		home: {
 			name: 'P/T Home',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x06\x04\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(PanTiltHome)
 			},
 		},
 		ptSpeedS: {
@@ -109,92 +118,64 @@ export function getActions(instance) {
 				},
 			],
 			callback: async (event) => {
-				instance.ptSpeed = event.options.speed
-
-				var chosenIndex = -1
-				for (var i = 0; i < SPEED_CHOICES.length; ++i) {
-					if (SPEED_CHOICES[i].id == instance.ptSpeed) {
-						chosenIndex = i
-						break
-					}
-				}
-				if (chosenIndex > -1) {
-					instance.ptSpeedIndex = chosenIndex
-				}
+				const speed = parseInt(event.options.speed, 16)
+				instance.setPanTiltSpeed(speed)
 			},
 		},
 		ptSpeedU: {
 			name: 'P/T Speed Up',
 			options: [],
 			callback: async (event) => {
-				if (instance.ptSpeedIndex == 0) {
-					instance.ptSpeedIndex = 0
-				} else if (instance.ptSpeedIndex > 0) {
-					// we decrement the index to speed up, because the SPEED list has the faster settings at the lower indicies
-					instance.ptSpeedIndex--
-				}
-				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
+				instance.increasePanTiltSpeed()
 			},
 		},
 		ptSpeedD: {
 			name: 'P/T Speed Down',
 			options: [],
 			callback: async (event) => {
-				if (instance.ptSpeedIndex == 23) {
-					instance.ptSpeedIndex = 23
-				} else if (instance.ptSpeedIndex < 23) {
-					// we increment the index to slow down, because the SPEED list has the slower settings at the higher indicies
-					instance.ptSpeedIndex++
-				}
-				instance.ptSpeed = SPEED_CHOICES[instance.ptSpeedIndex].id
+				instance.decreasePanTiltSpeed()
 			},
 		},
 		zoomI: {
 			name: 'Zoom In',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ZoomIn)
 			},
 		},
 		zoomO: {
 			name: 'Zoom Out',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ZoomOut, event.options)
 			},
 		},
 		zoomS: {
 			name: 'Zoom Stop',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x07\x00\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ZoomStop)
 			},
 		},
 		focusN: {
 			name: 'Focus Near',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusNearStandard)
 			},
 		},
 		focusF: {
 			name: 'Focus Far',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusFarStandard)
 			},
 		},
 		focusS: {
 			name: 'Focus Stop',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x08\x00\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusStop)
 			},
 		},
 		focusM: {
@@ -203,37 +184,31 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Auto / Manual Focus',
-					id: 'bol',
-					choices: [
-						{ id: '0', label: 'Auto Focus' },
-						{ id: '1', label: 'Manual Focus' },
-					],
+					id: FocusModeOption.id,
+					choices: FocusModeOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.bol == 0) {
-					var cmd = '\x81\x01\x04\x38\x02\xFF'
-				}
-				if (event.options.bol == 1) {
-					var cmd = '\x81\x01\x04\x38\x03\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusMode, event.options)
+			},
+			learn: async (event) => {
+				const opts = await instance.sendCommand(FocusModeInquiry)
+				if (opts === null) return undefined
+				return { ...opts }
 			},
 		},
 		focusL: {
 			name: 'Focus Lock',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x0A\x04\x68\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusLock)
 			},
 		},
 		focusU: {
 			name: 'Focus Unlock',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x0A\x04\x68\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(FocusUnlock)
 			},
 		},
 		expM: {
@@ -242,49 +217,31 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Mode setting',
-					id: 'val',
-					choices: [
-						{ id: '0', label: 'Full auto' },
-						{ id: '1', label: 'Manual' },
-						{ id: '2', label: 'Shutter Pri' },
-						{ id: '3', label: 'Iris Pri' },
-						{ id: '4', label: 'Bright mode (manual)' },
-					],
+					id: ExposureModeOption.id,
+					choices: ExposureModeOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.val == 0) {
-					var cmd = '\x81\x01\x04\x39\x00\xFF'
-				}
-				if (event.options.val == 1) {
-					var cmd = '\x81\x01\x04\x39\x03\xFF'
-				}
-				if (event.options.val == 2) {
-					var cmd = '\x81\x01\x04\x39\x0A\xFF'
-				}
-				if (event.options.val == 3) {
-					var cmd = '\x81\x01\x04\x39\x0B\xFF'
-				}
-				if (event.options.val == 4) {
-					var cmd = '\x81\x01\x04\x39\x0D\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ExposureMode, event.options)
+			},
+			learn: async (action) => {
+				const opts = await instance.sendCommand(ExposureModeInquiry)
+				if (opts === null) return undefined
+				return { ...opts }
 			},
 		},
 		irisU: {
 			name: 'Iris Up',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0B\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(IrisUp)
 			},
 		},
 		irisD: {
 			name: 'Iris Down',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0B\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(IrisDown)
 			},
 		},
 		irisS: {
@@ -293,31 +250,26 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Iris setting',
-					id: 'val',
-					choices: IRIS_CHOICES,
+					id: IrisSetOption.id,
+					choices: IrisSetOption.choices,
 				},
 			],
 			callback: async (event) => {
-				var cmd = Buffer.from('\x81\x01\x04\x4B\x00\x00\x00\x00\xFF', 'binary')
-				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
-				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(IrisSet, event.options)
 			},
 		},
 		shutU: {
 			name: 'Shutter Up',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0A\x02\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ShutterUp)
 			},
 		},
 		shutD: {
 			name: 'Shutter Down',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x0A\x03\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ShutterDown)
 			},
 		},
 		shutS: {
@@ -326,15 +278,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Shutter setting',
-					id: 'val',
-					choices: SHUTTER_CHOICES,
+					id: ShutterSetOption.id,
+					choices: ShutterSetOption.choices,
 				},
 			],
 			callback: async (event) => {
-				var cmd = Buffer.from('\x81\x01\x04\x4A\x00\x00\x00\x00\xFF', 'binary')
-				cmd.writeUInt8((parseInt(event.options.val, 16) & 0xf0) >> 4, 6)
-				cmd.writeUInt8(parseInt(event.options.val, 16) & 0x0f, 7)
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(ShutterSet, event.options)
 			},
 		},
 		savePset: {
@@ -343,14 +292,13 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetSaveOption.id,
+					choices: PresetSaveOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x3F\x01' + String.fromCharCode(parseInt(event.options.val, 16) & 0xff) + '\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(PresetSave, event.options)
 			},
 		},
 		recallPset: {
@@ -359,14 +307,13 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetRecallOption.id,
+					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x3F\x02' + String.fromCharCode(parseInt(event.options.val, 16) & 0xff) + '\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(PresetRecall, event.options)
 			},
 		},
 		speedPset: {
@@ -375,25 +322,20 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
-					id: 'val',
-					choices: PRESET_CHOICES,
+					id: PresetDriveNumberOption.id,
+					choices: PresetDriveNumberOption.choices,
 					minChoicesForSearch: 1,
 				},
 				{
 					type: 'dropdown',
 					label: 'speed setting',
-					id: 'speed',
-					choices: SPEED_CHOICES,
+					id: PresetDriveSpeedOption.id,
+					choices: PresetDriveSpeedOption.choices,
 					minChoicesForSearch: 1,
 				},
 			],
 			callback: async (event) => {
-				var cmd =
-					'\x81\x01\x06\x01' +
-					String.fromCharCode(parseInt(event.options.val, 16) & 0xff) +
-					String.fromCharCode(parseInt(event.options.speed, 16) & 0xff) +
-					'\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(PresetDriveSpeed, event.options)
 			},
 		},
 		power: {
@@ -402,20 +344,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'power on/off',
-					id: 'bool',
-					choices: [
-						{ id: 'off', label: 'off' },
-						{ id: 'on', label: 'on' },
-					],
+					id: CameraPowerOption.id,
+					choices: CameraPowerOption.choices,
 				},
 			],
 			callback: async (event) => {
-				if (event.options.bool == 'off') {
-					var cmd = '\x81\x01\x04\x00\x03\xFF'
-				} else {
-					var cmd = '\x81\x01\x04\x00\x02\xFF'
-				}
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(CameraPower, event.options)
 			},
 		},
 		wb: {
@@ -424,43 +358,19 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Mode',
-					id: 'val',
-					choices: [
-						{ id: 'automatic', label: 'Automatic' },
-						{ id: 'indoor', label: 'Indoor' },
-						{ id: 'outdoor', label: 'Outdoor' },
-						{ id: 'onepush', label: 'One Push' },
-						{ id: 'manual', label: 'Manual' },
-					],
+					id: WhiteBalanceOption.id,
+					choices: WhiteBalanceOption.choices,
 				},
 			],
 			callback: async (event) => {
-				switch (event.options.val) {
-					case 'automatic':
-						var cmd = '\x81\x01\x04\x35\x00\xFF'
-						break
-					case 'indoor':
-						var cmd = '\x81\x01\x04\x35\x01\xFF'
-						break
-					case 'outdoor':
-						var cmd = '\x81\x01\x04\x35\x02\xFF'
-						break
-					case 'onepush':
-						var cmd = '\x81\x01\x04\x35\x03\xFF'
-						break
-					case 'manual':
-						var cmd = '\x81\x01\x04\x35\x05\xFF'
-						break
-				}
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(WhiteBalance, event.options)
 			},
 		},
 		wbOPT: {
 			name: 'White balance one push trigger',
 			options: [],
 			callback: async (event) => {
-				var cmd = '\x81\x01\x04\x10\x05\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(WhiteBalanceOnePushTrigger)
 			},
 		},
 		awbS: {
@@ -469,27 +379,12 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Sensitivity',
-					id: 'val',
-					choices: [
-						{ id: 0, label: 'High' },
-						{ id: 1, label: 'Normal' },
-						{ id: 2, label: 'Low' },
-					],
+					id: AutoWhiteBalanceSensitivityOption.id,
+					choices: AutoWhiteBalanceSensitivityOption.choices,
 				},
 			],
 			callback: async (event) => {
-				switch (event.options.val) {
-					case 0:
-						var cmd = '\x81\x01\x04\xA9\x00\xFF'
-						break
-					case 1:
-						var cmd = '\x81\x01\x04\xA9\x01\xFF'
-						break
-					case 2:
-						var cmd = '\x81\x01\x04\xA9\x02\xFF'
-						break
-				}
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		autoTracking: {
@@ -498,46 +393,15 @@ export function getActions(instance) {
 				{
 					type: 'dropdown',
 					label: 'Auto Tracking (PTZ Optics G3 model required)',
-					id: 'tracking',
-					choices: [
-						{ id: 'off', label: 'Off' },
-						{ id: 'on', label: 'On' },
-					],
+					id: AutoTrackingOption.id,
+					choices: AutoTrackingOption.choices,
 				},
 			],
 			callback: async (event) => {
-				// PTZOptics G3 VISCA over IP Commands, 10/27/2023:
-				// 81 0A 11 54 0p FF, p: 0x2=On, 0x3=Off
-				const b = event.options.tracking === 'on' ? '\x02' : '\x03'
-				const cmd = '\x81\x0A\x11\x54' + b + '\xFF'
-				instance.sendVISCACommand(cmd)
+				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
-		custom: {
-			name: 'Custom command',
-			options: [
-				{
-					type: 'textinput',
-					label: 'Please refer to PTZOptics VISCA over IP command document for valid commands.',
-					id: 'custom',
-					regex: '/^81 ?([0-9a-fA-F]{2} ?){3,13}[fF][fF]$/',
-					width: 6,
-				},
-			],
-			callback: async (event) => {
-				if (typeof event.options.custom === 'string' || event.options.custom instanceof String) {
-					var hexData = event.options.custom.replace(/\s+/g, '')
-					var tempBuffer = Buffer.from(hexData, 'hex')
-					var cmd = tempBuffer.toString('binary')
-
-					if ((tempBuffer[0] & 0xf0) === 0x80) {
-						instance.sendVISCACommand(cmd)
-					} else {
-						instance.log('error', 'Error, command "' + event.options.custom + '" does not start with 8')
-					}
-				}
-			},
-		},
+		custom: generateCustomCommandAction(instance),
 	}
 
 	return actionDefinitions

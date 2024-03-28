@@ -1,22 +1,70 @@
-import { InstanceBase, TCPHelper, Regex, runEntrypoint } from '@companion-module/base'
+import { InstanceBase, Regex, runEntrypoint } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getPresets } from './presets.js'
+import { Command } from './visca/command.js'
+import { VISCAPort } from './visca/port.js'
 
 class PtzOpticsInstance extends InstanceBase {
-	socket = null
+	#visca
 
-	ptSpeed = '0C'
-	ptSpeedIndex = 12
+	/**
+	 * Send the given command to the camera, filling in parameters from the
+	 * specified options.  The options must be compatible with the command's
+	 * parameters.  Null may be passed if the command contains no parameters.
+	 *
+	 * @param {Command} command
+	 *    The command to send.
+	 * @param {?CompanionOptionValues} options
+	 *    Compatible options to use to fill in any parameters in `command`; may
+	 *    be null if `command` has no parameters.
+	 * @returns {Promise<?CompanionOptionValues>}
+	 *    A promise that resolves after the response to `command` (which may be
+	 *    an error response) has been processed.  If `command`'s expected
+	 *    response contains no parameters, or the response was an error, the
+	 *    promise resolves null.  Otherwise it resolves an object whose
+	 *    properties are choices corresponding to the parameters in the
+	 *    response.
+	 */
+	sendCommand(command, options = null) {
+		return this.#visca.sendCommand(command, options)
+	}
+
+	/**
+	 * The speed to be passed in the pan/tilt speed parameters of Pan Tilt Drive
+	 * VISCA commands.  Ranges between 0x01 (low speed) and 0x18 (high speed).
+	 * However, as 0x15-0x18 are valid only for panning, tilt speed is capped at
+	 * 0x14.
+	 */
+	#speed = 0x0c
+
+	panTiltSpeed() {
+		return {
+			panSpeed: this.#speed,
+			tiltSpeed: Math.min(this.#speed, 0x14),
+		}
+	}
+
+	setPanTiltSpeed(speed) {
+		if (0x01 <= speed && speed <= 0x18) {
+			this.#speed = speed
+		} else {
+			this.log('debug', `speed ${speed} unexpectedly not in range [0x01, 0x18]`)
+			this.#speed = 0x0c
+		}
+	}
+
+	increasePanTiltSpeed() {
+		if (this.#speed < 0x18) this.#speed++
+	}
+
+	decreasePanTiltSpeed() {
+		if (this.#speed > 0x01) this.#speed--
+	}
 
 	constructor(internal) {
 		super(internal)
-	}
 
-	sendVISCACommand(str) {
-		if (this.socket !== null) {
-			var buffer = Buffer.from(str, 'binary')
-			this.socket.send(buffer)
-		}
+		this.#visca = new VISCAPort(this)
 	}
 
 	updateActions() {
@@ -57,12 +105,8 @@ class PtzOpticsInstance extends InstanceBase {
 
 	// When the module gets deleted
 	async destroy() {
-		if (this.socket !== null) {
-			this.socket.destroy()
-			this.socket = null
-		}
-
-		this.log('destroying module: ', this.id)
+		this.log('info', `destroying module: ${this.id}`)
+		this.#visca.close()
 	}
 
 	async init(config) {
@@ -79,35 +123,10 @@ class PtzOpticsInstance extends InstanceBase {
 	}
 
 	initTCP() {
-		if (this.socket !== null) {
-			// clean up the socket and keep Companion connection status up to date in the event that the socket ceases to exist
-			this.socket.destroy()
-			this.socket = null
-
-			this.updateStatus('disconnected')
-		}
+		this.#visca.close()
 
 		if (this.config.host) {
-			// create a TCPHelper instance to use as our TCP socket
-			this.socket = new TCPHelper(this.config.host, this.config.port)
-
-			this.updateStatus('connecting')
-
-			this.socket.on('status_change', (status, message) => {
-				this.log('debug', message)
-			})
-
-			this.socket.on('error', (err) => {
-				// make sure that we log and update Companion connection status for a network failure
-				this.log('Network error', err)
-				this.log('error', 'Network error: ' + err.message)
-				this.updateStatus('connection_failure')
-			})
-
-			this.socket.on('connect', () => {
-				this.log('debug', 'Connected')
-				this.updateStatus('ok')
-			})
+			this.#visca.open(this.config.host, this.config.port)
 		}
 	}
 
@@ -121,7 +140,7 @@ class PtzOpticsInstance extends InstanceBase {
 
 		this.config = config
 
-		if (resetConnection || this.socket === null) {
+		if (resetConnection || this.#visca.closed) {
 			this.initTCP()
 		}
 	}
