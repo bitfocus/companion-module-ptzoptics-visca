@@ -548,7 +548,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: PtzOpticsActionId.SelectExposureMode,
 						options: {
-							bol: 0,
+							val: 0,
 						},
 					},
 				],
@@ -559,7 +559,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: PtzOpticsActionId.SelectExposureMode,
 						options: {
-							bol: 1,
+							val: 1,
 						},
 					},
 				],
