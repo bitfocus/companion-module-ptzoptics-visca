@@ -9,8 +9,8 @@
 	"bugs": "https://github.com/bitfocus/companion-module-ptzoptics-visca/issues",
 	"maintainers": [
 		{
-			"name": "Håkon Nessjøen",
-			"email": "haakon@bitfocus.io"
+			"name": "Jeff Walden",
+			"email": "jwalden@mit.edu"
 		}
 	],
 	"runtime": {
