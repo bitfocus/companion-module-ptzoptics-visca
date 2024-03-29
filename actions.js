@@ -46,6 +46,8 @@ import {
 } from './options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 
+export const CustomCommandActionId = 'custom'
+
 export function getActions(instance) {
 	function createPanTiltCallback(direction) {
 		return async (event) => {
@@ -401,7 +403,7 @@ export function getActions(instance) {
 				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
-		custom: generateCustomCommandAction(instance),
+		[CustomCommandActionId]: generateCustomCommandAction(instance),
 	}
 
 	return actionDefinitions
