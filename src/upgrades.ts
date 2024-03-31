@@ -1,3 +1,9 @@
+import type {
+	CompanionStaticUpgradeProps,
+	CompanionStaticUpgradeResult,
+	CompanionUpgradeContext,
+} from '@companion-module/base'
+import type { PtzOpticsConfig } from './config.js'
 import {
 	addCommandParametersAndResponseToCustomCommandOptions,
 	isCustomCommandMissingCommandParametersAndResponse,
@@ -13,12 +19,12 @@ import {
  *
  * Add plausible default values for all those new option ids to old-school
  * `options` that lack them.
- *
- * @param {import("@companion-module/base").CompanionUpgradeContext} _context
- * @param {import("@companion-module/base").CompanionStaticUpgradeProps} props
  */
-function updateCustomCommandsWithParamsAndResponses(_context, props) {
-	const result = {
+function updateCustomCommandsWithParamsAndResponses(
+	_context: CompanionUpgradeContext<PtzOpticsConfig>,
+	props: CompanionStaticUpgradeProps<PtzOpticsConfig>
+): CompanionStaticUpgradeResult<PtzOpticsConfig> {
+	const result: CompanionStaticUpgradeResult<PtzOpticsConfig> = {
 		updatedActions: [],
 		updatedConfig: null,
 		updatedFeedbacks: [],
