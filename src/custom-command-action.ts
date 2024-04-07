@@ -6,7 +6,7 @@ import type {
 } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
 import type { PtzOpticsInstance } from './instance.js'
-import { UserDefinedCommand, type CommandParams, type PartialCommandParams, type Response } from './visca/command.js'
+import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from './visca/command.js'
 
 /** Parse a VISCA message string into an array of byte values. */
 function parseMessage(msg: string): readonly number[] {
@@ -72,15 +72,6 @@ function addCommandParameterDefaults(options: CompanionOptionValues): void {
 	}
 }
 
-// The standard reply to an inquiry is one message containing one or more
-// parameters, so this must be at least 1.
-//
-// The standard response to a command is ACK and Completion, so this must be at
-// least 2.
-//
-// Leave it at 2 til someone wants more.
-const MAX_MESSAGES_IN_RESPONSE = 2
-
 const PARAMETERS_SPLITTER = /; ?/g
 const NIBBLES_SPLITTER = /, ?/g
 
@@ -130,70 +121,15 @@ function parseParameters(command: readonly number[], parametersString: string): 
 	return parameters
 }
 
-/**
- * Parse response options info into response/parameters info to pass to
- * `UserDefinedCommand`.
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- need to figure out how to sync up options object with response parameters
-function parseResponses(options: any /* CompanionOptionValues */): Response[] {
-	const responses = []
-
-	const responseCount = Number(options['response_count'])
-	for (let i = 0; i < responseCount; i++) {
-		const valueBytes = parseMessage(options[`response${i}_bytes`])
-		const maskBytes = parseMessage(options[`response${i}_mask`])
-		if (valueBytes.length !== maskBytes.length) {
-			throw new RangeError(`response #${i + 1} values and mask are different lengths`)
-		}
-
-		responses.push({
-			value: valueBytes,
-			mask: maskBytes,
-			params: {},
-		})
-	}
-
-	return responses
-}
-
-const STANDARD_RESPONSE = [
-	{ bytes: '90 40 FF', mask: 'FF F0 FF' },
-	{ bytes: '90 50 FF', mask: 'FF F0 FF' },
-]
-
-type ResponseField = keyof (typeof STANDARD_RESPONSE)[0]
-
-/**
- * Get the value of the given custom-command option for the `i`th return message
- * in a custom command's default response.
- */
-function getResponseOptionDefault(i: number, field: ResponseField): string {
-	if (i < STANDARD_RESPONSE.length) {
-		const resp = STANDARD_RESPONSE[i]
-		return resp[field]
-	}
-	return ''
-}
-
 const CommandParametersOptionId = 'command_parameters'
 const CommandParametersDefault = ''
 
-const ResponseCountOptionId = 'response_count'
-const ResponseCountDefault = STANDARD_RESPONSE.length
-
-function addResponseDefaults(options: CompanionOptionValues): void {
-	for (let i = 0; i < MAX_MESSAGES_IN_RESPONSE; i++) {
-		options[`response${i}_bytes`] = getResponseOptionDefault(i, 'bytes')
-		options[`response${i}_mask`] = getResponseOptionDefault(i, 'mask')
-	}
-}
-
 /**
  * Determine whether the given action information corresponds to a "Custom
- * command" action consisting only of a byte sequence, missing any information
- * about parameters within it or the expected response to it.
+ * command" action consisting only of a byte sequence, missing options that
+ * specify no parameters are present in it.
  */
-export function isCustomCommandMissingCommandParametersAndResponse(action: CompanionActionInfo): boolean {
+export function isCustomCommandMissingCommandParameterOptions(action: CompanionActionInfo): boolean {
 	return action.actionId === PtzOpticsActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
 }
 
@@ -202,35 +138,32 @@ export function isCustomCommandMissingCommandParametersAndResponse(action: Compa
  * "custom" specifying the bytes to send.
  *
  * Now, the "Custom command" action supports user-defined parameters in the
- * command being sent and an expected series of responses through a bunch of
- * added option ids.
+ * command being sent.
  *
- * Add plausible default values for all those new option ids to old-school
- * `options` that lack them.
+ * Add option values that specify "no parameters" to old-school `options` that
+ * lack them.
  */
-export function addCommandParametersAndResponseToCustomCommandOptions(options: CompanionOptionValues): void {
+export function addCommandParameterOptionsToCustomCommandOptions(options: CompanionOptionValues): void {
 	options[CommandParametersOptionId] = CommandParametersDefault
 	addCommandParameterDefaults(options)
-	options[ResponseCountOptionId] = ResponseCountDefault
-	addResponseDefaults(options)
 }
+
+const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 
 /**
  * Generate an action definition for the "Custom command" action.
  */
 export function generateCustomCommandAction(instance: PtzOpticsInstance): CompanionActionDefinition {
-	const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 	const PARAMETER_LIST_REGEX = '/^(?:[0-9]+(?:, ?[0-9]+)*(?:; ?[0-9]+(?:, ?[0-9]+)*)*|)$/'
 
 	return {
 		name: 'Custom command',
 		description:
 			'Send a command of custom bytes (with embedded parameters filled ' +
-			'by user-defined expression) to the camera, and accept a ' +
-			'response matching customized syntax.  (Any parameters in the ' +
-			'response must be masked out: there is presently no way to ' +
-			'access their values.)  Refer to PTZOptics VISCA over IP command ' +
-			'documentation for command/response structure.',
+			'by user-defined expression) to the camera.  The camera must ' +
+			'respond with the standard ACK + Completion response to the ' +
+			'message.  Refer to PTZOptics VISCA over IP command ' +
+			'documentation for command structure details.',
 		options: [
 			{
 				type: 'textinput',
@@ -251,52 +184,6 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 				default: CommandParametersDefault,
 			},
 			...generateInputsForCommandParameters(),
-			{
-				type: 'number',
-				label: 'Number of messages in response',
-				id: ResponseCountOptionId,
-				default: ResponseCountDefault,
-				min: 1,
-				max: MAX_MESSAGES_IN_RESPONSE,
-			},
-			...(() => {
-				// The range of byte values allowed by these two regular
-				// expressions must be identical.
-				// 1 + (1 to 14) + 1
-				const RESPONSE_REGEX = '/^90 ?(?:[0-9a-fA-F]{2} ?){1,14}[fF][fF]$/'
-				// (2 to 15) + 1
-				const RESPONSE_MASK_REGEX = '/(?:[0-9a-fA-F]{2} ?){2,15}[fF][fF]$/'
-
-				const allResponseFields: CompanionInputFieldTextInput[] = []
-				for (let i = 0; i < MAX_MESSAGES_IN_RESPONSE; i++) {
-					const isVisible = (options: CompanionOptionValues, i: number) => i < Number(options['response_count'])
-
-					const responseFields: CompanionInputFieldTextInput[] = [
-						{
-							type: 'textinput',
-							label: `Bytes of expected response #${i + 1} (set half-bytes in any parameters to zeroes)`,
-							id: `response${i}_bytes`,
-							regex: RESPONSE_REGEX,
-							default: getResponseOptionDefault(i, 'bytes'),
-							isVisibleData: i,
-							isVisible,
-						},
-						{
-							type: 'textinput',
-							label: `Mask bytes of expected response #${i + 1}`,
-							id: `response${i}_mask`,
-							regex: RESPONSE_MASK_REGEX,
-							default: getResponseOptionDefault(i, 'mask'),
-							isVisibleData: i,
-							isVisible,
-						},
-					]
-
-					allResponseFields.push(...responseFields)
-				}
-
-				return allResponseFields
-			})(),
 		],
 		callback: async ({ options }, context) => {
 			const commandBytes = parseMessage(String(options['custom']))
@@ -313,15 +200,7 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 				{} as PartialCommandParams
 			)
 
-			const responseMessages: Response[] = parseResponses(options).map(({ value, mask }) => {
-				return {
-					value,
-					mask,
-					params: {},
-				}
-			})
-
-			const command = new UserDefinedCommand(commandBytes, commandParams, responseMessages)
+			const command = new UserDefinedCommand(commandBytes, commandParams)
 
 			const commandOpts: { [key: string]: number | undefined } = {}
 			for (const key of Object.keys(commandParams)) {
