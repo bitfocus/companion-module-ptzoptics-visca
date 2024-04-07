@@ -1,5 +1,13 @@
-import { InstanceStatus, TCPHelper, type CompanionOptionValues } from '@companion-module/base'
-import { checkCommandBytes, type Response, responseIs, responseMatches, Command } from './command.js'
+import { type CompanionOptionValues, InstanceStatus, TCPHelper } from '@companion-module/base'
+import {
+	checkCommandBytes,
+	type Command,
+	Inquiry,
+	type Message,
+	type Response,
+	responseIs,
+	responseMatches,
+} from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
 
@@ -212,11 +220,62 @@ export class VISCAPort {
 		command: Command,
 		options: CompanionOptionValues | null = null
 	): Promise<CompanionOptionValues | null> {
-		const commandBytes = command.toBytes(options)
-		const err = checkCommandBytes(commandBytes)
+		return this.#send(command, options)
+	}
+
+	/**
+	 * Kick off sending the given command, then kick off asynchronous processing
+	 * of its response.
+	 *
+	 * Don't wait for the preceding command's response to be sent before sending
+	 * the command: some commands (for example, recalling presets) only receive
+	 * a full response after a delay, and it isn't acceptable to block a command
+	 * (for example, recalling a different preset because someone fat-fingered
+	 * the wrong button) during that time.
+	 *
+	 * @param command
+	 *    The command to send.
+	 * @param options
+	 *    Compatible options to use to fill in any parameters in `command`; may
+	 *    be omitted or null if `command` has no parameters.
+	 * @returns {Promise<?CompanionOptionValues>}
+	 *    A promise that resolves after the response to `command` (which may be
+	 *    an error response) has been processed.  The promise presently always
+	 *    resolves null, except that a response containing a parameter causes it
+	 *    to reject.
+	 */
+	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
+		return this.#send(inquiry, null)
+	}
+
+	/**
+	 * Kick off sending the given command/inquiry, then kick off asynchronous
+	 * processing of its response.
+	 *
+	 * Don't wait for the preceding message's response to be received before
+	 * sending the message: some messages (for example, recalling presets) only
+	 * receive a full response after a delay, and it isn't acceptable to block a
+	 * message (for example, recalling a different preset because someone fat-
+	 * fingered the wrong button) during that time.
+	 *
+	 * @param message
+	 *    The command/inquiry to send.
+	 * @param options
+	 *    Compatible options to use to fill in any parameters in `message`; may
+	 *    be omitted or null if `message` has no parameters.
+	 * @returns {Promise<?CompanionOptionValues>}
+	 *    A promise that resolves after the response to `message` (which may be
+	 *    an error response) has been processed.  The promise presently always
+	 *    resolves null, except that a response containing a parameter causes it
+	 *    to resolve an object whose properties will be those numeric parameters
+	 *    converted to choices.
+	 */
+	async #send(message: Message, options: CompanionOptionValues | null = null): Promise<CompanionOptionValues | null> {
+		const messageBytes = message.toBytes(options)
+		const err = checkCommandBytes(messageBytes)
 		if (err) {
-			this.#instance.log('error', `Error in command ${prettyBytes(commandBytes)}: ${err}`)
-			if (!command.isUserDefined()) {
+			this.#instance.log('error', `Error in command ${prettyBytes(messageBytes)}: ${err}`)
+			if (!message.isUserDefined()) {
 				this.#instance.log('error', BLAME_MODULE)
 			}
 			return null
@@ -224,21 +283,21 @@ export class VISCAPort {
 
 		const socket = this.#socket
 		if (socket === null) {
-			this.#instance.log('error', `Socket not open to send ${prettyBytes(commandBytes)}`)
+			this.#instance.log('error', `Socket not open to send ${prettyBytes(messageBytes)}`)
 			return null
 		}
 
-		const commandBuffer = Buffer.from(commandBytes)
+		const messageBuffer = Buffer.from(messageBytes)
 
 		// XXX A failed write needs to be handled here!
-		void socket.send(commandBuffer)
+		void socket.send(messageBuffer)
 
 		this.#pending++
 
 		const p = this.#lastResponsePromise
 			.then(async () => {
 				try {
-					return await this.#processResponse(socket, command, commandBuffer)
+					return await this.#processResponse(socket, message, messageBuffer)
 				} finally {
 					this.#pending--
 				}
@@ -255,12 +314,12 @@ export class VISCAPort {
 
 	/**
 	 * Process the full response (which may comprise multiple return messages)
-	 * to the given command.
+	 * to the given message.
 	 *
 	 * @param socket
 	 *    The socket used by this port.
 	 * @param command
-	 *    The command whose response is being processed.
+	 *    The message whose response is being processed.
 	 * @param commandBytes
 	 *    The bytes of `command` that were sent.
 	 * @returns
@@ -273,7 +332,7 @@ export class VISCAPort {
 	 */
 	async #processResponse(
 		socket: TCPHelper,
-		command: Command,
+		command: Message,
 		commandBuffer: Buffer
 	): Promise<CompanionOptionValues | null> {
 		let response
@@ -345,7 +404,7 @@ export class VISCAPort {
 
 		let i = 0
 		let out = null
-		const expectedResponse = command.response() || StandardResponse
+		const expectedResponse = command instanceof Inquiry ? [command.response()] : StandardResponse
 		for (; i < expectedResponse.length; i++) {
 			if (i > 0) {
 				response = await this.#readOneReturnMessage()

@@ -2,7 +2,7 @@ import { InstanceBase, type CompanionOptionValues, type SomeCompanionConfigField
 import { getActions } from './actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
-import type { Command } from './visca/command.js'
+import type { Command, Inquiry } from './visca/command.js'
 import { VISCAPort } from './visca/port.js'
 
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
@@ -13,7 +13,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#visca
 
 	/**
-	 * Send the given command to the camera, filling in parameters from the
+	 * Send the given command to the camera, filling in any parameters from the
 	 * specified options.  The options must be compatible with the command's
 	 * parameters.  Null may be passed if the command contains no parameters.
 	 *
@@ -35,6 +35,23 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		options: CompanionOptionValues | null = null
 	): Promise<CompanionOptionValues | null> {
 		return this.#visca.sendCommand(command, options)
+	}
+
+	/**
+	 * Send the given inquiry to the camera.
+	 *
+	 * @param inquiry
+	 *    The inquiry to send.
+	 * @returns
+	 *    A promise that resolves after the response to `command` (which may be
+	 *    an error response) has been processed.  If `command`'s expected
+	 *    response contains no parameters, or the response was an error, the
+	 *    promise resolves null.  Otherwise it resolves an object whose
+	 *    properties are choices corresponding to the parameters in the
+	 *    response.
+	 */
+	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
+		return this.#visca.sendInquiry(inquiry)
 	}
 
 	/**

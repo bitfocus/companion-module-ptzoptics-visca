@@ -206,7 +206,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				void instance.sendCommand(FocusMode, event.options)
 			},
 			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendCommand(FocusModeInquiry)
+				const opts = await instance.sendInquiry(FocusModeInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
 			},
@@ -240,7 +240,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				void instance.sendCommand(ExposureMode, event.options)
 			},
 			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendCommand(ExposureModeInquiry)
+				const opts = await instance.sendInquiry(ExposureModeInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
 			},
@@ -395,7 +395,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 						shouldToggle = true
 						break
 					case 'open': {
-						const opts = await instance.sendCommand(OnScreenDisplayInquiry)
+						const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
 						if (opts === null) return
 						shouldToggle = opts[OnScreenDisplayOption.id] !== 'open'
 					}
@@ -406,7 +406,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				}
 			},
 			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendCommand(OnScreenDisplayInquiry)
+				const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
 				if (opts === null) return undefined
 				return { ...opts }
 			},

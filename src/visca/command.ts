@@ -1,3 +1,4 @@
+import type { CompanionOptionValues } from '@companion-module/base'
 import { checkBytes, prettyBytes } from './utils.js'
 
 // TERMINOLOGY NOTE:
@@ -96,7 +97,7 @@ export type ResponseParam = {
  * provides a function to convert numeric parameter value to option value.
  */
 export type ResponseParams = {
-	[key: string]: ResponseParam
+	readonly [key: string]: ResponseParam
 }
 
 /**
@@ -114,47 +115,90 @@ export type Response = {
  * Verify that the provided response is valid.  (Null corresponds to the
  * standard ACK and Completion response and so is inherently valid.)
  */
-function validateResponse(response: readonly Response[] | null): void {
-	if (response === null) return
+function validateResponse(response: Response): void {
+	const { value, mask, params } = response
+	if (value.length !== mask.length) {
+		throw new RangeError('value and mask must have equal length')
+	}
 
-	for (const { value, mask, params } of response) {
-		if (value.length !== mask.length) {
-			throw new RangeError('value and mask must have equal length')
-		}
-		validateReturn(value)
-		checkBytes(mask)
+	validateReturn(value)
+	checkBytes(mask)
 
-		const seen = new Set<number>()
-		for (const { nibbles } of Object.values(params)) {
-			for (const nibble of nibbles) {
-				if (nibble < 2 || value.length * 2 - 2 <= nibble) {
-					throw new RangeError('nibble offset is out of range')
-				}
-				if ((value[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
-					throw new RangeError('nibble in value is nonzero')
-				}
-				if ((mask[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
-					throw new RangeError('nibble in mask is nonzero')
-				}
-				if (seen.has(nibble)) {
-					throw new RangeError('nibble appearing more than once in params')
-				}
-				seen.add(nibble)
+	const seen = new Set<number>()
+	for (const { nibbles } of Object.values(params)) {
+		for (const nibble of nibbles) {
+			if (nibble < 2 || value.length * 2 - 2 <= nibble) {
+				throw new RangeError('nibble offset is out of range')
 			}
+			if ((value[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
+				throw new RangeError('nibble in value is nonzero')
+			}
+			if ((mask[nibble >> 1] & (nibble % 2 === 1 ? 0x0f : 0xf0)) !== 0) {
+				throw new RangeError('nibble in mask is nonzero')
+			}
+			if (seen.has(nibble)) {
+				throw new RangeError('nibble appearing more than once in params')
+			}
+			seen.add(nibble)
 		}
 	}
 }
 
 /**
- * A command, potentially including user-provided parameters, that's expected to
- * complete successfully, returning a response having the indicated structure,
- * each return message within it potentially including parameters.
+ * Base class for all VISCA messages sent to a camera, both commands (no matter
+ * the parameters they support) and inquiries (no matter the response expected
+ * to them).
  */
-export class Command {
+export abstract class Message {
+	readonly #userDefined: boolean
+
+	/**
+	 * @param userDefined
+	 *    Whether this message was manually defined by the user, such that its
+	 *    correctness can't be presumed -- in which case errors this message
+	 *    triggers are logged but, unlike messages this module itself defines,
+	 *    will not fail the connection
+	 */
+	constructor(userDefined: boolean) {
+		this.#userDefined = userDefined
+	}
+
+	/**
+	 * Whether this message was defined by the user, such that we can't expect
+	 * it to process without syntax errors, unexpected responses, and the like.
+	 *
+	 * Errors in user-defined messages are logged, but the connection isn't put
+	 * into failure state because of user mistake.  Errors in messages defined
+	 * by this module don't presently put the connection into failure state, but
+	 * perhaps at a future time they will be made to do so, to detect bugs in
+	 * this module as quickly as possible.
+	 */
+	isUserDefined(): boolean {
+		return this.#userDefined
+	}
+
+	/**
+	 * Compute the bytes that constitute this message.  If this is a command,
+	 * fill in parameters in it according to the supplied option values.
+	 *
+	 * @param options
+	 *    An options object with properties compatible with the params used to
+	 *    construct this, if this is a command with parameters.  `null` is
+	 *    permitted if this is a command with no parameters or an inquiry.
+	 * @returns
+	 *    Bytes representing this message, with any parameters filled according
+	 *    to the provided options.
+	 */
+	abstract toBytes(options: CompanionOptionValues | null): readonly number[]
+}
+
+/**
+ * A VISCA command that potentially contains user-specified parameters, whose
+ * response consists of an ACK followed by a Completion.
+ */
+export abstract class Command extends Message {
 	readonly #commandBytes: readonly number[]
 	readonly #params: CommandParams | null
-	readonly #response: readonly Response[] | null
-	readonly #userDefined: boolean
 
 	/**
 	 * @param commandBytes
@@ -169,66 +213,32 @@ export class Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param response
-	 *    If null, indicates that the command expects the standard ACK followed
-	 *    by a Completion response.  Otherwise an array defining the expected
-	 *    order and structure of one or more response messages constituting a
-	 *    complete response to this command.  Each array element corresponds to
-	 *    a command in the overall response.  The 'value' property is an array
-	 *    of byte values for the command, with variable bits set to zero.  The
-	 *    'mask' property' is an array of byte masks equal in length to the
-	 *    'value' array, with bits set corresponding to the bits in the 'value'
-	 *    array that cannot vary.  The 'params' property is a hash whose keys
-	 *    name the parameters in the message and whose values define the nibbles
-	 *    constituting it and the manner of converting parameter numeric values
-	 *    to the values of options corresponding to that key.
 	 * @param userDefined
 	 *    Whether this command was manually defined by the user, such that its
 	 *    correctness can't be presumed -- in which case errors this command
 	 *    triggers are logged but, unlike commands this module itself defines,
 	 *    will not fail the connection
 	 */
-	constructor(
-		commandBytes: readonly number[],
-		params: CommandParams | null,
-		response: readonly Response[] | null,
-		userDefined: boolean
-	) {
+	constructor(commandBytes: readonly number[], params: CommandParams | null, userDefined: boolean) {
+		super(userDefined)
+
 		validateCommand(commandBytes)
 		this.#commandBytes = commandBytes
 
 		validateCommandParams(params, commandBytes)
 		this.#params = params
-
-		validateResponse(response)
-		this.#response = response
-
-		this.#userDefined = userDefined
 	}
 
-	/**
-	 * Compute the bytes that constitute this command, filling in parameters
-	 * according to the supplied option values.
-	 *
-	 * @param options
-	 *    An options object with properties compatible with the params used to
-	 *    construct this.  `null` is permitted when this command has no
-	 *    parameters.
-	 * @returns
-	 *    Bytes representing this command, with parameters filled according to
-	 *    the provided options.  The returned array must not be modified.
-	 */
-	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- need to figure out how to sync up options object with command parameters
-	toBytes(options: any /* CompanionOptionValues | null */): readonly number[] {
+	toBytes(options: CompanionOptionValues | null): readonly number[] {
 		const commandBytes = this.#commandBytes
 		const params = this.#params
-		if (params === null) {
+		if (params === null || options === null) {
 			return commandBytes
 		}
 
 		const bytes = commandBytes.slice()
 		for (const [id, { nibbles, choiceToParam }] of Object.entries(params)) {
-			let val = choiceToParam(options[id])
+			let val = choiceToParam(String(options[id]))
 
 			for (let i = nibbles.length; val !== 0 && i > 0; i--) {
 				const nibble = nibbles[i - 1]
@@ -248,34 +258,11 @@ export class Command {
 
 		return bytes
 	}
-
-	/**
-	 * Characteristics of the expected response to this command, or null if the
-	 * expected response is an ACK followed by a Completion.
-	 */
-	response(): readonly Response[] | null {
-		return this.#response
-	}
-
-	/**
-	 * Whether this command was defined by the user, such that we can't expect
-	 * it to execute without syntax errors, unexpected responses, and the like.
-	 * Errors in user-defined commands are logged, but the connection isn't put
-	 * into failure state because of user mistake -- whereas for errors with
-	 * commands defined by this module, we fail the connection so that bugs will
-	 * be discovered and reported as quickly as possible.
-	 */
-	isUserDefined(): boolean {
-		return this.#userDefined
-	}
 }
 
 /**
- * A command defined wholly within this module (as opposed to a command that's
- * defined by the user as a custom command), potentially including user-provided
- * parameters, that's expected to complete successfully, returning a response
- * having the indicated structure, each return message within it potentially
- * including parameters.
+ * A VISCA command that potentially contains user-specified parameters, whose
+ * response consists of an ACK followed by a Completion.
  */
 export class ModuleDefinedCommand extends Command {
 	/**
@@ -291,35 +278,12 @@ export class ModuleDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param response
-	 *    If null, indicates that the command expects the standard ACK followed
-	 *    by a Completion response.  Otherwise an array defining the expected
-	 *    order and structure of one or more response messages constituting a
-	 *    complete response to this command.  Each array element corresponds to
-	 *    a command in the overall response.  The 'value' property is an array
-	 *    of byte values for the command, with variable bits set to zero.  The
-	 *    'mask' property' is an array of byte masks equal in length to the
-	 *    'value' array, with bits set corresponding to the bits in the 'value'
-	 *    array that cannot vary.  The 'params' property is a hash whose keys
-	 *    name the parameters in the message and whose values define the nibbles
-	 *    constituting it and the manner of converting parameter numeric values
-	 *    to the values of options corresponding to that key.
 	 */
-	constructor(
-		commandBytes: readonly number[],
-		params: CommandParams | null = null,
-		response: readonly Response[] | null = null
-	) {
-		super(commandBytes, params, response, false)
+	constructor(commandBytes: readonly number[], params: CommandParams | null = null) {
+		super(commandBytes, params, false)
 	}
 }
 
-/**
- * A command  defined by the user as a custom command, potentially including
- * user-provided parameters, that's expected to complete successfully, returning
- * a response having the indicated structure, each return message within it
- * potentially including parameters.
- */
 export class UserDefinedCommand extends Command {
 	/**
 	 * @param commandBytes
@@ -334,26 +298,65 @@ export class UserDefinedCommand extends Command {
 	 *    parameter in `commandBytes` (from most to least significant) and a
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
-	 * @param response
-	 *    If null, indicates that the command expects the standard ACK followed
-	 *    by a Completion response.  Otherwise an array defining the expected
-	 *    order and structure of one or more response messages constituting a
-	 *    complete response to this command.  Each array element corresponds to
-	 *    a command in the overall response.  The 'value' property is an array
-	 *    of byte values for the command, with variable bits set to zero.  The
-	 *    'mask' property' is an array of byte masks equal in length to the
-	 *    'value' array, with bits set corresponding to the bits in the 'value'
-	 *    array that cannot vary.  The 'params' property is a hash whose keys
-	 *    name the parameters in the message and whose values define the nibbles
-	 *    constituting it and the manner of converting parameter numeric values
-	 *    to the values of options corresponding to that key.
 	 */
-	constructor(
-		commandBytes: readonly number[],
-		params: CommandParams | null = null,
-		response: readonly Response[] | null = null
-	) {
-		super(commandBytes, params, response, true)
+	constructor(commandBytes: readonly number[], params: CommandParams | null = null) {
+		super(commandBytes, params, true)
+	}
+}
+
+/**
+ * A VISCA inquiry consisting of a fixed byte sequence sent to the camera, that
+ * responds with a return message containing parameters specifying responses to
+ * the inquiry.
+ */
+export abstract class Inquiry extends Message {
+	readonly #commandBytes: readonly number[]
+	readonly #response: Response
+
+	/**
+	 * @param commandBytes
+	 *    An array of byte values that constitute this command, with any
+	 *    parameter nibbles set to zero.  (For example, `81 01 04 61 0p FF` with
+	 *    `p` as a parameter would use `[0x81, 0x01, 0x04, 0x61, 0x00, 0xFF]`).
+	 * @param response
+	 * 	  The structure of the expected response message to this inquiry,
+	 *    including all parameters within that response.
+	 * @param userDefined
+	 *    Whether this command was manually defined by the user, such that its
+	 *    correctness can't be presumed -- in which case errors this command
+	 *    triggers are logged but, unlike commands this module itself defines,
+	 *    will not fail the connection
+	 */
+
+	constructor(commandBytes: readonly number[], response: Response, userDefined: boolean) {
+		super(userDefined)
+
+		validateCommand(commandBytes)
+		this.#commandBytes = commandBytes
+
+		validateResponse(response)
+		this.#response = response
+	}
+
+	/** The structure of the response expected for this inquiry. */
+	response(): Response {
+		return this.#response
+	}
+
+	toBytes(_options: CompanionOptionValues | null): readonly number[] {
+		return this.#commandBytes
+	}
+}
+
+export class ModuleDefinedInquiry extends Inquiry {
+	constructor(commandBytes: readonly number[], response: Response) {
+		super(commandBytes, response, false)
+	}
+}
+
+export class UserDefinedInquiry extends Inquiry {
+	constructor(commandBytes: readonly number[], response: Response) {
+		super(commandBytes, response, true)
 	}
 }
 
