@@ -162,12 +162,12 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 			'Send a command of custom bytes (with embedded parameters filled ' +
 			'by user-defined expression) to the camera.  The camera must ' +
 			'respond with the standard ACK + Completion response to the ' +
-			'message.  Refer to PTZOptics VISCA over IP command ' +
-			'documentation for command structure details.',
+			'command or with an error.  Refer to PTZOptics VISCA over IP ' +
+			'command documentation for command structure details.',
 		options: [
 			{
 				type: 'textinput',
-				label: 'Bytes of command (set half-bytes in any parameters to zeroes)',
+				label: 'Bytes of the command (set all parameter half-bytes to zeroes)',
 				id: 'custom',
 				regex: COMMAND_REGEX,
 			},
@@ -177,10 +177,10 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 				id: CommandParametersOptionId,
 				regex: PARAMETER_LIST_REGEX,
 				tooltip:
-					'The parameter list must be separated by ' +
-					'semicolons.  Each parameter should be a comma-' +
-					'separated sequence of half-byte offsets into ' +
-					'the command.  Offsets must not be reused.',
+					'The parameter list must be separated by semicolons.  ' +
+					'Each parameter should be a comma-separated sequence of ' +
+					'half-byte offsets into the command.  Offsets must not ' +
+					'be reused.',
 				default: CommandParametersDefault,
 			},
 			...generateInputsForCommandParameters(),
@@ -202,7 +202,7 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 
 			const command = new UserDefinedCommand(commandBytes, commandParams)
 
-			const commandOpts: { [key: string]: number | undefined } = {}
+			const commandOpts: CompanionOptionValues = {}
 			for (const key of Object.keys(commandParams)) {
 				const val = await context.parseVariablesInString(String(options[`parameter${key}`]))
 				commandOpts[`param_${key}`] = Number(val)

@@ -1,4 +1,4 @@
-import { InstanceBase, type CompanionOptionValues, type SomeCompanionConfigField } from '@companion-module/base'
+import { type CompanionOptionValues, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
@@ -15,26 +15,34 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/**
 	 * Send the given command to the camera, filling in any parameters from the
 	 * specified options.  The options must be compatible with the command's
-	 * parameters.  Null may be passed if the command contains no parameters.
+	 * parameters.
 	 *
 	 * @param command
 	 *    The command to send.
 	 * @param options
 	 *    Compatible options to use to fill in any parameters in `command`; may
-	 *    be null if `command` has no parameters.
+	 *    be omitted if `command` has no parameters.
 	 * @returns
 	 *    A promise that resolves after the response to `command` (which may be
-	 *    an error response) has been processed.  If `command`'s expected
-	 *    response contains no parameters, or the response was an error, the
-	 *    promise resolves null.  Otherwise it resolves an object whose
-	 *    properties are choices corresponding to the parameters in the
-	 *    response.
+	 *    an error response) has been processed.  If `command`'s response was an
+	 *    an error not implicating overall connection stability, the promise
+	 *    resolves `undefined``.  Otherwise it resolves an object whose properties are
+	 *    choices corresponding to the parameters in the response.
 	 */
-	async sendCommand(
-		command: Command,
-		options: CompanionOptionValues | null = null
-	): Promise<CompanionOptionValues | null> {
-		return this.#visca.sendCommand(command, options)
+	async sendCommand(command: Command, options: CompanionOptionValues = {}): Promise<void> {
+		return this.#visca.sendCommand(command, options).then(
+			(result: void | Error) => {
+				if (typeof result === 'undefined') {
+					return
+				}
+
+				this.log('error', `Error processing command: ${result.message}`)
+			},
+			(_reason: Error) => {
+				// Swallow the error so that execution gracefully unwinds.
+				return
+			}
+		)
 	}
 
 	/**
@@ -43,15 +51,27 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 * @param inquiry
 	 *    The inquiry to send.
 	 * @returns
-	 *    A promise that resolves after the response to `command` (which may be
-	 *    an error response) has been processed.  If `command`'s expected
-	 *    response contains no parameters, or the response was an error, the
-	 *    promise resolves null.  Otherwise it resolves an object whose
-	 *    properties are choices corresponding to the parameters in the
-	 *    response.
+	 *    A promise that resolves after the response to `inquiry` (which may be
+	 *    an error response) has been processed.  If `inquiry`'s response was an
+	 *    an error not implicating overall connection stability, the promise
+	 *    resolves null.  Otherwise it resolves an object whose properties are
+	 *    choices corresponding to the parameters in the response.
 	 */
 	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
-		return this.#visca.sendInquiry(inquiry)
+		return this.#visca.sendInquiry(inquiry).then(
+			(result: CompanionOptionValues | Error) => {
+				if (result instanceof Error) {
+					this.log('error', `Error processing inquiry: ${result.message}`)
+					return null
+				}
+
+				return result
+			},
+			(_reason: Error) => {
+				// Swallow the error so that execution gracefully unwinds.
+				return null
+			}
+		)
 	}
 
 	/**

@@ -176,20 +176,6 @@ export abstract class Message {
 	isUserDefined(): boolean {
 		return this.#userDefined
 	}
-
-	/**
-	 * Compute the bytes that constitute this message.  If this is a command,
-	 * fill in parameters in it according to the supplied option values.
-	 *
-	 * @param options
-	 *    An options object with properties compatible with the params used to
-	 *    construct this, if this is a command with parameters.  `null` is
-	 *    permitted if this is a command with no parameters or an inquiry.
-	 * @returns
-	 *    Bytes representing this message, with any parameters filled according
-	 *    to the provided options.
-	 */
-	abstract toBytes(options: CompanionOptionValues | null): readonly number[]
 }
 
 /**
@@ -229,6 +215,18 @@ export abstract class Command extends Message {
 		this.#params = params
 	}
 
+	/**
+	 * Compute the bytes that constitute this command, filling in any parameters
+	 * in it according to the supplied option values.
+	 *
+	 * @param options
+	 *    An options object with properties compatible with the params used to
+	 *    construct this command.  `null` is permitted if this is a command with
+	 *    no parameters.
+	 * @returns
+	 *    Bytes representing this command, with any parameters filled according
+	 *    to the provided options.
+	 */
 	toBytes(options: CompanionOptionValues | null): readonly number[] {
 		const commandBytes = this.#commandBytes
 		const params = this.#params
@@ -343,7 +341,8 @@ export abstract class Inquiry extends Message {
 		return this.#response
 	}
 
-	toBytes(_options: CompanionOptionValues | null): readonly number[] {
+	/** Compute the bytes of this inquiry. */
+	toBytes(): readonly number[] {
 		return this.#commandBytes
 	}
 }
@@ -358,17 +357,6 @@ export class UserDefinedInquiry extends Inquiry {
 	constructor(commandBytes: readonly number[], response: Response) {
 		super(commandBytes, response, true)
 	}
-}
-
-/**
- * Check whether the bytes of VISCA response `response` are equal to `values`.
- */
-export function responseIs(response: readonly number[], values: readonly number[]): boolean {
-	if (response.length !== values.length) return false
-	for (let i = 0; i < response.length; i++) {
-		if (response[i] !== values[i]) return false
-	}
-	return true
 }
 
 /**
