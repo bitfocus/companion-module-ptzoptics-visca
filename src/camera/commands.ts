@@ -1,4 +1,3 @@
-import type { CompanionOptionValues } from '@companion-module/base'
 import type { PtzOpticsInstance } from '../instance.js'
 import {
 	AutoTrackingOption,
@@ -46,7 +45,7 @@ export async function sendPanTiltCommand(
 	direction: readonly [number, number],
 	panSpeed: number,
 	tiltSpeed: number
-): Promise<CompanionOptionValues | null> {
+): Promise<void> {
 	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
 	const command = new ModuleDefinedCommand(bytes)
 	return instance.sendCommand(command)
