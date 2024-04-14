@@ -8,7 +8,6 @@ import {
 	FocusModeOption,
 	IrisSetOption,
 	OnScreenDisplayNavigateOption,
-	OnScreenDisplayOption,
 	PresetDriveNumberOption,
 	PresetDriveSpeedOption,
 	PresetRecallOption,
@@ -16,7 +15,7 @@ import {
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from './options.js'
-import { ModuleDefinedCommand, ModuleDefinedInquiry } from './visca/command.js'
+import { ModuleDefinedCommand } from './visca/command.js'
 
 export enum PanTiltAction {
 	Up,
@@ -62,17 +61,6 @@ export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x
 	},
 })
 
-export const ExposureModeInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x39, 0xff], {
-	value: [0x90, 0x50, 0x00, 0xff],
-	mask: [0xff, 0xff, 0xf0, 0xff],
-	params: {
-		[ExposureModeOption.id]: {
-			nibbles: [5],
-			paramToChoice: ExposureModeOption.paramToChoice,
-		},
-	},
-})
-
 export const IrisUp = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0b, 0x02, 0xff])
 export const IrisDown = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x0b, 0x03, 0xff])
 export const IrisSet = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x4b, 0x00, 0x00, 0x00, 0x00, 0xff], {
@@ -102,17 +90,6 @@ export const FocusMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x38, 0x00,
 	},
 })
 
-export const FocusModeInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x38, 0xff], {
-	value: [0x90, 0x50, 0x00, 0xff],
-	mask: [0xff, 0xff, 0xf0, 0xff],
-	params: {
-		[FocusModeOption.id]: {
-			nibbles: [5],
-			paramToChoice: FocusModeOption.paramToChoice,
-		},
-	},
-})
-
 export const FocusLock = new ModuleDefinedCommand([0x81, 0x0a, 0x04, 0x68, 0x02, 0xff])
 export const FocusUnlock = new ModuleDefinedCommand([0x81, 0x0a, 0x04, 0x68, 0x03, 0xff])
 
@@ -129,17 +106,6 @@ export const CameraPower = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x00, 0x0
 
 export const OnScreenDisplayToggle = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x02, 0x5f, 0xff])
 export const OnScreenDisplayClose = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x03, 0xff])
-
-export const OnScreenDisplayInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x06, 0x06, 0xff], {
-	value: [0x90, 0x50, 0x00, 0xff],
-	mask: [0xff, 0xff, 0xf0, 0xff],
-	params: {
-		[OnScreenDisplayOption.id]: {
-			nibbles: [5],
-			paramToChoice: OnScreenDisplayOption.paramToChoice,
-		},
-	},
-})
 
 export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
 	[0x81, 0x01, 0x06, 0x01, 0x0e, 0x0e, 0x00, 0x00, 0xff],

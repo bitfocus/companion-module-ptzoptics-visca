@@ -5,11 +5,9 @@ import {
 	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
-	ExposureModeInquiry,
 	FocusFarStandard,
 	FocusLock,
 	FocusMode,
-	FocusModeInquiry,
 	FocusNearStandard,
 	FocusStop,
 	FocusUnlock,
@@ -19,7 +17,6 @@ import {
 	OnScreenDisplayBack,
 	OnScreenDisplayClose,
 	OnScreenDisplayEnter,
-	OnScreenDisplayInquiry,
 	OnScreenDisplayNavigate,
 	OnScreenDisplayToggle,
 	PanTiltAction,
@@ -39,6 +36,7 @@ import {
 	sendPanTiltCommand,
 } from './commands.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
+import { ExposureModeInquiry, FocusModeInquiry, OnScreenDisplayInquiry } from './inquiries.js'
 import type { PtzOpticsInstance } from './instance.js'
 import {
 	AutoTrackingOption,
