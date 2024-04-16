@@ -254,7 +254,7 @@ type PendingMessage = PendingCommand | PendingInquiry
  * The subset of the `PtzOpticsInstance` interface used by `VISCAPort` to log
  * messages and update instance connection status.
  */
-interface PartialInstance {
+export interface PartialInstance {
 	/** See {@link PtzOpticsInstance.log}. */
 	log: PtzOpticsInstance['log']
 
