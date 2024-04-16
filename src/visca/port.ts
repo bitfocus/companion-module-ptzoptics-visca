@@ -34,6 +34,18 @@ const BLAME_MODULE =
 	'Connections tab to report it.'
 
 /**
+ * The subset of the `PtzOpticsInstance` interface used by `VISCAPort` to log
+ * messages and update instance connection status.
+ */
+interface PartialInstance {
+	/** See {@link PtzOpticsInstance.log}. */
+	log: PtzOpticsInstance['log']
+
+	/** See {@link PtzOpticsInstance.updateStatus}. */
+	updateStatus: PtzOpticsInstance['updateStatus']
+}
+
+/**
  * A port abstraction into which VISCA commands can be written.
  */
 export class VISCAPort {
@@ -43,7 +55,7 @@ export class VISCAPort {
 	#socket: any = null
 
 	/** The instance that created this port. */
-	#instance: PtzOpticsInstance
+	#instance: PartialInstance
 
 	/**
 	 * A count of how many commands' responses are still waiting to be read.
@@ -83,7 +95,7 @@ export class VISCAPort {
 	 * Create a VISCAPort associated with the provided instance.  The port is
 	 * initially closed and must be opened to be used.
 	 */
-	constructor(instance: PtzOpticsInstance) {
+	constructor(instance: PartialInstance) {
 		this.#instance = instance
 		this.#reset()
 	}
