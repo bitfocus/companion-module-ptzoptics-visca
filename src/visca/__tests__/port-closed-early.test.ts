@@ -1,0 +1,53 @@
+import { InstanceStatus } from '@companion-module/base'
+import { describe, test } from '@jest/globals'
+import { FocusNearStandard, FocusStop } from '../../camera/commands.js'
+import { ExposureModeInquiry } from '../../camera/inquiries.js'
+import { ACK, ExposureModeInquiryBytes, FocusNearStandardBytes, FocusStopBytes } from './camera-interactions/bytes.js'
+import {
+	CameraExpectIncomingBytes,
+	CameraReplyBytes,
+	CloseVISCAPortEarly,
+	CommandFailedFatally,
+	InquiryFailedFatally,
+	InstanceStatusIs,
+	SendCommand,
+	SendInquiry,
+} from './camera-interactions/interactions.js'
+import { SocketClosedMatcher } from './camera-interactions/matchers.js'
+import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
+
+describe('VISCA port closed early', () => {
+	test('manual close with commands waiting for initial response *and* completion', async () => {
+		return RunCameraInteractionTest(
+			[
+				SendCommand(FocusNearStandard, 'focus-near'),
+				SendCommand(FocusStop, 'focus-stop'),
+				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
+				CameraExpectIncomingBytes(FocusStopBytes), // focus-stop
+				CameraReplyBytes(ACK(2)), // focus-near
+				CloseVISCAPortEarly(),
+				InstanceStatusIs(InstanceStatus.Disconnected),
+				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
+				CommandFailedFatally(SocketClosedMatcher, 'focus-stop'),
+			],
+			InstanceStatus.Disconnected
+		)
+	})
+
+	test('manual close with half-completed command and inquiry waiting for initial response', async () => {
+		return RunCameraInteractionTest(
+			[
+				SendCommand(FocusNearStandard, 'focus-near'),
+				SendInquiry(ExposureModeInquiry, 'exposure-mode'),
+				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
+				CameraExpectIncomingBytes(ExposureModeInquiryBytes), // exposure-mode
+				CameraReplyBytes(ACK(2)), // focus-near
+				CloseVISCAPortEarly(),
+				InstanceStatusIs(InstanceStatus.Disconnected),
+				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
+				InquiryFailedFatally(SocketClosedMatcher, 'exposure-mode'),
+			],
+			InstanceStatus.Disconnected
+		)
+	})
+})
