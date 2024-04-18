@@ -92,26 +92,27 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.setActionDefinitions(getActions(this))
 		this.setPresetDefinitions(getPresets())
 
-		// start up the TCP socket and attmept to get connected to the PTZOptics device
-		this.#initTCP()
+		// Start up the TCP socket and attempt to connect to the camera.
+		return this.#initTCP()
 	}
 
-	#initTCP(): void {
+	async #initTCP(): Promise<void> {
 		this.#visca.close()
 
 		if (this.#config.host !== '') {
-			this.#visca.open(this.#config.host, Number(this.#config.port))
+			return this.#visca.open(this.#config.host, Number(this.#config.port))
 		}
 	}
 
 	async configUpdated(config: PtzOpticsConfig): Promise<void> {
-		// handle if the connection needs to be reset (ex. if the user changes the IP address, and we need to re-connect the socket to the new address)
+		// Reset the connection if the connection is closed or the camera's
+		// address has changed.
 		const resetConnection = this.#visca.closed || this.#config.host !== config.host || this.#config.port !== config.port
 
 		this.#config = config
 
 		if (resetConnection) {
-			this.#initTCP()
+			return this.#initTCP()
 		}
 	}
 }

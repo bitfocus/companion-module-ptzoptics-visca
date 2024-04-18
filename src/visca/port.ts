@@ -114,16 +114,19 @@ export class VISCAPort {
 	}
 
 	/** Open this port connecting to the given host:port. */
-	open(host: string, port: number): void {
+	async open(host: string, port: number): Promise<void> {
 		const socket = (this.#socket = new TCPHelper(host, port))
 
 		const instance = this.#instance
 
 		instance.updateStatus(InstanceStatus.Connecting)
 
-		socket.on('connect', () => {
-			instance.log('debug', 'Connected')
-			instance.updateStatus(InstanceStatus.Ok)
+		const connected = new Promise<void>((resolve: () => void) => {
+			socket.on('connect', () => {
+				instance.log('debug', 'Connected')
+				instance.updateStatus(InstanceStatus.Ok)
+				resolve()
+			})
 		})
 		socket.on('status_change', (_status, message) => {
 			instance.log('debug', `Status change: ${message}`)
@@ -151,6 +154,8 @@ export class VISCAPort {
 		}
 
 		waitForNewData()
+
+		return connected
 	}
 
 	/** True iff this port is currently closed. */
