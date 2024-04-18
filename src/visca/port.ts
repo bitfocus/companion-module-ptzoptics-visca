@@ -50,9 +50,10 @@ interface PartialInstance {
  */
 export class VISCAPort {
 	/**
-	 * The TCP socket through which commands are sent and responses received.
+	 * The TCP socket through which commands are sent and responses received,
+	 * if this port is open.
 	 */
-	#socket: any = null
+	#socket: TCPHelper | null = null
 
 	/** The instance that created this port. */
 	#instance: PartialInstance
@@ -105,12 +106,12 @@ export class VISCAPort {
 		if (this.#socket !== null) {
 			this.#socket.destroy()
 			this.#socket = null
-		}
 
-		this.#pending = 0
-		this.#receivedData.length = 0
-		this.#lastResponsePromise = Promise.resolve(null)
-		this.#moreDataAvailable = Promise.resolve()
+			this.#pending = 0
+			this.#receivedData.length = 0
+			this.#lastResponsePromise = Promise.resolve(null)
+			this.#moreDataAvailable = Promise.resolve()
+		}
 	}
 
 	/** Open this port connecting to the given host:port. */
@@ -221,20 +222,23 @@ export class VISCAPort {
 			return null
 		}
 
-		if (this.#socket === null) {
+		const socket = this.#socket
+		if (socket === null) {
 			this.#instance.log('error', `Socket not open to send ${prettyBytes(commandBytes)}`)
 			return null
 		}
 
 		const commandBuffer = Buffer.from(commandBytes)
-		this.#socket.send(commandBuffer)
+
+		// XXX A failed write needs to be handled here!
+		void socket.send(commandBuffer)
 
 		this.#pending++
 
 		const p = this.#lastResponsePromise
 			.then(async () => {
 				try {
-					return await this.#processResponse(command, commandBuffer)
+					return await this.#processResponse(socket, command, commandBuffer)
 				} finally {
 					this.#pending--
 				}
@@ -253,6 +257,8 @@ export class VISCAPort {
 	 * Process the full response (which may comprise multiple return messages)
 	 * to the given command.
 	 *
+	 * @param socket
+	 *    The socket used by this port.
 	 * @param command
 	 *    The command whose response is being processed.
 	 * @param commandBytes
@@ -265,7 +271,11 @@ export class VISCAPort {
 	 *    properties are choices corresponding to the parameters in the
 	 *    response.
 	 */
-	async #processResponse(command: Command, commandBuffer: Buffer): Promise<CompanionOptionValues | null> {
+	async #processResponse(
+		socket: TCPHelper,
+		command: Command,
+		commandBuffer: Buffer
+	): Promise<CompanionOptionValues | null> {
 		let response
 		for (;;) {
 			response = await this.#readOneReturnMessage()
@@ -288,7 +298,9 @@ export class VISCAPort {
 			// passed that the command buffer is no longer full (from some other
 			// manipulation process that's inherently racing this connection).
 			this.#instance.log('info', `Command buffer full: resending ${prettyBytes(commandBuffer)}`)
-			this.#socket.send(commandBuffer)
+
+			// XXX A failed write needs to be handled here!
+			void socket.send(commandBuffer)
 		}
 
 		// Check for various errors specifically before processing the response
