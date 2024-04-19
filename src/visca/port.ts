@@ -1,4 +1,4 @@
-import { type CompanionOptionValues, InstanceStatus, TCPHelper } from '@companion-module/base'
+import { type CompanionOptionValues, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
 import {
 	checkCommandBytes,
 	type Command,
@@ -137,8 +137,9 @@ export class VISCAPort {
 				resolve()
 			})
 		})
-		socket.on('status_change', (_status, message) => {
-			instance.log('debug', `Status change: ${message}`)
+		socket.on('status_change', (status: TCPHelperEvents['status_change'][0], message?: string) => {
+			const msg = `Status change: ${status}${message ? ` (${message})` : ''}`
+			instance.log('debug', msg)
 		})
 		socket.on('error', (err) => {
 			// Make sure that we log and update Companion connection status for
