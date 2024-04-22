@@ -1,4 +1,3 @@
-// eslint-disable-next-line n/no-unpublished-import
 import { describe, expect, test } from '@jest/globals'
 import { ModuleDefinedCommand, UserDefinedCommand } from './command.js'
 import { OnScreenDisplayInquiry } from '../commands.js'
