@@ -10,7 +10,7 @@ import {
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
-import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from './options.js'
+import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from './camera/options.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}

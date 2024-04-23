@@ -34,10 +34,8 @@ import {
 	ZoomOut,
 	ZoomStop,
 	sendPanTiltCommand,
-} from './commands.js'
-import { generateCustomCommandAction } from './custom-command-action.js'
-import { ExposureModeInquiry, FocusModeInquiry, OnScreenDisplayInquiry } from './inquiries.js'
-import type { PtzOpticsInstance } from './instance.js'
+} from './camera/commands.js'
+import { ExposureModeInquiry, FocusModeInquiry, OnScreenDisplayInquiry } from './camera/inquiries.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -54,7 +52,9 @@ import {
 	PresetSaveOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
-} from './options.js'
+} from './camera/options.js'
+import { generateCustomCommandAction } from './custom-command-action.js'
+import type { PtzOpticsInstance } from './instance.js'
 
 export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {
