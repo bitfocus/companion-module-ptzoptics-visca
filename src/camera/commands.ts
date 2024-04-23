@@ -1,5 +1,5 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import type { PtzOpticsInstance } from './instance.js'
+import type { PtzOpticsInstance } from '../instance.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -15,7 +15,7 @@ import {
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from './options.js'
-import { ModuleDefinedCommand } from './visca/command.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 
 export enum PanTiltAction {
 	Up,

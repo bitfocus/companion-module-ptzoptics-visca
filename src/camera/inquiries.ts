@@ -1,5 +1,5 @@
 import { ExposureModeOption, FocusModeOption, OnScreenDisplayOption } from './options.js'
-import { ModuleDefinedInquiry } from './visca/command.js'
+import { ModuleDefinedInquiry } from '../visca/command.js'
 
 export const ExposureModeInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x39, 0xff], {
 	value: [0x90, 0x50, 0x00, 0xff],
