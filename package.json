@@ -43,7 +43,7 @@
 		"node": "^18.12"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.6.0"
+		"@companion-module/base": "~1.7.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^1.5.0",
