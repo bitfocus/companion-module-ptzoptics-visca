@@ -962,7 +962,7 @@ export function getPresets(): CompanionPresetDefinitions {
 				category: 'Save Preset',
 				name: `Save Preset ${save}`,
 				style: {
-					text: `SAVE\\nPSET\\n' + ${save}`,
+					text: `SAVE\\nPSET\\n${save}`,
 					size: '14',
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(0, 0, 0),
