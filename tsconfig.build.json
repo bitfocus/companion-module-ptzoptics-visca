@@ -8,6 +8,6 @@
 		"paths": {
 			"*": ["./node_modules/*"]
 		},
-		"module": "es2020"
+		"module": "es2022"
 	}
 }
