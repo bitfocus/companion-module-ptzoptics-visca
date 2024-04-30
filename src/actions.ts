@@ -384,7 +384,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async ({ options }) => {
-				let shouldToggle
+				let shouldToggle = false
 				switch (options[OnScreenDisplayOption.id]) {
 					case 'close':
 						void instance.sendCommand(OnScreenDisplayClose)

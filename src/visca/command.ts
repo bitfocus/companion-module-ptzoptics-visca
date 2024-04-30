@@ -241,7 +241,7 @@ export abstract class Command extends Message {
 			for (let i = nibbles.length; val !== 0 && i > 0; i--) {
 				const nibble = nibbles[i - 1]
 				const byteOffset = nibble >> 1
-				const isLower = nibble % 2 == 1
+				const isLower = nibble % 2 === 1
 
 				const contrib = val & 0xf
 				val >>= 4
