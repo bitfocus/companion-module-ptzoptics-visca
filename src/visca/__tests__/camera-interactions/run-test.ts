@@ -69,7 +69,7 @@ class MockInstance implements PartialInstance {
 	}
 
 	updateStatus(status: InstanceStatus, message?: string) {
-		LOG(`Status update: ${status}${message ? `, message ${message}` : ''}`)
+		LOG(`Status update: ${status}${typeof message === 'string' ? `, message ${message}` : ''}`)
 		this.currentStatus = status
 	}
 }

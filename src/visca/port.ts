@@ -380,7 +380,7 @@ export class VISCAPort {
 		instance.updateStatus(InstanceStatus.Connecting)
 
 		socket.on('status_change', (status: TCPHelperEvents['status_change'][0], message?: string) => {
-			const msg = `Status change: ${status}${message ? ` (${message})` : ''}`
+			const msg = `Status change: ${status}${typeof message === 'string' ? ` (${message})` : ''}`
 			instance.log('debug', msg)
 		})
 		socket.on('error', (err) => {
@@ -562,7 +562,7 @@ export class VISCAPort {
 			//   90 5y FF  (after initial ACK)
 			// Inquiry response:
 			//   90 50 ...one or more non-FF bytes...  FF
-			if ((secondByte & 0xf0) == 0x50) {
+			if ((secondByte & 0xf0) === 0x50) {
 				// Completion:
 				//   90 5y FF  (after initial ACK)
 				if (returnMessage.length === 3) {
@@ -605,7 +605,7 @@ export class VISCAPort {
 						let paramval = 0
 						for (const nibble of nibbles) {
 							const byteOffset = nibble >> 1
-							const isLower = nibble % 2 == 1
+							const isLower = nibble % 2 === 1
 
 							const byte = returnMessage[byteOffset]
 							const contrib = isLower ? byte & 0xf : byte >> 4
@@ -863,7 +863,7 @@ export class VISCAPort {
 	/** Send a message of the given type and bytes. */
 	async #sendMessage(type: MessageType, userDefined: boolean, messageBytes: readonly number[]): Promise<void | Error> {
 		const err = checkCommandBytes(messageBytes)
-		if (err) {
+		if (err !== null) {
 			// The bytes should already have been validated, so if this is hit,
 			// it's always an error.
 			let msg = `Attempt to send invalid ${type} ${prettyBytes(messageBytes)}: ${err}.`
