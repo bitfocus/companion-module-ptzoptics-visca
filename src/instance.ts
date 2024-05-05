@@ -9,6 +9,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#config: PtzOpticsConfig = {
 		host: '',
 		port: '5678',
+		debugLogging: false,
 	}
 	#visca
 
@@ -139,14 +140,18 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.#visca.close()
 
 		if (this.#config.host !== '') {
-			return this.#visca.open(this.#config.host, Number(this.#config.port))
+			return this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
 		}
 	}
 
 	async configUpdated(config: PtzOpticsConfig): Promise<void> {
-		// Reset the connection if the connection is closed or the camera's
-		// address has changed.
-		const resetConnection = this.#visca.closed || this.#config.host !== config.host || this.#config.port !== config.port
+		// Reset the connection if the connection is closed or any configuration
+		// changed.
+		const resetConnection =
+			this.#visca.closed ||
+			this.#config.host !== config.host ||
+			this.#config.port !== config.port ||
+			this.#config.debugLogging !== config.debugLogging
 
 		this.#config = config
 

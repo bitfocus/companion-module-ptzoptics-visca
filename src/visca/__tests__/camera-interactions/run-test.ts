@@ -538,7 +538,7 @@ export async function RunCameraInteractionTest(
 	})
 
 	// Both port and camera must be ready before we can start testing.
-	const [_portReady, camera] = await Promise.all([clientViscaPort.open('127.0.0.1', port), cameraPromise])
+	const [_portReady, camera] = await Promise.all([clientViscaPort.open('127.0.0.1', port, true), cameraPromise])
 
 	return verifyInteractions(clientViscaPort, camera, instance, interactions, finalStatus)
 }

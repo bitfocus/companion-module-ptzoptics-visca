@@ -3,7 +3,7 @@ import type {
 	CompanionStaticUpgradeResult,
 	CompanionUpgradeContext,
 } from '@companion-module/base'
-import type { PtzOpticsConfig } from './config.js'
+import { addDebugLoggingOptionToConfig, configIsMissingDebugLogging, type PtzOpticsConfig } from './config.js'
 import {
 	addCommandParameterOptionsToCustomCommandOptions,
 	isCustomCommandMissingCommandParameterOptions,
@@ -40,4 +40,28 @@ function updateCustomCommandsWithCommandParamOptions(
 	return result
 }
 
-export const UpgradeScripts = [updateCustomCommandsWithCommandParamOptions]
+/**
+ * A config option was added in 3.0.0 to turn on extra logging to Companion's
+ * logs, to make it easier to debug the module in case of error.  Add a default
+ * value for that option to older configs.
+ */
+function addDebugLoggingConfigIfMissing(
+	_context: CompanionUpgradeContext<PtzOpticsConfig>,
+	props: CompanionStaticUpgradeProps<PtzOpticsConfig>
+): CompanionStaticUpgradeResult<PtzOpticsConfig> {
+	const result: CompanionStaticUpgradeResult<PtzOpticsConfig> = {
+		updatedActions: [],
+		updatedConfig: null,
+		updatedFeedbacks: [],
+	}
+
+	if (configIsMissingDebugLogging(props.config)) {
+		addDebugLoggingOptionToConfig(props.config)
+
+		result.updatedConfig = props.config
+	}
+
+	return result
+}
+
+export const UpgradeScripts = [updateCustomCommandsWithCommandParamOptions, addDebugLoggingConfigIfMissing]
