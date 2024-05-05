@@ -38,8 +38,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 				this.log('error', `Error processing command: ${result.message}`)
 			},
-			(_reason: Error) => {
+			(reason: Error) => {
 				// Swallow the error so that execution gracefully unwinds.
+				this.log('error', `Unhandled command rejection was suppressed: ${reason}`)
 				return
 			}
 		)
@@ -67,8 +68,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 				return result
 			},
-			(_reason: Error) => {
+			(reason: Error) => {
 				// Swallow the error so that execution gracefully unwinds.
+				this.log('error', `Unhandled inquiry rejection was suppressed: ${reason}`)
 				return null
 			}
 		)
