@@ -37,6 +37,9 @@
 		],
 		"*.{ts,tsx,js,jsx}": [
 			"yarn lint:raw --fix"
+		],
+		"*.yaml": [
+			"prettier --write"
 		]
 	},
 	"engines": {
