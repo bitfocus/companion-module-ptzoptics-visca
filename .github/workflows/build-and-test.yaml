@@ -27,17 +27,22 @@ jobs:
           yarn install
         env:
           CI: true
-      - name: Build module
+      - name: Lint module code
+        run: |
+          yarn lint
+        env:
+          CI: true
+      - name: Compile module code
         run: |
           yarn build
         env:
           CI: true
-      - name: Run Jest tests
+      - name: Run module tests
         run: |
           yarn test
         env:
           CI: true
-      - name: Test package
+      - name: Build Companion package
         run: |
           yarn companion-module-build
         env:
