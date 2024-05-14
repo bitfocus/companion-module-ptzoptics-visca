@@ -123,7 +123,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'speed setting',
+					label: 'Speed setting',
 					id: PanTiltSetSpeedOption.id,
 					choices: PanTiltSetSpeedOption.choices,
 					default: PanTiltSetSpeedOption.default,
@@ -195,7 +195,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Auto / Manual Focus',
+					label: 'Auto/manual focus',
 					id: FocusModeOption.id,
 					choices: FocusModeOption.choices,
 					default: FocusModeOption.default,
@@ -307,7 +307,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Preset Nr.',
+					label: 'Preset number',
 					id: PresetSaveOption.id,
 					choices: PresetSaveOption.choices,
 					minChoicesForSearch: 1,
@@ -323,7 +323,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'textinput',
-					label: 'Preset Number',
+					label: 'Preset number',
 					id: PresetSaveOption.id,
 					useVariables: true,
 					tooltip: 'Preset number range of 0-89, 100-254',
@@ -344,7 +344,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Preset Nr.',
+					label: 'Preset number',
 					id: PresetRecallOption.id,
 					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
@@ -360,7 +360,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'textinput',
-					label: 'Preset Number',
+					label: 'Preset number',
 					id: PresetRecallOption.id,
 					useVariables: true,
 					tooltip: 'Preset number range of 0-89, 100-254',
@@ -381,7 +381,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Preset Nr.',
+					label: 'Preset number',
 					id: PresetDriveNumberOption.id,
 					choices: PresetDriveNumberOption.choices,
 					minChoicesForSearch: 1,
@@ -389,7 +389,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 				{
 					type: 'dropdown',
-					label: 'speed setting',
+					label: 'Speed setting',
 					id: PresetDriveSpeedOption.id,
 					choices: PresetDriveSpeedOption.choices,
 					minChoicesForSearch: 1,
@@ -405,7 +405,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'power on/standby',
+					label: 'Power on/standby',
 					id: CameraPowerOption.id,
 					choices: CameraPowerOption.choices,
 					default: CameraPowerOption.default,
@@ -422,7 +422,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 					type: 'dropdown',
 					label: 'Activate OSD menu',
 					id: OnScreenDisplayOption.id,
-					choices: [...OnScreenDisplayOption.choices, { id: 'toggle', label: 'toggle' }],
+					choices: [...OnScreenDisplayOption.choices, { id: 'toggle', label: 'Toggle' }],
 					default: 'toggle',
 				},
 			],
@@ -523,7 +523,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'Auto Tracking (PTZ Optics G3 model required)',
+					label: 'Auto tracking (PTZ Optics G3 model required)',
 					id: AutoTrackingOption.id,
 					choices: AutoTrackingOption.choices,
 					default: AutoTrackingOption.default,

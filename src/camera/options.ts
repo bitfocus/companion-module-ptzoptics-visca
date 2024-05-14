@@ -35,8 +35,8 @@ export const PanTiltSetSpeedOption = {
 export const FocusModeOption = {
 	id: 'bol',
 	choices: [
-		{ id: '0', label: 'Auto Focus' },
-		{ id: '1', label: 'Manual Focus' },
+		{ id: '0', label: 'Auto focus' },
+		{ id: '1', label: 'Manual focus' },
 	],
 	default: '0',
 	choiceToParam: (choice: string): number => {
@@ -64,11 +64,11 @@ export const FocusModeOption = {
 export const ExposureModeOption = {
 	id: 'val',
 	choices: [
-		{ id: '0', label: 'Full auto' },
+		{ id: '0', label: 'Full Auto' },
 		{ id: '1', label: 'Manual' },
 		{ id: '2', label: 'Shutter Pri' },
 		{ id: '3', label: 'Iris Pri' },
-		{ id: '4', label: 'Bright mode (manual)' }, // Not in latest API doc: remove?
+		{ id: '4', label: 'Bright Mode (manual)' }, // Not in latest API doc: remove?
 	],
 	default: '0',
 	choiceToParam: (choice: string): number => {
@@ -156,8 +156,8 @@ export const ShutterSetOption = {
 export const CameraPowerOption = {
 	id: 'bool',
 	choices: [
-		{ id: 'off', label: 'standby' },
-		{ id: 'on', label: 'on' },
+		{ id: 'off', label: 'Standby' },
+		{ id: 'on', label: 'On' },
 	],
 	default: 'on',
 	choiceToParam: (choice: string): number => {
@@ -175,8 +175,8 @@ export const CameraPowerOption = {
 export const OnScreenDisplayOption = {
 	id: 'state',
 	choices: [
-		{ id: 'open', label: 'open' },
-		{ id: 'close', label: 'close' },
+		{ id: 'open', label: 'Open' },
+		{ id: 'close', label: 'Close' },
 	],
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
@@ -203,10 +203,10 @@ export const OnScreenDisplayOption = {
 export const OnScreenDisplayNavigateOption = {
 	id: 'direction',
 	choices: [
-		{ id: 'up', label: 'up' },
-		{ id: 'right', label: 'right' },
-		{ id: 'down', label: 'down' },
-		{ id: 'left', label: 'left' },
+		{ id: 'up', label: 'Up' },
+		{ id: 'right', label: 'Right' },
+		{ id: 'down', label: 'Down' },
+		{ id: 'left', label: 'Left' },
 	],
 	choiceToParam: (choice: string): number => {
 		switch (choice) {
