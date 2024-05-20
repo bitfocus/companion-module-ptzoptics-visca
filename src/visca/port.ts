@@ -1,4 +1,10 @@
-import { type CompanionOptionValues, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
+import {
+	assertNever,
+	type CompanionOptionValues,
+	InstanceStatus,
+	TCPHelper,
+	type TCPHelperEvents,
+} from '@companion-module/base'
 import { checkCommandBytes, type Command, Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
@@ -262,6 +268,21 @@ export interface PartialInstance {
  */
 type ReturnMessages = AsyncGenerator<readonly number[], void, unknown>
 
+type DisconnectedStatus = { type: 'disconnected' }
+
+type ConnectingStatus = {
+	type: 'connecting'
+	open: Promise<void>
+	reject: (reason: Error) => void
+}
+
+type ConnectedStatus = { type: 'connected' }
+
+/**
+ * The connection status of a port.
+ */
+type ConnectionStatus = DisconnectedStatus | ConnectingStatus | ConnectedStatus
+
 /**
  * A port abstraction into which VISCA commands can be written.
  */
@@ -271,6 +292,14 @@ export class VISCAPort {
 	 * if this port is open.
 	 */
 	#socket: TCPHelper | null = null
+
+	/**
+	 * The connection status of a port.  Ports begin life disconnected, then
+	 * proceed to connecting with associated promise to wait on for connection
+	 * to complete, then are either connected or revert to disconnected when
+	 * that promise settles.
+	 */
+	#connectionStatus: ConnectionStatus = { type: 'disconnected' }
 
 	/** The instance that created this port. */
 	#instance: PartialInstance
@@ -340,15 +369,22 @@ export class VISCAPort {
 	 * Close this port if it's currently open.  If provided, the optional reason
 	 * will be used to reject pending commands/inquiries.
 	 */
-	close(reason?: string): void {
+	close(reason = 'Socket was closed'): void {
+		let didClose = false
 		if (this.#socket !== null) {
+			didClose = true
+
 			this.#socket.destroy()
 			this.#socket = null
-
-			if (reason === undefined) {
-				reason = 'Message not fully processed: socket was closed'
+			if (this.#connectionStatus.type === 'connecting') {
+				this.#connectionStatus.reject(new Error('Port closed before a connection was established'))
 			}
+			this.#connectionStatus = { type: 'disconnected' }
+		}
 
+		this.#instance.updateStatus(InstanceStatus.Disconnected)
+
+		if (didClose) {
 			// Empty out all pending commands, then resolve them all with fatal
 			// errors.  Start with commands that have received an ACK, because
 			// they necessarily were received before messages still awaiting an
@@ -366,12 +402,21 @@ export class VISCAPort {
 				pendingMessage.fatalError(reason)
 			}
 		}
-
-		this.#instance.updateStatus(InstanceStatus.Disconnected)
 	}
 
-	/** Open this port connecting to the given host:port. */
-	async open(host: string, port: number, debugLogging: boolean): Promise<void> {
+	/**
+	 * Open this port connecting to the given host:port.
+	 *
+	 * This operation initiates a connection to the camera and reading of return
+	 * messages from it, but it doesn't delay for the connection to actually be
+	 * established, because this could in principle take a long time.  Command
+	 * and inquiry sending will implicitly wait for the connection to be
+	 * established, if needed.  If you require the connection to be established,
+	 * await `connect()` after calling this function.
+	 */
+	open(host: string, port: number, debugLogging: boolean): void {
+		this.close()
+
 		const socket = (this.#socket = new TCPHelper(host, port))
 		this.#debugLogging = debugLogging
 
@@ -392,14 +437,27 @@ export class VISCAPort {
 
 		const returnMessages = this.#readReturnMessages(socket)
 
-		await new Promise<void>((resolve: () => void) => {
-			socket.on('connect', () => {
-				instance.log('debug', 'Connected')
-				instance.updateStatus(InstanceStatus.Ok)
+		let connectionReject: ((reason: Error) => void) | null = null
+		const open = new Promise<void>((resolve: () => void, reject: (reason: Error) => void) => {
+			connectionReject = reject
 
-				resolve()
+			socket.on('connect', () => {
+				if (this.#connectionStatus.type === 'connecting') {
+					instance.log('debug', 'Connected')
+
+					instance.updateStatus(InstanceStatus.Ok)
+					this.#connectionStatus = { type: 'connected' }
+					resolve()
+				}
 			})
 		})
+
+		this.#connectionStatus = {
+			type: 'connecting',
+			open,
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reject: connectionReject!,
+		}
 
 		// Process return messages consistent with the commands/inquiries that
 		// have been sent.
@@ -413,6 +471,26 @@ export class VISCAPort {
 			.finally(() => {
 				this.#instance.log('info', `Return message processing completed`)
 			})
+	}
+
+	/**
+	 * Wait for a connection to the camera initiated by `open()` to be
+	 * established.  Reject if the port was closed or if a preceding `open()`
+	 * has not occurred.
+	 */
+	async connect(): Promise<void> {
+		const status = this.#connectionStatus
+		switch (status.type) {
+			case 'disconnected':
+				throw new Error('Port has not been opened')
+			case 'connected':
+				return
+			case 'connecting':
+				await status.open
+				return
+			default:
+				assertNever(status)
+		}
 	}
 
 	/**
@@ -801,6 +879,9 @@ export class VISCAPort {
 	 * all manipulations (for example, to quickly recall a different preset
 	 * after a wrong button was fat-fingered) for that entire time.
 	 *
+	 * This function implicitly waits for the connection to be fully established
+	 * as if `await this.connect()` had occurred.
+	 *
 	 * @param command
 	 *    The command to send.
 	 * @param options
@@ -835,6 +916,9 @@ export class VISCAPort {
 	 * receive a full response after a delay, and it isn't acceptable to delay
 	 * all manipulations (for example, to quickly recall a different preset
 	 * after a wrong button was fat-fingered) for that entire time.
+	 *
+	 * This function implicitly waits for the connection to be fully established
+	 * as if `await this.connect()` had occurred.
 	 *
 	 * @param inquiry
 	 *    The inquiry to send.
@@ -877,6 +961,16 @@ export class VISCAPort {
 		const socket = this.#socket
 		if (socket === null) {
 			return this.#errorWhileProcessingMessage(`Socket not open to send ${type}`, messageBytes)
+		}
+		if (this.#connectionStatus.type === 'connecting') {
+			try {
+				await this.#connectionStatus.open
+			} catch (err) {
+				if (err instanceof Error) {
+					return err
+				}
+				return new Error(`Error waiting for connection to open: ${err}`)
+			}
 		}
 
 		return this.#sendBytes(socket, messageBytes)
