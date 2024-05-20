@@ -78,6 +78,10 @@ type CloseVISCAPort = {
 	readonly type: 'close-visca-port'
 }
 
+type WaitForConnection = {
+	readonly type: 'wait-for-connection'
+}
+
 /**
  * An interaction to perform during a camera interaction sequence test using
  * `RunCameraInteractionTest`.
@@ -95,6 +99,7 @@ export type Interaction =
 	| InquiryFatalFailure
 	| InstanceStatusCheck
 	| CloseVISCAPort
+	| WaitForConnection
 
 /**
  * Send a command that has options through the VISCA port.
@@ -260,4 +265,18 @@ export function InstanceStatusIs(status: InstanceStatus): InstanceStatusCheck {
  */
 export function CloseVISCAPortEarly(): CloseVISCAPort {
 	return { type: 'close-visca-port' }
+}
+
+/**
+ * Wait for the port to be fully connected to the camera if it isn't already.
+ * (It's allowed for the connection to already be established.)
+ *
+ * "Opening" a port doesn't wait for a connection to be established, in order
+ * that it can complete quickly: subsequent actions that depend on full
+ * connection will wait until an "opened" connection is established.  This
+ * interaction manually performs that waiting; the only visible effect right now
+ * is to guarantee the instance status is `Ok` and not possibly `Connecting`.
+ */
+export function WaitUntilConnectedToCamera(): WaitForConnection {
+	return { type: 'wait-for-connection' }
 }

@@ -31,6 +31,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *    choices corresponding to the parameters in the response.
 	 */
 	async sendCommand(command: Command, options: CompanionOptionValues = {}): Promise<void> {
+		// `sendCommand` implicitly waits for the connection to be fully
+		// established, so it's unnecessary to resolve `this.#visca.connect()`
+		// here.
 		return this.#visca.sendCommand(command, options).then(
 			(result: void | Error) => {
 				if (typeof result === 'undefined') {
@@ -60,6 +63,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *    choices corresponding to the parameters in the response.
 	 */
 	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
+		// `sendInquiry` implicitly waits for the connection to be fully
+		// established, so it's unnecessary to resolve `this.#visca.connect()`
+		// here.
 		return this.#visca.sendInquiry(inquiry).then(
 			(result: CompanionOptionValues | Error) => {
 				if (result instanceof Error) {
@@ -132,15 +138,21 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.setActionDefinitions(getActions(this))
 		this.setPresetDefinitions(getPresets())
 
-		// Start up the TCP socket and attempt to connect to the camera.
-		return this.#initTCP()
+		// Create the TCP socket and start connecting to the camera.  (Don't
+		// delay until the connection is established, tho: init() must complete
+		// in a relatively short time or else Companion will kill the connection
+		// and restart it, resulting in the module/connection in effect
+		// repeatedly banging its head against a wall.)
+		this.#initTCP()
 	}
 
-	async #initTCP(): Promise<void> {
+	#initTCP(): void {
 		this.#visca.close()
 
 		if (this.#config.host !== '') {
-			return this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
+			// This initiates the connection without delaying to fully establish
+			// it as `await this.#visca.connect()` would do.
+			this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
 		}
 	}
 
@@ -156,7 +168,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.#config = config
 
 		if (resetConnection) {
-			return this.#initTCP()
+			this.#initTCP()
 		}
 	}
 }
