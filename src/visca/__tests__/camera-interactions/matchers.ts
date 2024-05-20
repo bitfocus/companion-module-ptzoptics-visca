@@ -26,7 +26,7 @@ export const InquiryResponseWithoutInquiryMatcher = /^Received inquiry response 
 export const ErrorOfUnexpectedLengthMatcher = /^Encountered error response of unexpected length/
 export const UnrecognizedErrorMatcher = /^Received error response to \[[0-9A-Z ]+\] with unrecognized format/
 
-export const SocketClosedMatcher = 'Message not fully processed: socket was closed'
+export const SocketClosedMatcher = 'Socket was closed'
 
 export const AttemptSendInvalidMatcher = /^Attempt to send invalid /
 
