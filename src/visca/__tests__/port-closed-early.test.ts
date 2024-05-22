@@ -6,6 +6,7 @@ import { ACK, ExposureModeInquiryBytes, FocusNearStandardBytes, FocusStopBytes }
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CloseVISCAPortEarly,
 	CommandFailedFatally,
 	InquiryFailedFatally,
@@ -41,6 +42,7 @@ describe('VISCA port closed early', () => {
 				SendInquiry(ExposureModeInquiry, 'exposure-mode'),
 				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
 				CameraExpectIncomingBytes(ExposureModeInquiryBytes), // exposure-mode
+				CameraReplyNetworkChange([0xe0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(ACK(2)), // focus-near
 				CloseVISCAPortEarly(),
 				InstanceStatusIs(InstanceStatus.Disconnected),

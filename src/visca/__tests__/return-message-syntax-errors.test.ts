@@ -13,13 +13,14 @@ import {
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailedFatally,
 	InquiryFailedFatally,
 	InstanceStatusIs,
 	SendCommand,
 	SendInquiry,
 } from './camera-interactions/interactions.js'
-import { BadReturnStartByteMatcher, MatchVISCABytes } from './camera-interactions/matchers.js'
+import { BadReturnNot90Matcher, BadReturnStartByteMatcher, MatchVISCABytes } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
 
 describe('VISCA return message syntax errors', () => {
@@ -32,6 +33,34 @@ describe('VISCA return message syntax errors', () => {
 				InstanceStatusIs(InstanceStatus.Ok),
 				CameraReplyBytes(BadReply), // focus-near
 				CommandFailedFatally([BadReturnStartByteMatcher, MatchVISCABytes(BadReply)], 'focus-near'),
+			],
+			InstanceStatus.ConnectionFailure
+		)
+	})
+
+	test('return message bad start byte a0', async () => {
+		const BadReply = [0xa0, 0x42, 0xff]
+		return RunCameraInteractionTest(
+			[
+				SendCommand(FocusNearStandard, 'focus-near'),
+				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
+				InstanceStatusIs(InstanceStatus.Ok),
+				CameraReplyBytes(BadReply), // focus-near
+				CommandFailedFatally([BadReturnNot90Matcher, MatchVISCABytes(BadReply)], 'focus-near'),
+			],
+			InstanceStatus.ConnectionFailure
+		)
+	})
+
+	test('return message bad start byte 80', async () => {
+		const BadReply = [0x80, 0x42, 0xff]
+		return RunCameraInteractionTest(
+			[
+				SendCommand(FocusNearStandard, 'focus-near'),
+				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
+				InstanceStatusIs(InstanceStatus.Ok),
+				CameraReplyBytes(BadReply), // focus-near
+				CommandFailedFatally([BadReturnNot90Matcher, MatchVISCABytes(BadReply)], 'focus-near'),
 			],
 			InstanceStatus.ConnectionFailure
 		)
@@ -85,6 +114,7 @@ describe('VISCA return message syntax errors', () => {
 				CameraExpectIncomingBytes(ExposureModeInquiryBytes), // exposure-mode
 				CameraExpectIncomingBytes(FocusModeInquiryBytes), // focus-mode
 				InstanceStatusIs(InstanceStatus.Ok),
+				CameraReplyNetworkChange([0xb0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(BadReply), // near
 				CommandFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'near'),
 				InstanceStatusIs(InstanceStatus.ConnectionFailure),

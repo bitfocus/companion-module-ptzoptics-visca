@@ -5,6 +5,7 @@ import { ExposureModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	InquiryFailed,
 	SendInquiry,
 } from './camera-interactions/interactions.js'
@@ -68,6 +69,7 @@ describe('inquiry response mismatch', () => {
 			[
 				SendInquiry(ZoomPositionInquiry, 'zoom-position'),
 				CameraExpectIncomingBytes(ZoomPositionInquiryBytes), // zoom-position
+				CameraReplyNetworkChange([0xc0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(MaskMismatchResponseBytes), // zoom-position
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(MaskMismatchResponseBytes), UserDefinedInquiryMatcher],

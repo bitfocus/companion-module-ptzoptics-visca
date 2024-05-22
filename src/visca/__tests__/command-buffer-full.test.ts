@@ -10,6 +10,7 @@ import {
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailed,
 	CommandSucceeded,
 	SendCommand,
@@ -24,6 +25,7 @@ describe('VISCA port command buffer full', () => {
 				SendCommand(OnScreenDisplayClose, 'close'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // close
 				CameraReplyBytes(CommandBufferFullBytes), // close
+				CameraReplyNetworkChange([0xa0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // close again
 				CameraReplyBytes(ACKCompletion(2)), // close again
 				CommandSucceeded('close'),
