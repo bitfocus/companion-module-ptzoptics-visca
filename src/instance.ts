@@ -132,7 +132,27 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.#visca.close()
 	}
 
+	/**
+	 * Write a copy of the given module config information to logs.
+	 *
+	 * @param config
+	 *   The config information to log.
+	 * @param desc
+	 *   A description of the event occasioning the logging.
+	 */
+	logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
+		this.log(
+			'info',
+			`PTZOptics module configuration on ${desc}: ${JSON.stringify(config, (_k, v) => {
+				if (v === undefined) return { undefined: true }
+				return v
+			})}`
+		)
+	}
+
 	async init(config: PtzOpticsConfig): Promise<void> {
+		this.logConfig(config, 'init()')
+
 		this.#config = config
 
 		this.setActionDefinitions(getActions(this))
@@ -157,6 +177,8 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	}
 
 	async configUpdated(config: PtzOpticsConfig): Promise<void> {
+		this.logConfig(config, 'configUpdated()')
+
 		// Reset the connection if the connection is closed or any configuration
 		// changed.
 		const resetConnection =
