@@ -5,6 +5,7 @@ import { FocusModeInquiry } from '../../camera/inquiries.js'
 import { ACK, FocusLockBytes, FocusModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailedFatally,
 	InquirySucceeded,
@@ -49,6 +50,7 @@ describe('no pending inquiry', () => {
 		const InquiryResponse = [0x90, 0x50, 0x17 /* makes it an inquiry response */, 0xff]
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(FocusLock, 'focus-lock'),
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
 				CameraReplyBytes(ACK(1)), // focus-lock

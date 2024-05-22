@@ -4,6 +4,7 @@ import { ExposureModeInquiry } from '../../camera/inquiries.js'
 import { ExposureModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	InquiryFailed,
 	SendInquiry,
@@ -66,6 +67,7 @@ describe('inquiry response mismatch', () => {
 		const MaskMismatchResponseBytes = [0x90, 0x50, 0xf1, 0x02, 0x03, 0x04, 0xff]
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xc0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendInquiry(ZoomPositionInquiry, 'zoom-position'),
 				CameraExpectIncomingBytes(ZoomPositionInquiryBytes), // zoom-position
 				CameraReplyBytes(MaskMismatchResponseBytes), // zoom-position

@@ -4,6 +4,7 @@ import { CameraPower, FocusLock } from '../../camera/commands.js'
 import { ACKCompletion, CameraPowerBytes, Completion, FocusLockBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailedFatally,
 	CommandSucceeded,
@@ -16,6 +17,7 @@ describe('completion in empty socket', () => {
 	test('completion in never-used socket', async () => {
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
 				CameraReplyBytes(Completion(1)), // camera-power

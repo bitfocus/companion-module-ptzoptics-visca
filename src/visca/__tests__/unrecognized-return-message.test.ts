@@ -4,6 +4,7 @@ import { OnScreenDisplayClose } from '../../camera/commands.js'
 import { OnScreenDisplayCloseBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailedFatally,
 	SendCommand,
@@ -29,6 +30,7 @@ describe('unrecognized return message', () => {
 		const UnrecognizedError = [0x90, 0x60, 0x17, 0xff] // 17 not 41/03/02 as 60 requires
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xd0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(OnScreenDisplayClose, 'close'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // close
 				CameraReplyBytes(UnrecognizedError), // close

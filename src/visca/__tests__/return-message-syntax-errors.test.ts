@@ -12,6 +12,7 @@ import {
 } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailedFatally,
 	InquiryFailedFatally,
@@ -78,6 +79,7 @@ describe('VISCA return message syntax errors', () => {
 		const BadReplyMatcher = MatchVISCABytes(BadReply)
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xb0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(FocusNearStandard, 'near'),
 				SendInquiry(ExposureModeInquiry, 'exposure-mode'),
 				SendInquiry(FocusModeInquiry, 'focus-mode'),

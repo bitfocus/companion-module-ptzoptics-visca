@@ -203,6 +203,8 @@ async function verifyInteractions(
 	const instance = new MockInstance()
 	const clientViscaPort = new VISCAPort(instance)
 
+	let socketWritesPerformed = false
+
 	const camera = new Promise<Camera>((resolve: (camera: Camera) => void) => {
 		server.once('connection', (socket: net.Socket) => {
 			LOG(`Server received connection on port ${socket.localPort}`)
@@ -294,8 +296,21 @@ async function verifyInteractions(
 					}
 					break
 				}
+				case 'camera-network-change': {
+					const { bytes } = interaction
+					if (socketWritesPerformed) {
+						throw new Error('CameraInitialNetworkChangeReply must appear before all other replies')
+					}
+					const buf = Buffer.from(bytes)
+					socketWritesPerformed = true
+					if (!(await camera).socket.write(buf)) {
+						throw new Error(`Writing ${prettyBytes(buf)} failed, socket closed`)
+					}
+					break
+				}
 				case 'camera-reply': {
 					const { bytes } = interaction
+					socketWritesPerformed = true
 					if (!(await camera).socket.write(bytes)) {
 						throw new Error(`Writing ${prettyBytes([...bytes])} failed, socket closed`)
 					}

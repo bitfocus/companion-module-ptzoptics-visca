@@ -4,6 +4,7 @@ import { FocusModeInquiry } from '../../camera/inquiries.js'
 import { ACK, FocusModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	InquiryFailedFatally,
 	SendInquiry,
@@ -15,6 +16,7 @@ describe('ACK without pending command', () => {
 	test('ACK with only inquiry pending', async () => {
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xf0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendInquiry(FocusModeInquiry, 'focus-mode'),
 				CameraExpectIncomingBytes(FocusModeInquiryBytes), // focus-mode
 				CameraReplyBytes(ACK(1)), // focus-mode

@@ -9,6 +9,7 @@ import {
 } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailed,
 	CommandSucceeded,
@@ -21,6 +22,7 @@ describe('VISCA port command buffer full', () => {
 	test('command buffer full, resent', async () => {
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xa0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(OnScreenDisplayClose, 'close'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // close
 				CameraReplyBytes(CommandBufferFullBytes), // close

@@ -5,6 +5,7 @@ import { ExposureModeInquiry } from '../../camera/inquiries.js'
 import { ACK, ExposureModeInquiryBytes, FocusNearStandardBytes, FocusStopBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CloseVISCAPortEarly,
 	CommandFailedFatally,
@@ -37,6 +38,7 @@ describe('VISCA port closed early', () => {
 	test('manual close with half-completed command and inquiry waiting for initial response', async () => {
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xe0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(FocusNearStandard, 'focus-near'),
 				SendInquiry(ExposureModeInquiry, 'exposure-mode'),
 				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near

@@ -526,6 +526,49 @@ export class VISCAPort {
 			})
 		})()
 
+		// Some non-PTZOptics cameras (at least some Sony[0] and Aver[1] models)
+		// send a "Network Change Message" (y0 38 FF, y = Device address + 8) at
+		// startup to indicate the device's address for daisy-chained RS-232
+		// control.  (Sony models don't send it in VISCA over IP situations
+		// because it's irrelevant when the IP already uniquely addresses the
+		// device.  But at least one report from the field says there's a camera
+		// that sends it for VISCA over IP.)
+		//
+		// Because this message isn't meaningful in the VISCA over IP case, we
+		// can just skip it if it's present.  PTZOptics cameras don't send any
+		// `90 xy FF` responses where `x=3`, so skipping this should be harmless
+		// for them while giving those other cameras a chance to work with this
+		// module.
+		//
+		// 0. https://www.sony.net/Products/CameraSystem/CA/BRC_X400_SRG_X400/Technical_Document/E042100111.pdf
+		// 1. https://communication.aver.com/DownloadFile.aspx?n=5174%7C0C0D934C-A84C-423C-A14F-42C5F322C8AD&t=ServiceDownload
+		while (receivedData.length === 0) {
+			await moreDataAvailable
+		}
+		const firstByte = receivedData[0]
+		if ((firstByte & 0b1000_1111) === 0b1000_0000) {
+			while (receivedData.length < 2) {
+				await moreDataAvailable
+			}
+
+			const secondByte = receivedData[1]
+			if (secondByte === 0x38) {
+				while (receivedData.length < 3) {
+					await moreDataAvailable
+				}
+
+				const thirdByte = receivedData[2]
+				if (thirdByte === 0xff) {
+					const networkChange = receivedData.splice(0, 3)
+					if (this.#debugLogging) {
+						this.#instance.log('info', `RECV: ${prettyBytes(networkChange)}`)
+					}
+					this.#instance.log('info', 'Skipping initial network change reply')
+				}
+			}
+		}
+
+		// After any leading "y0 38 FF" is skipped, read replies.
 		for (;;) {
 			while (receivedData.length === 0) {
 				await moreDataAvailable

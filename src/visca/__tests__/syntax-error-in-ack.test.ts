@@ -4,6 +4,7 @@ import { FocusNearStandard } from '../../camera/commands.js'
 import { FocusNearStandardBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
+	CameraInitialNetworkChangeReply,
 	CameraReplyBytes,
 	CommandFailedFatally,
 	InstanceStatusIs,
@@ -33,6 +34,7 @@ describe('VISCA ACK syntax errors', () => {
 		const BadStartByte = [0x42]
 		return RunCameraInteractionTest(
 			[
+				CameraInitialNetworkChangeReply([0xb0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(FocusNearStandard, 'focus-near'),
 				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near
 				InstanceStatusIs(InstanceStatus.Ok),
