@@ -531,11 +531,29 @@ export class VISCAPort {
 				await moreDataAvailable
 			}
 
-			// PTZOptics VISCA over IP responses always begin with 0x90.
-			if (receivedData[0] !== 0x90) {
+			// PTZOptics VISCA over IP responses always begin with 0x90.  But
+			// some non-PTZOptics cameras (at least some Sony[0] and Aver[1]
+			// models) periodically send a "Network Change Message" (z0 38 FF,
+			// z = device address + 8) to signal the device's address for
+			// daisy-chained RS-232 control  (Sony models don't send it in VISCA
+			// over IP situations because this particular address is immaterial
+			// to VISCA over IP, where the IP address uniquely identifies the
+			// device and so messages only always apply to just one camera.  But
+			// at least one report from the field shows there's a camera that
+			// will send `80 38 FF` to the module.)
+			//
+			// Because this message isn't meaningful for VISCA over IP, and
+			// because PTZOptics cameras don't send any `z0 xy FF` messages
+			// where `x=3`, we can safely accept a `z0` leading byte here,
+			// discard all received network change messages, then restrict all
+			// other replies to start with `90`.
+			//
+			// 0. https://www.sony.net/Products/CameraSystem/CA/BRC_X400_SRG_X400/Technical_Document/E042100111.pdf
+			// 1. https://communication.aver.com/DownloadFile.aspx?n=5174%7C0C0D934C-A84C-423C-A14F-42C5F322C8AD&t=ServiceDownload
+			if ((receivedData[0] & 0b1000_1111) !== 0b1000_0000) {
 				const leadingBytes = receivedData.slice(0, 8)
 				throw this.#errorWhileProcessingMessage(
-					"Error in camera response: return message data doesn't start with 0x90",
+					'Camera sent return message data not starting with z0 (where z=8 to F)',
 					leadingBytes
 				)
 			}
@@ -589,6 +607,8 @@ export class VISCAPort {
 			//     90 60 02 FF
 			// Inquiry response:
 			//   90 50 ...one or more non-FF bytes...  FF
+			// Network change response (some non-PTZOptics cameras only):
+			//   z0 38 FF (z=8 to F)
 			//
 			// The second byte therefore dictates return message interpretation.
 			//
@@ -598,9 +618,31 @@ export class VISCAPort {
 			// command.)
 			const secondByte = returnMessage[1]
 
-			//   ACK (and then later Completion or maybe an error):
-			//     90 4y FF  90 5y FF  (ACK, Completion)
-			//     90 4y FF  ........  (ACK, some Error)
+			// Network change response (some non-PTZOptics cameras only):
+			//   z0 38 FF (z=8 to F)
+			if (secondByte === 0x38) {
+				if (returnMessage.length !== 3) {
+					throw this.#errorWhileProcessingMessage(
+						'Received network change response of unexpected length',
+						returnMessage
+					)
+				}
+
+				// As discussed in `#readReturnMessages`, ignore this message.
+				continue
+			}
+
+			// Some VISCA flavors allow a `z0` initial byte in all return
+			// messages, not just network changes.  We choose to be conservative
+			// in what we accept until someone complains and permit it only in
+			// network change messages.
+			if (returnMessage[0] !== 0x90) {
+				throw this.#errorWhileProcessingMessage('Received return message not starting with 0x90', returnMessage)
+			}
+
+			// ACK (and then later Completion or maybe an error):
+			//   90 4y FF  90 5y FF  (ACK, Completion)
+			//   90 4y FF  ........  (ACK, some Error)
 			//
 			// Move the command from the waiting-initial-response queue to the
 			// waiting-for-completion queue with the socket (the `y` nibble)

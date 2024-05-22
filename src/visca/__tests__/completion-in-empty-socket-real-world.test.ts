@@ -21,6 +21,7 @@ import {
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailed,
 	CommandSucceeded,
 	SendCommand,
@@ -34,6 +35,7 @@ describe('completion in empty socket', () => {
 	test('completion in never-used socket', async () => {
 		return RunCameraInteractionTest(
 			[
+				CameraReplyNetworkChange([0x80, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(OnScreenDisplayClose, 'osd-close-1'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-1
 				SendCommand(PresetRecall, { val: '04' }, 'preset-recall-2'),
@@ -43,6 +45,7 @@ describe('completion in empty socket', () => {
 				SendCommand(OnScreenDisplayClose, 'osd-close-3'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-3
 				SendCommand(PresetRecall, { val: '01' }, 'preset-recall-4'),
+				CameraReplyNetworkChange([0xf0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraExpectIncomingBytes(PresetRecallBytes(1)), // preset-recall-4
 				SendCommand(OnScreenDisplayClose, 'osd-close-5'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-5
@@ -69,6 +72,7 @@ describe('completion in empty socket', () => {
 				SendCommand(FocusStop, 'focus-stop-12'),
 				CameraExpectIncomingBytes(FocusStopBytes), // focus-stop-12
 				SendCommand(FocusNearStandard, 'focus-near-standard-13'),
+				CameraReplyNetworkChange([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraExpectIncomingBytes(FocusNearStandardBytes), // focus-near-standard-13
 				SendCommand(FocusStop, 'focus-stop-14'),
 				CameraExpectIncomingBytes(FocusStopBytes), // focus-stop-14
@@ -86,6 +90,7 @@ describe('completion in empty socket', () => {
 				CommandFailed([CantBeExecutedNowMatcher, MatchVISCABytes(FocusStopBytes)], 'focus-stop-10'),
 				CameraReplyBytes(CommandNotExecutable(1)), // focus-far-standard-11
 				CommandFailed([CantBeExecutedNowMatcher, MatchVISCABytes(FocusFarStandardBytes)], 'focus-far-standard-11'),
+				CameraReplyNetworkChange([0xc0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(CommandNotExecutable(2)), // focus-stop-12
 				CommandFailed([CantBeExecutedNowMatcher, MatchVISCABytes(FocusStopBytes)], 'focus-stop-12'),
 				CameraReplyBytes(CommandNotExecutable(1)), // focus-near-standard-13

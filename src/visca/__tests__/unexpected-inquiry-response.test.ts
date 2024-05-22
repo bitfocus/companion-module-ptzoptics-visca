@@ -6,6 +6,7 @@ import { ACK, FocusLockBytes, FocusModeInquiryBytes } from './camera-interaction
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailedFatally,
 	InquirySucceeded,
 	SendCommand,
@@ -52,6 +53,7 @@ describe('no pending inquiry', () => {
 				SendCommand(FocusLock, 'focus-lock'),
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
 				CameraReplyBytes(ACK(1)), // focus-lock
+				CameraReplyNetworkChange([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(InquiryResponse),
 				CommandFailedFatally([InquiryResponseWithoutInquiryMatcher, MatchVISCABytes(InquiryResponse)], 'focus-lock'),
 			],

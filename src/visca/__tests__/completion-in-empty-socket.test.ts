@@ -5,6 +5,7 @@ import { ACKCompletion, CameraPowerBytes, Completion, FocusLockBytes } from './c
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailedFatally,
 	CommandSucceeded,
 	SendCommand,
@@ -18,6 +19,7 @@ describe('completion in empty socket', () => {
 			[
 				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
+				CameraReplyNetworkChange([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(Completion(1)), // camera-power
 				CommandFailedFatally([CompletionInEmptySocketMatcher(1), MatchVISCABytes(Completion(1))], 'camera-power'),
 			],
