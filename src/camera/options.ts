@@ -266,10 +266,10 @@ export const AutoWhiteBalanceSensitivityOption = {
 }
 
 const PRESET_CHOICES = []
-const PRESET_MAP = new Map<number, string>();
+const PRESET_MAP = new Map<number, string>()
 for (let i = 0; i < 255; ++i) {
 	if (i < 90 || i > 99) {
-		let hexval = ('0' + i.toString(16)).slice(-2)
+		const hexval = ('0' + i.toString(16)).slice(-2)
 		PRESET_MAP.set(i, hexval)
 		PRESET_CHOICES.push({ id: hexval, label: String(i) })
 	}
@@ -285,7 +285,7 @@ export const PresetSaveOption = {
 }
 
 export const PresetRecallOption = {
-	id: 'val',	
+	id: 'val',
 	choices: PRESET_CHOICES,
 	valmap: PRESET_MAP,
 	useVariableId: 'useVariableForPreset',
