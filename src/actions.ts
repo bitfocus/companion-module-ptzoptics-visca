@@ -1,4 +1,4 @@
-import type { CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
+import type { CompanionActionDefinitions, CompanionActionEvent, CompanionOptionValues } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	AutoTracking,
@@ -55,6 +55,8 @@ import {
 } from './camera/options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 import type { PtzOpticsInstance } from './instance.js'
+
+
 
 export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {
@@ -321,15 +323,46 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'Recall Preset',
 			options: [
 				{
+					type: 'checkbox',
+					label: 'Use a variable for preset',
+					default: false,
+					id: PresetRecallOption.useVariableId,
+				},
+				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: PresetRecallOption.id,
 					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
 					default: PresetRecallOption.default,
+					isVisible:  (options: CompanionOptionValues): boolean => {
+						return !(options.useVariableForPreset)
+					},
+				},
+				{
+					type: 'textinput',
+					label: 'Preset Number from Variable',
+					id: 'recallPresetVariableVal',	
+					useVariables: true,		
+					isVisible: (options: CompanionOptionValues): boolean=> {
+						return !!(options.useVariableForPreset)
+					},		
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
+				instance.log('info', "options are:" + JSON.stringify(event.options));
+				if (!! event.options.useVariableForPreset) {
+					const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
+					instance.log('info', "val is: " + varPreset)
+					const hexval = PresetRecallOption.valmap.get(parseInt(varPreset))
+					if (hexval == undefined) {
+						instance.log('error', "Invalid recall preset value of: " + varPreset)
+						return
+					}
+					event.options.val = hexval
+				}
+				
+				
 				void instance.sendCommand(PresetRecall, event.options)
 			},
 		},
