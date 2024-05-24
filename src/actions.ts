@@ -55,6 +55,7 @@ import {
 } from './camera/options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 import type { PtzOpticsInstance } from './instance.js'
+import { parsePresetVariableOption } from './preset-by-number.js'
 
 export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {
@@ -331,6 +332,27 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			],
 			callback: async (event: CompanionActionEvent) => {
 				void instance.sendCommand(PresetRecall, event.options)
+			},
+		},
+		[PtzOpticsActionId.RecallPresetFromVar]: {
+			name: 'Recall Preset (by number)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Preset Number',
+					id: PresetRecallOption.id,
+					useVariables: true,
+					tooltip: 'Preset number range of 0-89, 100-254',
+					default: '0',
+				},
+			],
+			callback: async ({ options }, context) => {
+				const errorOrValue = await parsePresetVariableOption(options, context)
+				if (typeof errorOrValue === 'string') {
+					instance.log('error', errorOrValue)
+				} else {
+					void instance.sendCommand(PresetRecall, errorOrValue)
+				}
 			},
 		},
 		[PtzOpticsActionId.SetPresetDriveSpeed]: {

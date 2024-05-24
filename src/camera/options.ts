@@ -265,10 +265,26 @@ export const AutoWhiteBalanceSensitivityOption = {
 	},
 }
 
+/** Convert a number to a two-digit hex string. */
+export function twoDigitHex(n: number): string {
+	return n.toString(16).padStart(2, '0')
+}
+
+/**
+ * Determine whether a number is a valid preset.
+ *
+ * The overall preset range is `[0, 256)`, but presets `[90, 100)` and `255` are
+ * [reserved by PTZOptics](https://community.ptzoptics.com/s/article/PTZOptics-Preset-Commands---Reserved-Presets-and-Special-Functions)
+ * for various purposes and so are considered invalid.
+ */
+export function isValidPreset(n: number): boolean {
+	return n < 90 || (n > 99 && n < 255)
+}
+
 const PRESET_CHOICES = []
 for (let i = 0; i < 255; ++i) {
-	if (i < 90 || i > 99) {
-		PRESET_CHOICES.push({ id: ('0' + i.toString(16)).slice(-2), label: String(i) })
+	if (isValidPreset(i)) {
+		PRESET_CHOICES.push({ id: twoDigitHex(i), label: String(i) })
 	}
 }
 
