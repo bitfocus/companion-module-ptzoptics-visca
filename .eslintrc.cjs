@@ -8,6 +8,8 @@ module.exports = {
 				allowModules: ['@jest/globals'],
 			},
 		],
+		'@typescript-eslint/strict-boolean-expressions': 'error',
+		eqeqeq: 'error',
 	},
 	overrides: [],
 }

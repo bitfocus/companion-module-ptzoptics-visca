@@ -62,14 +62,14 @@ function checkInquirySucceeded(expectedResponse: CompanionOptionValues, actualRe
  * updates.
  */
 class MockInstance implements PartialInstance {
-	currentStatus = InstanceStatus.Disconnected
+	currentStatus = InstanceStatus.UnknownError
 
 	log = (level: LogLevel, msg: string) => {
 		LOG(`Log (${level}): ${msg}`)
 	}
 
 	updateStatus(status: InstanceStatus, message?: string) {
-		LOG(`Status update: ${status}${message ? `, message ${message}` : ''}`)
+		LOG(`Status update: ${status}${typeof message === 'string' ? `, message ${message}` : ''}`)
 		this.currentStatus = status
 	}
 }
@@ -169,21 +169,24 @@ type Camera = {
 	 * bytes.
 	 */
 	readIncomingBytes: (amount: number) => Promise<readonly number[]>
+
+	/**
+	 * A promise that resolves when the "camera"'s incoming connection socket
+	 * closes, resolving `true` if there was a connection error (i.e. the
+	 * `VISCAPort` was manually closed, terminating the connection) and `false`
+	 * otherwise.
+	 */
+	socketClosed: Promise<boolean>
 }
 
 /**
- * Perform the interactions specified by `interactions` using the opened
- * `clientViscaPort` connected to `camera`, with the `instance` used to
- * construct `clientViscaPort`.  Close `camera` and `clientViscaPort` when
- * interactions are finished (including in case of error).
+ * Perform the interactions specified by `interactions` using a fresh
+ * `VISCAPort`.
  *
- * @param clientViscaPort
- *   A port through which VISCA commands and inquiries can be sent and their
- *   responses received, on which an `open` call has resolved.
- * @param camera
- *   The mock camera used in this test, to which `clientViscaPort` is connected.
- * @param instance
- *   The mock instance used to create `visca`.
+ * @param server
+ *   A server that performs the functions of a mock camera.
+ * @param port
+ *   The TCP port the camera mocked by `server` is running on.
  * @param interactions
  *   An array of the interactions to perform.  The array must be "complete" in
  *   that all sent commands and inquiries must have their responses expected and
@@ -192,20 +195,68 @@ type Camera = {
  *    The expected status of `instance` after all interactions have completed.
  */
 async function verifyInteractions(
-	clientViscaPort: VISCAPort,
-	camera: Camera,
-	instance: MockInstance,
+	server: net.Server,
+	port: number,
 	interactions: readonly Interaction[],
 	finalStatus: InstanceStatus
 ): Promise<void> {
-	LOG(`Mock camera running on port ${camera.socket.localPort}`)
+	const instance = new MockInstance()
+	const clientViscaPort = new VISCAPort(instance)
 
-	let cameraSocketCloseExpectsError = false
-	const cameraSocketClosed = new Promise<boolean>((resolve: (hadError: boolean) => void) => {
-		camera.socket.once('close', (hadError: boolean) => {
-			resolve(hadError)
+	const camera = new Promise<Camera>((resolve: (camera: Camera) => void) => {
+		server.once('connection', (socket: net.Socket) => {
+			LOG(`Server received connection on port ${socket.localPort}`)
+
+			const socketClosed = new Promise<boolean>((resolve: (hadError: boolean) => void) => {
+				socket.once('close', (hadError: boolean) => {
+					resolve(hadError)
+				})
+			})
+
+			const cameraIncomingBytes: number[] = []
+			let cameraSocketError = false
+			socket.once('error', (_err: Error) => {
+				cameraSocketError = true
+			})
+
+			let cameraReceivedMoreBytes = (async function cameraWaitToReceiveBytes() {
+				return new Promise<void>((resolve: () => void) => {
+					socket.once('data', (data: Buffer) => {
+						if (cameraSocketError) {
+							return
+						}
+
+						cameraIncomingBytes.push(...data)
+						resolve()
+
+						cameraReceivedMoreBytes = cameraWaitToReceiveBytes()
+					})
+				})
+			})()
+
+			async function readIncomingBytes(amount: number): Promise<readonly number[]> {
+				if (amount < 0) {
+					amount = cameraIncomingBytes.length
+				}
+				while (cameraIncomingBytes.length < amount) {
+					await cameraReceivedMoreBytes
+				}
+				return cameraIncomingBytes.splice(0, amount)
+			}
+
+			const camera = { server, socket, readIncomingBytes, socketClosed }
+			resolve(camera)
 		})
 	})
+
+	// Unless the VISCAPort is closed, the socket that the camera sees shouldn't
+	// close with an error.
+	let cameraSocketCloseExpectsError = false
+
+	// NOTE: This doesn't wait for the connection to be fully established.
+	//       Operations must either implicitly wait for it to be established or
+	//       `connect()` must be awaited.
+	clientViscaPort.open('127.0.0.1', port, true)
 
 	try {
 		const sentCommands: Map<string, Promise<void | Error>> = new Map()
@@ -231,7 +282,7 @@ async function verifyInteractions(
 				case 'camera-expect-incoming-bytes': {
 					const { bytes: expectedBytes } = interaction
 					LOG(`Camera receiving ${expectedBytes.length} bytes`)
-					const incomingBytes = await camera.readIncomingBytes(expectedBytes.length)
+					const incomingBytes = await (await camera).readIncomingBytes(expectedBytes.length)
 					if (
 						!incomingBytes.every((v: number, i: number) => {
 							return v === expectedBytes[i]
@@ -245,7 +296,7 @@ async function verifyInteractions(
 				}
 				case 'camera-reply': {
 					const { bytes } = interaction
-					if (!camera.socket.write(bytes)) {
+					if (!(await camera).socket.write(bytes)) {
 						throw new Error(`Writing ${prettyBytes([...bytes])} failed, socket closed`)
 					}
 					LOG(`Wrote ${prettyBytes([...bytes])} to socket`)
@@ -403,6 +454,20 @@ async function verifyInteractions(
 					cameraSocketCloseExpectsError = true
 					break
 				}
+				case 'wait-for-connection': {
+					const { currentStatus: beforeStatus } = instance
+					if (![InstanceStatus.Connecting, InstanceStatus.Ok].includes(beforeStatus)) {
+						throw new Error(`Connection should be connecting or connected, instead was ${repr(beforeStatus)}`)
+					}
+
+					await clientViscaPort.connect()
+
+					const afterStatus = instance.currentStatus
+					if (afterStatus !== InstanceStatus.Ok) {
+						throw new Error(`Instance status should be Ok after connect(), was ${repr(afterStatus)}`)
+					}
+					break
+				}
 				default:
 					assertNever(type)
 					break
@@ -431,10 +496,12 @@ async function verifyInteractions(
 		LOG('interaction testing finished')
 		clientViscaPort.close()
 
+		const { socketClosed: cameraSocketClosed, server } = await camera
+
 		const hadErrorClosingCameraSocket = await cameraSocketClosed
 
 		await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
-			camera.server.close(() => {
+			server.close(() => {
 				if (hadErrorClosingCameraSocket !== cameraSocketCloseExpectsError) {
 					let msg = 'camera socket unexpectedly closed '
 					msg += `with${hadErrorClosingCameraSocket ? '' : 'out'} error`
@@ -446,7 +513,7 @@ async function verifyInteractions(
 		})
 	}
 
-	const leftoverCameraIncomingBytes = await camera.readIncomingBytes(-1)
+	const leftoverCameraIncomingBytes = await (await camera).readIncomingBytes(-1)
 	if (leftoverCameraIncomingBytes.length > 0) {
 		throw new Error(`Camera received unexpected excess bytes: ${prettyBytes(leftoverCameraIncomingBytes)}`)
 	}
@@ -495,50 +562,5 @@ export async function RunCameraInteractionTest(
 		}
 	)
 
-	const instance = new MockInstance()
-	const clientViscaPort = new VISCAPort(instance)
-
-	const cameraPromise = new Promise<Camera>((resolve: (camera: Camera) => void) => {
-		server.once('connection', (socket: net.Socket) => {
-			LOG(`connection opened`)
-
-			const cameraIncomingBytes: number[] = []
-			let cameraSocketError = false
-			socket.once('error', (_err: Error) => {
-				cameraSocketError = true
-			})
-
-			let cameraReceivedMoreBytes = (async function cameraWaitToReceiveBytes() {
-				return new Promise<void>((resolve: () => void) => {
-					socket.once('data', (data: Buffer) => {
-						if (cameraSocketError) {
-							return
-						}
-
-						cameraIncomingBytes.push(...data)
-						resolve()
-
-						cameraReceivedMoreBytes = cameraWaitToReceiveBytes()
-					})
-				})
-			})()
-
-			async function readIncomingBytes(amount: number): Promise<readonly number[]> {
-				if (amount < 0) {
-					amount = cameraIncomingBytes.length
-				}
-				while (cameraIncomingBytes.length < amount) {
-					await cameraReceivedMoreBytes
-				}
-				return cameraIncomingBytes.splice(0, amount)
-			}
-
-			resolve({ server, socket, readIncomingBytes })
-		})
-	})
-
-	// Both port and camera must be ready before we can start testing.
-	const [_portReady, camera] = await Promise.all([clientViscaPort.open('127.0.0.1', port), cameraPromise])
-
-	return verifyInteractions(clientViscaPort, camera, instance, interactions, finalStatus)
+	return verifyInteractions(server, port, interactions, finalStatus)
 }

@@ -9,6 +9,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#config: PtzOpticsConfig = {
 		host: '',
 		port: '5678',
+		debugLogging: false,
 	}
 	#visca
 
@@ -30,6 +31,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *    choices corresponding to the parameters in the response.
 	 */
 	async sendCommand(command: Command, options: CompanionOptionValues = {}): Promise<void> {
+		// `sendCommand` implicitly waits for the connection to be fully
+		// established, so it's unnecessary to resolve `this.#visca.connect()`
+		// here.
 		return this.#visca.sendCommand(command, options).then(
 			(result: void | Error) => {
 				if (typeof result === 'undefined') {
@@ -38,8 +42,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 				this.log('error', `Error processing command: ${result.message}`)
 			},
-			(_reason: Error) => {
+			(reason: Error) => {
 				// Swallow the error so that execution gracefully unwinds.
+				this.log('error', `Unhandled command rejection was suppressed: ${reason}`)
 				return
 			}
 		)
@@ -58,6 +63,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *    choices corresponding to the parameters in the response.
 	 */
 	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
+		// `sendInquiry` implicitly waits for the connection to be fully
+		// established, so it's unnecessary to resolve `this.#visca.connect()`
+		// here.
 		return this.#visca.sendInquiry(inquiry).then(
 			(result: CompanionOptionValues | Error) => {
 				if (result instanceof Error) {
@@ -67,8 +75,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 				return result
 			},
-			(_reason: Error) => {
+			(reason: Error) => {
 				// Swallow the error so that execution gracefully unwinds.
+				this.log('error', `Unhandled inquiry rejection was suppressed: ${reason}`)
 				return null
 			}
 		)
@@ -123,33 +132,65 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.#visca.close()
 	}
 
+	/**
+	 * Write a copy of the given module config information to logs.
+	 *
+	 * @param config
+	 *   The config information to log.
+	 * @param desc
+	 *   A description of the event occasioning the logging.
+	 */
+	logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
+		this.log(
+			'info',
+			`PTZOptics module configuration on ${desc}: ${JSON.stringify(config, (_k, v) => {
+				if (v === undefined) return { undefined: true }
+				return v
+			})}`
+		)
+	}
+
 	async init(config: PtzOpticsConfig): Promise<void> {
+		this.logConfig(config, 'init()')
+
 		this.#config = config
 
 		this.setActionDefinitions(getActions(this))
 		this.setPresetDefinitions(getPresets())
 
-		// Start up the TCP socket and attempt to connect to the camera.
-		return this.#initTCP()
+		// Create the TCP socket and start connecting to the camera.  (Don't
+		// delay until the connection is established, tho: init() must complete
+		// in a relatively short time or else Companion will kill the connection
+		// and restart it, resulting in the module/connection in effect
+		// repeatedly banging its head against a wall.)
+		this.#initTCP()
 	}
 
-	async #initTCP(): Promise<void> {
+	#initTCP(): void {
 		this.#visca.close()
 
 		if (this.#config.host !== '') {
-			return this.#visca.open(this.#config.host, Number(this.#config.port))
+			// This initiates the connection without delaying to fully establish
+			// it as `await this.#visca.connect()` would do.
+			this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
 		}
 	}
 
 	async configUpdated(config: PtzOpticsConfig): Promise<void> {
-		// Reset the connection if the connection is closed or the camera's
-		// address has changed.
-		const resetConnection = this.#visca.closed || this.#config.host !== config.host || this.#config.port !== config.port
+		this.logConfig(config, 'configUpdated()')
+
+		// Reset the connection if the connection is closed or any configuration
+		// changed.
+		const resetConnection =
+			this.#visca.closed ||
+			this.#config.host !== config.host ||
+			this.#config.port !== config.port ||
+			this.#config.debugLogging !== config.debugLogging
 
 		this.#config = config
 
 		if (resetConnection) {
-			return this.#initTCP()
+			this.#initTCP()
 		}
 	}
 }

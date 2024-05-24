@@ -1,13 +1,13 @@
-import { type CompanionOptionValues, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
+import {
+	assertNever,
+	type CompanionOptionValues,
+	InstanceStatus,
+	TCPHelper,
+	type TCPHelperEvents,
+} from '@companion-module/base'
 import { checkCommandBytes, type Command, Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
-
-/**
- * Log extra information about message/response processing while the processing
- * code is still fresh and not well-executed.
- */
-const DEBUG_PROCESSING = true
 
 const BLAME_MODULE =
 	'This is likely a bug in the ptzoptics-visca Companion module.  Please ' +
@@ -268,6 +268,21 @@ export interface PartialInstance {
  */
 type ReturnMessages = AsyncGenerator<readonly number[], void, unknown>
 
+type DisconnectedStatus = { type: 'disconnected' }
+
+type ConnectingStatus = {
+	type: 'connecting'
+	open: Promise<void>
+	reject: (reason: Error) => void
+}
+
+type ConnectedStatus = { type: 'connected' }
+
+/**
+ * The connection status of a port.
+ */
+type ConnectionStatus = DisconnectedStatus | ConnectingStatus | ConnectedStatus
+
 /**
  * A port abstraction into which VISCA commands can be written.
  */
@@ -278,8 +293,19 @@ export class VISCAPort {
 	 */
 	#socket: TCPHelper | null = null
 
+	/**
+	 * The connection status of a port.  Ports begin life disconnected, then
+	 * proceed to connecting with associated promise to wait on for connection
+	 * to complete, then are either connected or revert to disconnected when
+	 * that promise settles.
+	 */
+	#connectionStatus: ConnectionStatus = { type: 'disconnected' }
+
 	/** The instance that created this port. */
 	#instance: PartialInstance
+
+	/** Log extra information about message/response processing. */
+	#debugLogging = false
 
 	/**
 	 * Commmands *and* inquiries sent to the camera but that the camera hasn't
@@ -343,15 +369,22 @@ export class VISCAPort {
 	 * Close this port if it's currently open.  If provided, the optional reason
 	 * will be used to reject pending commands/inquiries.
 	 */
-	close(reason?: string): void {
+	close(reason = 'Socket was closed'): void {
+		let didClose = false
 		if (this.#socket !== null) {
+			didClose = true
+
 			this.#socket.destroy()
 			this.#socket = null
-
-			if (reason === undefined) {
-				reason = 'Message not fully processed: socket was closed'
+			if (this.#connectionStatus.type === 'connecting') {
+				this.#connectionStatus.reject(new Error('Port closed before a connection was established'))
 			}
+			this.#connectionStatus = { type: 'disconnected' }
+		}
 
+		this.#instance.updateStatus(InstanceStatus.Disconnected)
+
+		if (didClose) {
 			// Empty out all pending commands, then resolve them all with fatal
 			// errors.  Start with commands that have received an ACK, because
 			// they necessarily were received before messages still awaiting an
@@ -369,20 +402,30 @@ export class VISCAPort {
 				pendingMessage.fatalError(reason)
 			}
 		}
-
-		this.#instance.updateStatus(InstanceStatus.Disconnected)
 	}
 
-	/** Open this port connecting to the given host:port. */
-	async open(host: string, port: number): Promise<void> {
+	/**
+	 * Open this port connecting to the given host:port.
+	 *
+	 * This operation initiates a connection to the camera and reading of return
+	 * messages from it, but it doesn't delay for the connection to actually be
+	 * established, because this could in principle take a long time.  Command
+	 * and inquiry sending will implicitly wait for the connection to be
+	 * established, if needed.  If you require the connection to be established,
+	 * await `connect()` after calling this function.
+	 */
+	open(host: string, port: number, debugLogging: boolean): void {
+		this.close()
+
 		const socket = (this.#socket = new TCPHelper(host, port))
+		this.#debugLogging = debugLogging
 
 		const instance = this.#instance
 
 		instance.updateStatus(InstanceStatus.Connecting)
 
 		socket.on('status_change', (status: TCPHelperEvents['status_change'][0], message?: string) => {
-			const msg = `Status change: ${status}${message ? ` (${message})` : ''}`
+			const msg = `Status change: ${status}${typeof message === 'string' ? ` (${message})` : ''}`
 			instance.log('debug', msg)
 		})
 		socket.on('error', (err) => {
@@ -394,14 +437,27 @@ export class VISCAPort {
 
 		const returnMessages = this.#readReturnMessages(socket)
 
-		await new Promise<void>((resolve: () => void) => {
-			socket.on('connect', () => {
-				instance.log('debug', 'Connected')
-				instance.updateStatus(InstanceStatus.Ok)
+		let connectionReject: ((reason: Error) => void) | null = null
+		const open = new Promise<void>((resolve: () => void, reject: (reason: Error) => void) => {
+			connectionReject = reject
 
-				resolve()
+			socket.on('connect', () => {
+				if (this.#connectionStatus.type === 'connecting') {
+					instance.log('debug', 'Connected')
+
+					instance.updateStatus(InstanceStatus.Ok)
+					this.#connectionStatus = { type: 'connected' }
+					resolve()
+				}
 			})
 		})
+
+		this.#connectionStatus = {
+			type: 'connecting',
+			open,
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+			reject: connectionReject!,
+		}
 
 		// Process return messages consistent with the commands/inquiries that
 		// have been sent.
@@ -415,6 +471,26 @@ export class VISCAPort {
 			.finally(() => {
 				this.#instance.log('info', `Return message processing completed`)
 			})
+	}
+
+	/**
+	 * Wait for a connection to the camera initiated by `open()` to be
+	 * established.  Reject if the port was closed or if a preceding `open()`
+	 * has not occurred.
+	 */
+	async connect(): Promise<void> {
+		const status = this.#connectionStatus
+		switch (status.type) {
+			case 'disconnected':
+				throw new Error('Port has not been opened')
+			case 'connected':
+				return
+			case 'connecting':
+				await status.open
+				return
+			default:
+				assertNever(status)
+		}
 	}
 
 	/**
@@ -478,7 +554,7 @@ export class VISCAPort {
 			}
 
 			const returnMessage = receivedData.splice(0, terminatorOffset + 1)
-			if (DEBUG_PROCESSING) {
+			if (this.#debugLogging) {
 				this.#instance.log('info', `RECV: ${prettyBytes(returnMessage)}`)
 			}
 			yield returnMessage
@@ -544,7 +620,7 @@ export class VISCAPort {
 				const { i, command } = result
 
 				const socket = secondByte & 0xf
-				if (DEBUG_PROCESSING) {
+				if (this.#debugLogging) {
 					this.#instance.log('info', `Processing ${prettyBytes(command.bytes)} ACK in socket ${socket}`)
 				}
 
@@ -564,7 +640,7 @@ export class VISCAPort {
 			//   90 5y FF  (after initial ACK)
 			// Inquiry response:
 			//   90 50 ...one or more non-FF bytes...  FF
-			if ((secondByte & 0xf0) == 0x50) {
+			if ((secondByte & 0xf0) === 0x50) {
 				// Completion:
 				//   90 5y FF  (after initial ACK)
 				if (returnMessage.length === 3) {
@@ -572,7 +648,7 @@ export class VISCAPort {
 					// (also emptying its socket) and resolve the corresponding
 					// command's promise.
 					const socket = secondByte & 0x0f
-					if (DEBUG_PROCESSING) {
+					if (this.#debugLogging) {
 						this.#instance.log('info', `Completion in socket ${socket}`)
 					}
 
@@ -607,7 +683,7 @@ export class VISCAPort {
 						let paramval = 0
 						for (const nibble of nibbles) {
 							const byteOffset = nibble >> 1
-							const isLower = nibble % 2 == 1
+							const isLower = nibble % 2 === 1
 
 							const byte = returnMessage[byteOffset]
 							const contrib = isLower ? byte & 0xf : byte >> 4
@@ -678,7 +754,7 @@ export class VISCAPort {
 						'relevant camera mode before executing this command.'
 					command.nonfatalError(reason)
 
-					if (DEBUG_PROCESSING) {
+					if (this.#debugLogging) {
 						this.#instance.log('info', 'Removing non-executable command from #waitingForInitialResponse')
 					}
 
@@ -803,6 +879,9 @@ export class VISCAPort {
 	 * all manipulations (for example, to quickly recall a different preset
 	 * after a wrong button was fat-fingered) for that entire time.
 	 *
+	 * This function implicitly waits for the connection to be fully established
+	 * as if `await this.connect()` had occurred.
+	 *
 	 * @param command
 	 *    The command to send.
 	 * @param options
@@ -838,6 +917,9 @@ export class VISCAPort {
 	 * all manipulations (for example, to quickly recall a different preset
 	 * after a wrong button was fat-fingered) for that entire time.
 	 *
+	 * This function implicitly waits for the connection to be fully established
+	 * as if `await this.connect()` had occurred.
+	 *
 	 * @param inquiry
 	 *    The inquiry to send.
 	 * @returns
@@ -865,7 +947,7 @@ export class VISCAPort {
 	/** Send a message of the given type and bytes. */
 	async #sendMessage(type: MessageType, userDefined: boolean, messageBytes: readonly number[]): Promise<void | Error> {
 		const err = checkCommandBytes(messageBytes)
-		if (err) {
+		if (err !== null) {
 			// The bytes should already have been validated, so if this is hit,
 			// it's always an error.
 			let msg = `Attempt to send invalid ${type} ${prettyBytes(messageBytes)}: ${err}.`
@@ -880,13 +962,25 @@ export class VISCAPort {
 		if (socket === null) {
 			return this.#errorWhileProcessingMessage(`Socket not open to send ${type}`, messageBytes)
 		}
+		if (this.#connectionStatus.type === 'connecting') {
+			try {
+				await this.#connectionStatus.open
+			} catch (err) {
+				if (err instanceof Error) {
+					return err
+				}
+				return new Error(`Error waiting for connection to open: ${err}`)
+			}
+		}
 
 		return this.#sendBytes(socket, messageBytes)
 	}
 
 	/** Write the supplied bytes to the socket. */
 	async #sendBytes(socket: TCPHelper, message: readonly number[]): Promise<void | Error> {
-		this.#instance.log('info', `SEND: ${prettyBytes(message)}...`)
+		if (this.#debugLogging) {
+			this.#instance.log('info', `SEND: ${prettyBytes(message)}...`)
+		}
 		const sent = await socket.send(Buffer.from(message))
 		if (!sent) {
 			return new Error('Data not sent: socket is closed')

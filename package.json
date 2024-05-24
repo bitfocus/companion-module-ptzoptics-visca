@@ -1,6 +1,6 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "3.0.0-rc3",
+	"version": "3.1.0-dev",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
@@ -37,6 +37,9 @@
 		],
 		"*.{ts,tsx,js,jsx}": [
 			"yarn lint:raw --fix"
+		],
+		"*.yaml": [
+			"prettier --write"
 		]
 	},
 	"engines": {

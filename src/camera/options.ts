@@ -156,7 +156,7 @@ export const ShutterSetOption = {
 export const CameraPowerOption = {
 	id: 'bool',
 	choices: [
-		{ id: 'off', label: 'off' },
+		{ id: 'off', label: 'standby' },
 		{ id: 'on', label: 'on' },
 	],
 	default: 'on',

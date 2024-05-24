@@ -25,6 +25,7 @@ function makeCustomActionInfo(includeParameters: boolean): CompanionActionInfo {
 
 	return cai
 }
+
 describe('custom command upgrade to support parameters', () => {
 	test('old-school custom command testing and upgrading', () => {
 		const needsUpgrade = makeCustomActionInfo(false)

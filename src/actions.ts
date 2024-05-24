@@ -395,7 +395,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			options: [
 				{
 					type: 'dropdown',
-					label: 'power on/off',
+					label: 'power on/standby',
 					id: CameraPowerOption.id,
 					choices: CameraPowerOption.choices,
 					default: CameraPowerOption.default,
@@ -417,7 +417,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async ({ options }) => {
-				let shouldToggle
+				let shouldToggle = false
 				switch (options[OnScreenDisplayOption.id]) {
 					case 'close':
 						void instance.sendCommand(OnScreenDisplayClose)
