@@ -349,11 +349,9 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 					},		
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.log('info', "options are:" + JSON.stringify(event.options));
+			callback: async (event: CompanionActionEvent) => {				
 				if (!! event.options.useVariableForPreset) {
-					const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
-					instance.log('info', "val is: " + varPreset)
+					const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)					
 					const hexval = PresetRecallOption.valmap.get(parseInt(varPreset))
 					if (hexval == undefined) {
 						instance.log('error', "Invalid recall preset value of: " + varPreset)
@@ -361,8 +359,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 					}
 					event.options.val = hexval
 				}
-				
-				
+								
 				void instance.sendCommand(PresetRecall, event.options)
 			},
 		},
