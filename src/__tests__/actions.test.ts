@@ -11,50 +11,50 @@ describe('test recall preset values', () => {
 	const actions = getActions(testMock as any)
 	test('Dropdown value used', async () => {
 		testMock.resetLastCommand()
-		const testEvent = {
+		const testEvent: CompanionActionEvent = {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
 			options: { val: '04' },
 			surfaceId: 'hot:edit',
-		} as CompanionActionEvent
+		}
 		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 04 FF]')
 	})
 
 	test('Variable value contant used dec 37', async () => {
 		testMock.resetLastCommand()
-		const testEvent = {
+		const testEvent: CompanionActionEvent = {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
 			options: { recallPresetVariableVal: '37' },
 			surfaceId: 'hot:edit',
-		} as CompanionActionEvent
+		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 25 FF]')
 	})
 	test('Variable value variable does not resolve to valid recall preset', async () => {
 		testMock.resetLastCommand()
-		const testEvent = {
+		const testEvent: CompanionActionEvent = {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
 			options: { recallPresetVariableVal: 'foo' },
 			surfaceId: 'hot:edit',
-		} as CompanionActionEvent
+		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('')
 	})
 	test('Variable value constant invalid preset', async () => {
 		testMock.resetLastCommand()
-		const testEvent = {
+		const testEvent: CompanionActionEvent = {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
 			options: { recallPresetVariableVal: '99' },
 			surfaceId: 'hot:edit',
-		} as CompanionActionEvent
+		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('')
 	})
@@ -62,13 +62,13 @@ describe('test recall preset values', () => {
 	test('Variable value resolves to dec 254', async () => {
 		testMock.resetLastCommand()
 		testMock.setVariableInMapEntry('foo', '254')
-		const testEvent = {
+		const testEvent: CompanionActionEvent = {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
 			options: { recallPresetVariableVal: 'foo' },
 			surfaceId: 'hot:edit',
-		} as CompanionActionEvent
+		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 FE FF]')
 	})
