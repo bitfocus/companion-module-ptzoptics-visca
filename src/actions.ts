@@ -341,7 +341,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 					label: 'Preset Number from Variable',
 					id: 'recallPresetVariableVal',
 					useVariables: true,
-					tooltip: 'Preset number range of 0-89, 100-255',
+					tooltip: 'Preset number range of 0-89, 100-254',
 					default: '0',
 				},
 			],
