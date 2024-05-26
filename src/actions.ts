@@ -1,4 +1,4 @@
-import type { CompanionActionDefinitions, CompanionActionEvent, CompanionOptionValues } from '@companion-module/base'
+import type { CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
 import { PtzOpticsActionId } from './actions-enum.js'
 import {
 	AutoTracking,
@@ -321,43 +321,38 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'Recall Preset',
 			options: [
 				{
-					type: 'checkbox',
-					label: 'Use a variable for preset',
-					default: false,
-					id: PresetRecallOption.useVariableId,
-				},
-				{
 					type: 'dropdown',
 					label: 'Preset Nr.',
 					id: PresetRecallOption.id,
 					choices: PresetRecallOption.choices,
 					minChoicesForSearch: 1,
 					default: PresetRecallOption.default,
-					isVisible: (options: CompanionOptionValues): boolean => {
-						return options.useVariableForPreset === undefined ? false : !(options.useVariableForPreset as boolean)
-					},
 				},
+			],
+			callback: async (event: CompanionActionEvent) => {
+				void instance.sendCommand(PresetRecall, event.options)
+			},
+		},
+		[PtzOpticsActionId.RecallPresetFromVar]: {
+			name: 'Recall Preset From Variable',
+			options: [
 				{
 					type: 'textinput',
 					label: 'Preset Number from Variable',
 					id: 'recallPresetVariableVal',
 					useVariables: true,
-					isVisible: (options: CompanionOptionValues): boolean => {
-						return options.useVariableForPreset === undefined ? false : (options.useVariableForPreset as boolean)
-					},
+					tooltip: 'Preset number range of 0-89, 100-255',
+					default: '0',
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				if (event.options.useVariableForPreset as boolean) {
-					const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
-					const hexval = PresetRecallOption.valmap.get(parseInt(varPreset, 10))
-					if (hexval === undefined) {
-						instance.log('error', 'Invalid recall preset value of: ' + varPreset)
-						return
-					}
-					event.options.val = hexval
+				const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
+				const hexval = PresetRecallOption.valmap.get(parseInt(varPreset, 10))
+				if (hexval === undefined) {
+					instance.log('error', 'Invalid recall preset value of: ' + varPreset)
+					return
 				}
-
+				event.options.val = hexval
 				void instance.sendCommand(PresetRecall, event.options)
 			},
 		},

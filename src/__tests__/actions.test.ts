@@ -15,7 +15,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { val: '04', useVariableForPreset: false, recallPresetVariableVal: 'ff' },
+			options: { val: '04' },
 			surfaceId: 'hot:edit',
 		} as CompanionActionEvent
 		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
@@ -28,10 +28,10 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { val: '04', useVariableForPreset: true, recallPresetVariableVal: '37' },
+			options: { recallPresetVariableVal: '37' },
 			surfaceId: 'hot:edit',
 		} as CompanionActionEvent
-		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
+		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 25 FF]')
 	})
 	test('Variable value variable does not resolve to valid recall preset', async () => {
@@ -40,10 +40,10 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { val: '04', useVariableForPreset: true, recallPresetVariableVal: 'foo' },
+			options: { recallPresetVariableVal: 'foo' },
 			surfaceId: 'hot:edit',
 		} as CompanionActionEvent
-		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
+		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('')
 	})
 	test('Variable value constant invalid preset', async () => {
@@ -52,10 +52,10 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { val: '04', useVariableForPreset: true, recallPresetVariableVal: '99' },
+			options: { recallPresetVariableVal: '99' },
 			surfaceId: 'hot:edit',
 		} as CompanionActionEvent
-		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
+		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('')
 	})
 
@@ -66,10 +66,10 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { val: '04', useVariableForPreset: true, recallPresetVariableVal: 'foo' },
+			options: { recallPresetVariableVal: 'foo' },
 			surfaceId: 'hot:edit',
 		} as CompanionActionEvent
-		await actions[PtzOpticsActionId.RecallPreset]?.callback(testEvent, testMock as any)
+		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 FE FF]')
 	})
 })

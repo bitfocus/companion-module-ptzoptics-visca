@@ -289,7 +289,6 @@ export const PresetRecallOption = {
 	choices: PRESET_CHOICES,
 	valmap: PRESET_MAP,
 	useVariableId: 'useVariableForPreset',
-	textRecallId: 'recallPresetVariableVal',
 	default: '00', // preset 0 recalls the home setting
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
