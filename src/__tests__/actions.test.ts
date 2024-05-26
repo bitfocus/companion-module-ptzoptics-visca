@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@jest/globals'
 
-import { getActions } from './actions.js'
-import { PtzOpticsActionId } from './actions-enum.js'
+import { getActions } from '../actions.js'
+import { PtzOpticsActionId } from '../actions-enum.js'
 import { CompanionActionEvent } from '@companion-module/base'
 import { ActionsMock } from './actions-mock.js'
 

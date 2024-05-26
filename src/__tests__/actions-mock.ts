@@ -2,9 +2,9 @@
  * Mock instance like PtzOpticsInstance which can be used for testing what might be sent to the camera
  *
  */
-import type { Command } from './visca/command.js'
+import type { Command } from '../visca/command.js'
 import { LogLevel, type CompanionOptionValues } from '@companion-module/base'
-import { prettyBytes } from './visca/utils.js'
+import { prettyBytes } from '../visca/utils.js'
 
 export class ActionsMock {
 	#last_hex_command = ''
