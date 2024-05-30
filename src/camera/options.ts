@@ -265,13 +265,18 @@ export const AutoWhiteBalanceSensitivityOption = {
 	},
 }
 
+export function twoDigitHex(n: number): string {
+	return ('0' + n.toString(16)).slice(-2)
+}
+
+export function isValidPreset(n: number): boolean {
+	return n < 90 || (n > 99 && n < 255)
+}
+
 const PRESET_CHOICES = []
-const PRESET_MAP = new Map<number, string>()
 for (let i = 0; i < 255; ++i) {
-	if (i < 90 || i > 99) {
-		const hexval = ('0' + i.toString(16)).slice(-2)
-		PRESET_MAP.set(i, hexval)
-		PRESET_CHOICES.push({ id: hexval, label: String(i) })
+	if (isValidPreset(i)) {
+		PRESET_CHOICES.push({ id: twoDigitHex(i), label: String(i) })
 	}
 }
 
@@ -287,7 +292,6 @@ export const PresetSaveOption = {
 export const PresetRecallOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	valmap: PRESET_MAP,
 	useVariableId: 'useVariableForPreset',
 	default: '00', // preset 0 recalls the home setting
 	choiceToParam: (choice: string): number => {

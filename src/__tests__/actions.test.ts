@@ -72,4 +72,17 @@ describe('test recall preset values', () => {
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
 		expect(testMock.getLastCommand()).toBe('[81 01 04 3F 02 FE FF]')
 	})
+
+	test('Invalid preset value dec 255', async () => {
+		testMock.resetLastCommand()
+		const testEvent: CompanionActionEvent = {
+			id: 'xvoL964H3jiHhMP_UAdIJ',
+			actionId: 'recallPset',
+			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
+			options: { recallPresetVariableVal: '255' },
+			surfaceId: 'hot:edit',
+		}
+		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
+		expect(testMock.getLastCommand()).toBe('')
+	})
 })

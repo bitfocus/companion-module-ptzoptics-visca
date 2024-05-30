@@ -52,6 +52,8 @@ import {
 	PresetSaveOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
+	isValidPreset,
+	twoDigitHex,
 } from './camera/options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 import type { PtzOpticsInstance } from './instance.js'
@@ -334,11 +336,11 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			},
 		},
 		[PtzOpticsActionId.RecallPresetFromVar]: {
-			name: 'Recall Preset From Variable',
+			name: 'Recall Preset (by number)',
 			options: [
 				{
 					type: 'textinput',
-					label: 'Preset Number from Variable',
+					label: 'Preset Number',
 					id: 'recallPresetVariableVal',
 					useVariables: true,
 					tooltip: 'Preset number range of 0-89, 100-254',
@@ -347,13 +349,15 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			],
 			callback: async (event: CompanionActionEvent) => {
 				const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
-				const hexval = PresetRecallOption.valmap.get(parseInt(varPreset, 10))
-				if (hexval === undefined) {
+				const preset = parseInt(varPreset, 10)
+				instance.log('error', '' + Number.isNaN(preset))
+				instance.log('error', '' + isValidPreset(preset))
+				if (Number.isNaN(preset) || !isValidPreset(preset)) {
 					instance.log('error', 'Invalid recall preset value of: ' + varPreset)
 					return
 				}
-				event.options.val = hexval
-				void instance.sendCommand(PresetRecall, event.options)
+				//event.options.val = twoDigitHex(preset)
+				void instance.sendCommand(PresetRecall, { val: twoDigitHex(preset) })
 			},
 		},
 		[PtzOpticsActionId.SetPresetDriveSpeed]: {
