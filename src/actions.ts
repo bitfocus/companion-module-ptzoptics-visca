@@ -341,17 +341,15 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				{
 					type: 'textinput',
 					label: 'Preset Number',
-					id: 'recallPresetVariableVal',
+					id: PresetRecallOption.id,
 					useVariables: true,
 					tooltip: 'Preset number range of 0-89, 100-254',
 					default: '0',
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				const varPreset = await instance.parseVariablesInString(event.options.recallPresetVariableVal as string)
+				const varPreset = await instance.parseVariablesInString(String(event.options.val))
 				const preset = parseInt(varPreset, 10)
-				instance.log('error', '' + Number.isNaN(preset))
-				instance.log('error', '' + isValidPreset(preset))
 				if (Number.isNaN(preset) || !isValidPreset(preset)) {
 					instance.log('error', 'Invalid recall preset value of: ' + varPreset)
 					return

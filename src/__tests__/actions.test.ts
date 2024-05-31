@@ -28,7 +28,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { recallPresetVariableVal: '37' },
+			options: { val: '37' },
 			surfaceId: 'hot:edit',
 		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
@@ -40,7 +40,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { recallPresetVariableVal: 'foo' },
+			options: { val: 'foo' },
 			surfaceId: 'hot:edit',
 		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
@@ -52,7 +52,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { recallPresetVariableVal: '99' },
+			options: { val: '99' },
 			surfaceId: 'hot:edit',
 		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
@@ -66,7 +66,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { recallPresetVariableVal: 'foo' },
+			options: { val: 'foo' },
 			surfaceId: 'hot:edit',
 		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
@@ -79,7 +79,7 @@ describe('test recall preset values', () => {
 			id: 'xvoL964H3jiHhMP_UAdIJ',
 			actionId: 'recallPset',
 			controlId: 'bank:DwwXN-l4qpqi1Hh_29a50',
-			options: { recallPresetVariableVal: '255' },
+			options: { val: '255' },
 			surfaceId: 'hot:edit',
 		}
 		await actions[PtzOpticsActionId.RecallPresetFromVar]?.callback(testEvent, testMock as any)
