@@ -1,7 +1,8 @@
-import { CompanionActionInfo } from '@companion-module/base'
+import { CompanionActionContext, CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import {
 	addCommandParameterOptionsToCustomCommandOptions,
+	computeCustomCommandAndOptions,
 	isCustomCommandMissingCommandParameterOptions,
 } from './custom-command-action.js'
 
@@ -48,5 +49,125 @@ describe('custom command upgrade to support parameters', () => {
 
 		const newStyle = makeCustomActionInfo(true)
 		expect(isCustomCommandMissingCommandParameterOptions(newStyle)).toBe(false)
+	})
+})
+
+class MockContext implements CompanionActionContext {
+	#variables = new Map<string, string>()
+
+	setVariable(variable: string, value: string): void {
+		this.#variables.set(variable, value)
+	}
+
+	deleteVariable(variable: string): boolean {
+		return this.#variables.delete(variable)
+	}
+
+	async parseVariablesInString(text: string): Promise<string> {
+		// This is a crude, trimmed-down copy of the algorithm from Companion
+		// source code in `companion/lib/Instance/Variable.js`, enough for basic
+		// testing purposes.
+		const reg = /\$\(((?:[^:$)]+):(?:[^)$]+))\)/
+
+		let result = text
+
+		let matchCount = 0
+		let matches
+		while ((matches = reg.exec(result)) !== null) {
+			if (matchCount++ > 10) {
+				throw new Error(`Excessive variable replacements in ${JSON.stringify(text)}`)
+			}
+
+			const [fullId, variable] = matches
+			const val = this.#variables.get(variable) ?? '$NA'
+			result = result.replace(fullId, () => val)
+		}
+
+		return result
+	}
+}
+
+describe('custom command ultimate bytes sent', () => {
+	test('no parameters', async () => {
+		const context = new MockContext()
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x0a, 0x11, 0x54, 0x00, 0xff])
+	})
+
+	test('one parameter, no variables', async () => {
+		const context = new MockContext()
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '9',
+			parameter0: '5',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x0a, 0x11, 0x54, 0x05, 0xff])
+	})
+
+	test('one parameter, nonexistent variable', async () => {
+		const context = new MockContext()
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '9',
+			parameter0: '$(internal:custom_doesnt_exist)',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x0a, 0x11, 0x54, 0x00, 0xff])
+	})
+
+	test('one parameter, existing variable', async () => {
+		const context = new MockContext()
+		context.setVariable('internal:custom_does_exist', '8')
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '9',
+			parameter0: '$(internal:custom_does_exist)',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x0a, 0x11, 0x54, 0x08, 0xff])
+	})
+
+	test('one parameter, two variables', async () => {
+		const context = new MockContext()
+		context.setVariable('internal:custom_one', '3')
+		context.setVariable('internal:custom_two', '1')
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '9',
+			parameter0: '$(internal:custom_two)$(internal:custom_one)',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x0a, 0x11, 0x54, 0x0d, 0xff])
+	})
+
+	test('two parameters, two variables', async () => {
+		const context = new MockContext()
+		context.setVariable('internal:custom_one', '2')
+		context.setVariable('internal:custom_two', '1')
+
+		const actionOptions = {
+			custom: '81 0A 11 54 00 FF',
+			command_parameters: '2; 9',
+			parameter0: '7',
+			parameter1: '$(internal:custom_two)$(internal:custom_one)',
+		}
+
+		const { command, options } = await computeCustomCommandAndOptions(actionOptions, context)
+		expect(command.toBytes(options)).toStrictEqual([0x81, 0x7a, 0x11, 0x54, 0x0c, 0xff])
 	})
 })
