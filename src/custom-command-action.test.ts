@@ -1,10 +1,11 @@
-import { CompanionActionContext, CompanionActionInfo } from '@companion-module/base'
+import { CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import {
 	addCommandParameterOptionsToCustomCommandOptions,
 	computeCustomCommandAndOptions,
 	isCustomCommandMissingCommandParameterOptions,
 } from './custom-command-action.js'
+import { MockContext } from './__tests__/mock-context.js'
 
 function makeCustomActionInfo(includeParameters: boolean): CompanionActionInfo {
 	const cai: CompanionActionInfo = {
@@ -51,41 +52,6 @@ describe('custom command upgrade to support parameters', () => {
 		expect(isCustomCommandMissingCommandParameterOptions(newStyle)).toBe(false)
 	})
 })
-
-class MockContext implements CompanionActionContext {
-	#variables = new Map<string, string>()
-
-	setVariable(variable: string, value: string): void {
-		this.#variables.set(variable, value)
-	}
-
-	deleteVariable(variable: string): boolean {
-		return this.#variables.delete(variable)
-	}
-
-	async parseVariablesInString(text: string): Promise<string> {
-		// This is a crude, trimmed-down copy of the algorithm from Companion
-		// source code in `companion/lib/Instance/Variable.js`, enough for basic
-		// testing purposes.
-		const reg = /\$\(((?:[^:$)]+):(?:[^)$]+))\)/
-
-		let result = text
-
-		let matchCount = 0
-		let matches
-		while ((matches = reg.exec(result)) !== null) {
-			if (matchCount++ > 10) {
-				throw new Error(`Excessive variable replacements in ${JSON.stringify(text)}`)
-			}
-
-			const [fullId, variable] = matches
-			const val = this.#variables.get(variable) ?? '$NA'
-			result = result.replace(fullId, () => val)
-		}
-
-		return result
-	}
-}
 
 describe('custom command ultimate bytes sent', () => {
 	test('no parameters', async () => {
