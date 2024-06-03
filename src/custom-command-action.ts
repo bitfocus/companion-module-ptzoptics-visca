@@ -190,7 +190,7 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 
 			const commandParams: CommandParams = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
 				(acc, nibbles, i) => {
-					acc[`param_${i}`] = {
+					acc[`${i}`] = {
 						nibbles,
 						choiceToParam: Number,
 					}
@@ -203,9 +203,9 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 			const command = new UserDefinedCommand(commandBytes, commandParams)
 
 			const commandOpts: CompanionOptionValues = {}
-			for (const key of Object.keys(commandParams)) {
-				const val = await context.parseVariablesInString(String(options[`parameter${key}`]))
-				commandOpts[`param_${key}`] = Number(val)
+			for (const i of Object.keys(commandParams)) {
+				const val = await context.parseVariablesInString(String(options[`parameter${i}`]))
+				commandOpts[i] = val
 			}
 
 			void instance.sendCommand(command, commandOpts)
