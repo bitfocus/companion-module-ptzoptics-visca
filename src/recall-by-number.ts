@@ -16,7 +16,6 @@ export async function parsePresetVariableOption(
 ): Promise<CompanionOptionValues | string> {
 	const varPreset = await context.parseVariablesInString(String(options.val))
 	const preset = parseInt(varPreset, 10)
-	twoDigitHex(preset)
 
 	if (Number.isNaN(preset) || !isValidPreset(preset)) {
 		return 'Invalid recall preset value of: ' + options.val
