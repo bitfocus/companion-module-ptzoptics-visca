@@ -297,9 +297,9 @@ async function verifyInteractions(
 				case 'camera-reply': {
 					const { bytes } = interaction
 					if (!(await camera).socket.write(bytes)) {
-						throw new Error(`Writing ${prettyBytes([...bytes])} failed, socket closed`)
+						throw new Error(`Writing ${prettyBytes(bytes)} failed, socket closed`)
 					}
-					LOG(`Wrote ${prettyBytes([...bytes])} to socket`)
+					LOG(`Wrote ${prettyBytes(bytes)} to socket`)
 					break
 				}
 				case 'command-succeeded': {

@@ -15,8 +15,8 @@ export function CompletionInEmptySocketMatcher(y: number): RegExp {
 	return new RegExp(`^Received Completion for socket ${y}, but no command is executing in it`)
 }
 
-export const BadReturnStartByteMatcher =
-	/^Error in camera response: return message data doesn't start with 0x90 \(VISCA bytes \[[0-9A-Z]{2}(?: [0-9A-Z]{2})*\]\)$/
+export const BadReturnStartByteMatcher = /^Camera sent return message data not starting with z0 \(where z=8 to F\)/
+export const BadReturnNot90Matcher = /^Received return message not starting with 0x90/
 
 export const UserDefinedInquiryMatcher = /Double-check the syntax of your inquiry./
 export const UserDefinedMessageMatcher = /Double-check the syntax of the message./

@@ -163,6 +163,30 @@ export function CameraExpectIncomingBytes(bytes: readonly number[]): CameraIncom
 	return { type: 'camera-expect-incoming-bytes', bytes }
 }
 
+/**
+ * The lead byte of a network change reply: `z0` where `z` is a nibble whose
+ * high bit is set.
+ */
+type NetworkChangeFirstByte = 0x80 | 0x90 | 0xa0 | 0xb0 | 0xc0 | 0xd0 | 0xe0 | 0xf0
+
+/**
+ * Make the "camera" send a Network Change Reply identifying as the desired
+ * camera.
+ *
+ * These messages aren't sent by PTZOptics cameras, but some non-PTZOptics
+ * cameras send them (despite that they serve no purpose with VISCA over IP).
+ * This reply can be sprinkled pretty much anywhere in the stream of camera
+ * replies, and the module should simply skip them.  (Note that if you want to
+ * guarantee the skipping happens, you have to ensure that subsequent bytes sent
+ * by the camera are depended upon in some fashion.)
+ *
+ * @param bytes
+ *   A network change reply sequence: `z0 38 FF` where `z = Device address + 8`.
+ */
+export function CameraReplyNetworkChange(bytes: readonly [NetworkChangeFirstByte, 0x38, 0xff]): CameraReply {
+	return { type: 'camera-reply', bytes: new Uint8Array(bytes) }
+}
+
 /** Make the "camera" reply with the given bytes. */
 export function CameraReplyBytes(bytes: readonly number[]): CameraReply {
 	return { type: 'camera-reply', bytes: new Uint8Array(bytes) }

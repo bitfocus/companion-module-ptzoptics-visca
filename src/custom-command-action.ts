@@ -1,4 +1,5 @@
 import type {
+	CompanionActionContext,
 	CompanionActionDefinition,
 	CompanionActionInfo,
 	CompanionInputFieldTextInput,
@@ -150,6 +151,45 @@ export function addCommandParameterOptionsToCustomCommandOptions(options: Compan
 
 const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 
+type CommandAndOptions = {
+	command: UserDefinedCommand
+	options: CompanionOptionValues
+}
+
+/**
+ * Given the `options` for a "Custom command" action, compute the
+ * `UserDefinedCommand` and `CompanionOptionValues` that can be used to send the
+ * command.
+ */
+export async function computeCustomCommandAndOptions(
+	options: CompanionOptionValues,
+	context: CompanionActionContext
+): Promise<CommandAndOptions> {
+	const commandBytes = parseMessage(String(options['custom']))
+
+	const commandParams: CommandParams = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
+		(acc, nibbles, i) => {
+			acc[`${i}`] = {
+				nibbles,
+				choiceToParam: Number,
+			}
+
+			return acc
+		},
+		{} as PartialCommandParams
+	)
+
+	const command = new UserDefinedCommand(commandBytes, commandParams)
+
+	const commandOpts: CompanionOptionValues = {}
+	for (const i of Object.keys(commandParams)) {
+		const val = await context.parseVariablesInString(String(options[`parameter${i}`]))
+		commandOpts[i] = val
+	}
+
+	return { command, options: commandOpts }
+}
+
 /**
  * Generate an action definition for the "Custom command" action.
  */
@@ -186,28 +226,7 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 			...generateInputsForCommandParameters(),
 		],
 		callback: async ({ options }, context) => {
-			const commandBytes = parseMessage(String(options['custom']))
-
-			const commandParams: CommandParams = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
-				(acc, nibbles, i) => {
-					acc[`param_${i}`] = {
-						nibbles,
-						choiceToParam: Number,
-					}
-
-					return acc
-				},
-				{} as PartialCommandParams
-			)
-
-			const command = new UserDefinedCommand(commandBytes, commandParams)
-
-			const commandOpts: CompanionOptionValues = {}
-			for (const key of Object.keys(commandParams)) {
-				const val = await context.parseVariablesInString(String(options[`parameter${key}`]))
-				commandOpts[`param_${key}`] = Number(val)
-			}
-
+			const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
 			void instance.sendCommand(command, commandOpts)
 		},
 	}

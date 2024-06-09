@@ -5,6 +5,7 @@ import { OnScreenDisplayCloseBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
+	CameraReplyNetworkChange,
 	CommandFailedFatally,
 	SendCommand,
 } from './camera-interactions/interactions.js'
@@ -31,6 +32,7 @@ describe('unrecognized return message', () => {
 			[
 				SendCommand(OnScreenDisplayClose, 'close'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // close
+				CameraReplyNetworkChange([0xd0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(UnrecognizedError), // close
 				CommandFailedFatally([UnrecognizedErrorMatcher, MatchVISCABytes(UnrecognizedError)], 'close'),
 			],
