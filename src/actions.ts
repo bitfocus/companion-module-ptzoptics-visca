@@ -52,11 +52,10 @@ import {
 	PresetSaveOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
-	isValidPreset,
-	twoDigitHex,
 } from './camera/options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 import type { PtzOpticsInstance } from './instance.js'
+import { parsePresetVariableOption } from './recall-by-number.js'
 
 export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {
@@ -347,15 +346,13 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 					default: '0',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				const varPreset = await instance.parseVariablesInString(String(event.options.val))
-				const preset = parseInt(varPreset, 10)
-				if (Number.isNaN(preset) || !isValidPreset(preset)) {
-					instance.log('error', 'Invalid recall preset value of: ' + varPreset)
-					return
+			callback: async ({ options }, context) => {
+				const errorOrValue = await parsePresetVariableOption(options, context)
+				if (typeof errorOrValue === 'string') {
+					instance.log('error', errorOrValue)
+				} else {
+					void instance.sendCommand(PresetRecall, errorOrValue)
 				}
-				//event.options.val = twoDigitHex(preset)
-				void instance.sendCommand(PresetRecall, { val: twoDigitHex(preset) })
 			},
 		},
 		[PtzOpticsActionId.SetPresetDriveSpeed]: {
