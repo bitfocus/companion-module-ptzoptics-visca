@@ -55,7 +55,7 @@ import {
 } from './camera/options.js'
 import { generateCustomCommandAction } from './custom-command-action.js'
 import type { PtzOpticsInstance } from './instance.js'
-import { parsePresetVariableOption } from './recall-by-number.js'
+import { parsePresetVariableOption } from './preset-by-number.js'
 
 export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
 	function createPanTiltCallback(direction: readonly [number, number]) {

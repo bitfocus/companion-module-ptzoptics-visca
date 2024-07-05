@@ -292,7 +292,6 @@ export const PresetSaveOption = {
 export const PresetRecallOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	useVariableId: 'useVariableForPreset',
 	default: '00', // preset 0 recalls the home setting
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)

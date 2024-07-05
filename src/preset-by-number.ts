@@ -1,6 +1,5 @@
 import { CompanionOptionValues } from '@companion-module/base'
 import { isValidPreset, twoDigitHex } from './camera/options.js'
-//import { PtzOpticsInstance } from './instance.js'
 import { CompanionCommonCallbackContext } from '@companion-module/base/dist/module-api/common.js'
 
 /**
