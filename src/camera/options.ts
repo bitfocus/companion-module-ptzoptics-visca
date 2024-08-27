@@ -266,7 +266,7 @@ export const AutoWhiteBalanceSensitivityOption = {
 }
 
 export function twoDigitHex(n: number): string {
-	return ('0' + n.toString(16)).slice(-2)
+	return n.toString(16).padStart(2, '0')
 }
 
 export function isValidPreset(n: number): boolean {

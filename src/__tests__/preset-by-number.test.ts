@@ -24,7 +24,7 @@ const toBeExpectedCommandBytes: MatcherFunction<[command: Command, expected_byte
 	expected_bytes
 ) {
 	if (typeof actual === 'string') {
-		throw new TypeError('Input showuld be of type CompanionOptionValues not string')
+		throw new TypeError('Input should be of type CompanionOptionValues not string')
 	}
 
 	const commandBytes = command.toBytes(actual as CompanionOptionValues)
@@ -35,7 +35,7 @@ const toBeExpectedCommandBytes: MatcherFunction<[command: Command, expected_byte
 			`expected ${this.utils.printReceived(prettyBytes(commandBytes))} ${
 				pass ? 'not ' : ''
 			}to match\nreceived ${this.utils.printExpected(expected_bytes)}`,
-		pass: pass,
+		pass,
 	}
 }
 
@@ -52,7 +52,7 @@ const toBeErrorString: MatcherFunction<[]> = function (actual) {
 
 	return {
 		message: () => `expected result ${pass ? 'not ' : ''}to be an error string, received: ${actual}`,
-		pass: pass,
+		pass,
 	}
 }
 
