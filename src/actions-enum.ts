@@ -29,6 +29,7 @@ export enum PtzOpticsActionId {
 	ShutterDown = 'shutD',
 	SetShutter = 'shutS',
 	SetPreset = 'savePset',
+	SetPresetFromVar = 'savePsetFromVar',
 	RecallPreset = 'recallPset',
 	RecallPresetFromVar = 'recallPsetFromVar',
 	SetPresetDriveSpeed = 'speedPset',
