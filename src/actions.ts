@@ -318,6 +318,27 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				void instance.sendCommand(PresetSave, event.options)
 			},
 		},
+		[PtzOpticsActionId.SetPresetFromVar]: {
+			name: 'Save Preset (by number)',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Preset Number',
+					id: PresetSaveOption.id,
+					useVariables: true,
+					tooltip: 'Preset number range of 0-89, 100-254',
+					default: '0',
+				},
+			],
+			callback: async ({ options }, context) => {
+				const errorOrValue = await parsePresetVariableOption(options, context)
+				if (typeof errorOrValue === 'string') {
+					instance.log('error', errorOrValue)
+				} else {
+					void instance.sendCommand(PresetSave, errorOrValue)
+				}
+			},
+		},
 		[PtzOpticsActionId.RecallPreset]: {
 			name: 'Recall Preset',
 			options: [
