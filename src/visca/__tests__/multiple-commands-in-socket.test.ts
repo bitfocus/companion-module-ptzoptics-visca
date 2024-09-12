@@ -30,7 +30,7 @@ describe('multiple ACKs in same socket', () => {
 				CameraReplyBytes(Completion(1)), // ptz-home
 				CommandSucceeded('ptz-home'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -53,7 +53,7 @@ describe('multiple ACKs in same socket', () => {
 				CameraReplyBytes(Completion(2)), // focus-lock
 				CommandSucceeded('focus-lock'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

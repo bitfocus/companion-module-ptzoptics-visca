@@ -34,7 +34,7 @@ describe('VISCA port sending/receiving basics', () => {
 				CameraReplyBytes(ACKCompletion(1)), // osd-close
 				CommandSucceeded('osd-close'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -46,10 +46,10 @@ describe('VISCA port sending/receiving basics', () => {
 				CameraReplyBytes(SyntaxErrorBytes),
 				CommandFailed(
 					[CameraReportedSyntaxErrorMatcher, MatchVISCABytes(OnScreenDisplayCloseBytes), BlameModuleMatcher],
-					'osd-close'
+					'osd-close',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -61,7 +61,7 @@ describe('VISCA port sending/receiving basics', () => {
 				CameraReplyBytes([0x90, 0x50, 0x02, 0xff]), // osd-inquiry
 				InquirySucceeded({ state: 'open' }, 'osd-inquiry'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -73,10 +73,10 @@ describe('VISCA port sending/receiving basics', () => {
 				CameraReplyBytes(SyntaxErrorBytes), // osd-inquiry
 				InquiryFailed(
 					[CameraReportedSyntaxErrorMatcher, MatchVISCABytes(OnScreenDisplayInquiryBytes), BlameModuleMatcher],
-					'osd-inquiry'
+					'osd-inquiry',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

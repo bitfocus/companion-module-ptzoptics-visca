@@ -26,7 +26,7 @@ describe('network change reply', () => {
 				CameraReplyBytes(ACKCompletion(1)), // osd-close
 				CommandSucceeded('osd-close'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -43,7 +43,7 @@ describe('network change reply', () => {
 				CameraReplyBytes([0x90, 0x50, 0x02, 0xff]), // osd-inquiry
 				InquirySucceeded({ state: 'open' }, 'osd-inquiry'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -61,7 +61,7 @@ describe('network change reply', () => {
 				CameraReplyBytes(ACKCompletion(2)), // osd-close-after
 				CommandSucceeded('osd-close-after'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -79,7 +79,7 @@ describe('network change reply', () => {
 				CameraReplyBytes([0x90, 0x50, 0x02, 0xff]), // osd-inquiry-after
 				InquirySucceeded({ state: 'open' }, 'osd-inquiry-after'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 

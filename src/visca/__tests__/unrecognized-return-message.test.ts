@@ -22,7 +22,7 @@ describe('unrecognized return message', () => {
 				CameraReplyBytes(UnknownReturn), // close
 				CommandFailedFatally([UnrecognizedFormatMatcher, MatchVISCABytes(UnknownReturn)], 'close'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -36,7 +36,7 @@ describe('unrecognized return message', () => {
 				CameraReplyBytes(UnrecognizedError), // close
 				CommandFailedFatally([UnrecognizedErrorMatcher, MatchVISCABytes(UnrecognizedError)], 'close'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

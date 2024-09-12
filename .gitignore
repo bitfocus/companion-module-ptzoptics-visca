@@ -3,3 +3,4 @@ pkg/
 pkg.tgz
 /dist
 DEBUG-PACKAGED
+/.yarn

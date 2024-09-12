@@ -34,7 +34,7 @@ describe('VISCA return message syntax errors', () => {
 				CameraReplyBytes(BadReply), // focus-near
 				CommandFailedFatally([BadReturnStartByteMatcher, MatchVISCABytes(BadReply)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -48,7 +48,7 @@ describe('VISCA return message syntax errors', () => {
 				CameraReplyBytes(BadReply), // focus-near
 				CommandFailedFatally([BadReturnNot90Matcher, MatchVISCABytes(BadReply)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -62,7 +62,7 @@ describe('VISCA return message syntax errors', () => {
 				CameraReplyBytes(BadReply), // focus-near
 				CommandFailedFatally([BadReturnNot90Matcher, MatchVISCABytes(BadReply)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -76,7 +76,7 @@ describe('VISCA return message syntax errors', () => {
 				CameraReplyBytes(BadReply), // focus-near
 				CommandFailedFatally([BadReturnStartByteMatcher, MatchVISCABytes(BadReply)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -98,7 +98,7 @@ describe('VISCA return message syntax errors', () => {
 				CommandFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'stop'),
 				CommandFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -121,7 +121,7 @@ describe('VISCA return message syntax errors', () => {
 				InquiryFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'exposure-mode'),
 				InquiryFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'focus-mode'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -146,7 +146,7 @@ describe('VISCA return message syntax errors', () => {
 				InquiryFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'exposure-mode'),
 				InquiryFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'focus-mode'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -166,7 +166,7 @@ describe('VISCA return message syntax errors', () => {
 				InstanceStatusIs(InstanceStatus.ConnectionFailure),
 				CommandFailedFatally([BadReturnStartByteMatcher, BadReplyMatcher], 'focus-stop'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

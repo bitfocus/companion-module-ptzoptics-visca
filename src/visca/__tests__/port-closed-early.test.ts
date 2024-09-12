@@ -31,7 +31,7 @@ describe('VISCA port closed early', () => {
 				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
 				CommandFailedFatally(SocketClosedMatcher, 'focus-stop'),
 			],
-			InstanceStatus.Disconnected
+			InstanceStatus.Disconnected,
 		)
 	})
 
@@ -49,7 +49,7 @@ describe('VISCA port closed early', () => {
 				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
 				InquiryFailedFatally(SocketClosedMatcher, 'exposure-mode'),
 			],
-			InstanceStatus.Disconnected
+			InstanceStatus.Disconnected,
 		)
 	})
 })

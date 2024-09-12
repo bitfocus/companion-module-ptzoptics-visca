@@ -29,7 +29,7 @@ describe('terminator embedded in command via param', () => {
 				WaitUntilConnectedToCamera(),
 				// NOTE: No bytes are ever sent to (or received by) the camera.
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

@@ -21,10 +21,10 @@ describe('command error with no commands awaiting initial response', () => {
 				CameraReplyBytes(SyntaxErrorBytes),
 				CommandFailedFatally(
 					[NoMessagesAwaitingInitialResponseMatcher, MatchVISCABytes(SyntaxErrorBytes)],
-					'focus-near'
+					'focus-near',
 				),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

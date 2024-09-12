@@ -44,7 +44,7 @@ export async function sendPanTiltCommand(
 	instance: PtzOpticsInstance,
 	direction: readonly [number, number],
 	panSpeed: number,
-	tiltSpeed: number
+	tiltSpeed: number,
 ): Promise<void> {
 	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
 	const command = new ModuleDefinedCommand(bytes)
@@ -113,7 +113,7 @@ export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
 			nibbles: [13, 15],
 			choiceToParam: OnScreenDisplayNavigateOption.choiceToParam,
 		},
-	}
+	},
 )
 
 export const OnScreenDisplayEnter = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x05, 0xff])

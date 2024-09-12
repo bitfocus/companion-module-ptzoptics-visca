@@ -25,7 +25,7 @@ describe('no pending inquiry', () => {
 				CameraReplyBytes(InquiryResponse),
 				CommandFailedFatally([InquiryResponseWithoutInquiryMatcher, MatchVISCABytes(InquiryResponse)], 'focus-lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -42,7 +42,7 @@ describe('no pending inquiry', () => {
 				CameraReplyBytes(InquiryResponse),
 				CommandFailedFatally([InquiryResponseWithoutInquiryMatcher, MatchVISCABytes(InquiryResponse)], 'focus-lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -57,7 +57,7 @@ describe('no pending inquiry', () => {
 				CameraReplyBytes(InquiryResponse),
 				CommandFailedFatally([InquiryResponseWithoutInquiryMatcher, MatchVISCABytes(InquiryResponse)], 'focus-lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

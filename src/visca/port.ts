@@ -5,7 +5,7 @@ import {
 	TCPHelper,
 	type TCPHelperEvents,
 } from '@companion-module/base'
-import { checkCommandBytes, type Command, Inquiry, type Response, responseMatches } from './command.js'
+import { checkCommandBytes, type Command, type Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
 
@@ -226,7 +226,7 @@ class PendingInquiry extends PendingBase {
 		userDefined: boolean,
 		resolve: InquiryResolve,
 		reject: MessageRejectFatally,
-		expectedResponse: Response
+		expectedResponse: Response,
 	) {
 		super(bytes, userDefined, reject)
 
@@ -455,7 +455,6 @@ export class VISCAPort {
 		this.#connectionStatus = {
 			type: 'connecting',
 			open,
-			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			reject: connectionReject!,
 		}
 
@@ -554,7 +553,7 @@ export class VISCAPort {
 				const leadingBytes = receivedData.slice(0, 8)
 				throw this.#errorWhileProcessingMessage(
 					'Camera sent return message data not starting with z0 (where z=8 to F)',
-					leadingBytes
+					leadingBytes,
 				)
 			}
 
@@ -624,7 +623,7 @@ export class VISCAPort {
 				if (returnMessage.length !== 3) {
 					throw this.#errorWhileProcessingMessage(
 						'Received network change response of unexpected length',
-						returnMessage
+						returnMessage,
 					)
 				}
 
@@ -651,7 +650,7 @@ export class VISCAPort {
 				if (returnMessage.length !== 3) {
 					throw this.#errorWhileProcessingMessage(
 						'Received malformed ACK, closing connection to avoid send/receive decoherence',
-						returnMessage
+						returnMessage,
 					)
 				}
 
@@ -699,7 +698,7 @@ export class VISCAPort {
 					if (command === undefined) {
 						throw this.#errorWhileProcessingMessage(
 							`Received Completion for socket ${socket}, but no command is executing in it`,
-							returnMessage
+							returnMessage,
 						)
 					}
 
@@ -780,7 +779,7 @@ export class VISCAPort {
 					if (commandAwaitingInitialResponse === undefined) {
 						throw this.#errorWhileProcessingMessage(
 							'Received Command Not Executable with no commands awaiting initial response',
-							returnMessage
+							returnMessage,
 						)
 					}
 					const { i, command } = commandAwaitingInitialResponse
@@ -807,7 +806,7 @@ export class VISCAPort {
 				if (this.#waitingForInitialResponse.length === 0) {
 					throw this.#errorWhileProcessingMessage(
 						'Unexpected error with no messages awaiting initial response',
-						returnMessage
+						returnMessage,
 					)
 				}
 
@@ -869,7 +868,7 @@ export class VISCAPort {
 
 				throw this.#errorWhileProcessingMessage(
 					`Received error response to ${prettyBytes(messageBytes)} with unrecognized format`,
-					returnMessage
+					returnMessage,
 				)
 			} // (secondByte & 0xf0) === 0x60
 
@@ -980,7 +979,7 @@ export class VISCAPort {
 
 			return new Promise((resolve: InquiryResolve, reject: MessageRejectFatally) => {
 				this.#waitingForInitialResponse.push(
-					new PendingInquiry(messageBytes, isUserDefined, resolve, reject, inquiry.response())
+					new PendingInquiry(messageBytes, isUserDefined, resolve, reject, inquiry.response()),
 				)
 			})
 		})

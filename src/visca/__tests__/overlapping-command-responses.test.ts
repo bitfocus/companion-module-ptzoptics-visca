@@ -29,7 +29,7 @@ describe('ACK/Completion interleaving', () => {
 				CameraReplyBytes(Completion(2)), // preset-5
 				CommandSucceeded('preset-5'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -51,7 +51,7 @@ describe('ACK/Completion interleaving', () => {
 				CameraReplyBytes(Completion(2)), // preset-5
 				CommandSucceeded('preset-5'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

@@ -23,7 +23,7 @@ describe('completion in empty socket', () => {
 				CameraReplyBytes(Completion(1)), // camera-power
 				CommandFailedFatally([CompletionInEmptySocketMatcher(1), MatchVISCABytes(Completion(1))], 'camera-power'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -39,7 +39,7 @@ describe('completion in empty socket', () => {
 				CameraReplyBytes(Completion(2)), // focus-lock
 				CommandFailedFatally([CompletionInEmptySocketMatcher(2), MatchVISCABytes(Completion(2))], 'focus-lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -55,7 +55,7 @@ describe('completion in empty socket', () => {
 				CameraReplyBytes(Completion(1)), // focus-lock
 				CommandFailedFatally([CompletionInEmptySocketMatcher(1), MatchVISCABytes(Completion(1))], 'focus-lock'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

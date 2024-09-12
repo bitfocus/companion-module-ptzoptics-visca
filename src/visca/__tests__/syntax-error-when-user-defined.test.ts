@@ -29,10 +29,10 @@ describe('syntax error in user-defined message', () => {
 				CameraReplyBytes(SyntaxErrorBytes), // reset-sharpness
 				CommandFailed(
 					[CameraReportedSyntaxErrorMatcher, MatchVISCABytes(ResetSharpnessBytes), UserDefinedMessageMatcher],
-					'reset-sharpness'
+					'reset-sharpness',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -56,10 +56,10 @@ describe('syntax error in user-defined message', () => {
 				CameraReplyBytes(SyntaxErrorBytes), // ABCD
 				InquiryFailed(
 					[CameraReportedSyntaxErrorMatcher, MatchVISCABytes(ABCDInquiryBytes), UserDefinedMessageMatcher],
-					'ABCD'
+					'ABCD',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

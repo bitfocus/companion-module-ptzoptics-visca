@@ -21,7 +21,7 @@ import {
  */
 function updateCustomCommandsWithCommandParamOptions(
 	_context: CompanionUpgradeContext<PtzOpticsConfig>,
-	props: CompanionStaticUpgradeProps<PtzOpticsConfig>
+	props: CompanionStaticUpgradeProps<PtzOpticsConfig>,
 ): CompanionStaticUpgradeResult<PtzOpticsConfig> {
 	const result: CompanionStaticUpgradeResult<PtzOpticsConfig> = {
 		updatedActions: [],
@@ -47,7 +47,7 @@ function updateCustomCommandsWithCommandParamOptions(
  */
 function addDebugLoggingConfigIfMissing(
 	_context: CompanionUpgradeContext<PtzOpticsConfig>,
-	props: CompanionStaticUpgradeProps<PtzOpticsConfig>
+	props: CompanionStaticUpgradeProps<PtzOpticsConfig>,
 ): CompanionStaticUpgradeResult<PtzOpticsConfig> {
 	const result: CompanionStaticUpgradeResult<PtzOpticsConfig> = {
 		updatedActions: [],

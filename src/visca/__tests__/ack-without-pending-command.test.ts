@@ -22,7 +22,7 @@ describe('ACK without pending command', () => {
 				CameraReplyBytes(ACK(1)), // focus-mode
 				InquiryFailedFatally([ACKWithoutPendingCommandMatcher, MatchVISCABytes(ACK(1))], 'focus-mode'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

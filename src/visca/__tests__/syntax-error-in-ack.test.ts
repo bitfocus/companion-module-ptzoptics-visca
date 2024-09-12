@@ -26,7 +26,7 @@ describe('VISCA ACK syntax errors', () => {
 				CameraReplyBytes(TooLongACK), // focus-near, ACK but extra 33 byte
 				CommandFailedFatally([BadACKMatcher, MatchVISCABytes(TooLongACK)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -41,7 +41,7 @@ describe('VISCA ACK syntax errors', () => {
 				CameraReplyBytes(BadStartByte), // focus-near
 				CommandFailedFatally([BadReturnStartByteMatcher, MatchVISCABytes(BadStartByte)], 'focus-near'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

@@ -15,7 +15,7 @@ import { isValidPreset, twoDigitHex } from './camera/options.js'
  */
 export async function parsePresetVariableOption(
 	options: CompanionOptionValues,
-	context: CompanionActionContext
+	context: CompanionActionContext,
 ): Promise<CompanionOptionValues | string> {
 	const presetStr = String(options.val)
 	const preset = parseInt(await context.parseVariablesInString(presetStr), 10)

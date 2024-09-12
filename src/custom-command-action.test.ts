@@ -1,4 +1,4 @@
-import { CompanionActionInfo } from '@companion-module/base'
+import { type CompanionActionInfo } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import {
 	addCommandParameterOptionsToCustomCommandOptions,

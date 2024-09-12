@@ -100,7 +100,7 @@ describe('completion in empty socket', () => {
 				CameraReplyBytes(Completion(2)), // preset-recall-8
 				CommandSucceeded('preset-recall-8'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

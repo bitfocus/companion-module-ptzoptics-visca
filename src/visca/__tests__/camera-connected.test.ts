@@ -14,7 +14,7 @@ describe('port connected', () => {
 				InstanceStatusIs(InstanceStatus.Connecting),
 				WaitUntilConnectedToCamera(),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 

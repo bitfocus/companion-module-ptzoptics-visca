@@ -30,7 +30,7 @@ describe('command not executable error', () => {
 				CameraReplyBytes(CommandNotExecutable(0xf)), // focus-near
 				CommandFailed([CantBeExecutedNowMatcher, MatchVISCABytes(FocusNearStandardBytes)], 'focus-near'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -42,10 +42,10 @@ describe('command not executable error', () => {
 				CameraReplyBytes(CommandNotExecutable(7)), // exposure-mode
 				InquiryFailedFatally(
 					[NotExecutableWithNoCommandsAwaitingInitialResponseMatcher, MatchVISCABytes(CommandNotExecutable(7))],
-					'exposure-mode'
+					'exposure-mode',
 				),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -62,7 +62,7 @@ describe('command not executable error', () => {
 				CameraReplyBytes([0x90, 0x50, 0x0a, 0xff]), // exposure-mode
 				InquirySucceeded({ val: '2' }, 'exposure-mode'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

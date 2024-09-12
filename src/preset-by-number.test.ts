@@ -12,7 +12,7 @@ function optionsWithPresetOption(text: string): CompanionOptionValues {
 function expectResolvesToCommandBytes(
 	result: string | CompanionOptionValues,
 	command: Command,
-	expectedBytes: readonly number[]
+	expectedBytes: readonly number[],
 ): void {
 	if (typeof result === 'string') {
 		throw new TypeError('Result should not have been an error, instead got: ' + result)

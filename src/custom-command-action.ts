@@ -131,7 +131,9 @@ const CommandParametersDefault = ''
  * specify no parameters are present in it.
  */
 export function isCustomCommandMissingCommandParameterOptions(action: CompanionActionInfo): boolean {
-	return action.actionId === PtzOpticsActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
+	return (
+		action.actionId === (PtzOpticsActionId.SendCustomCommand as any) && !(CommandParametersOptionId in action.options)
+	)
 }
 
 /**
@@ -163,7 +165,7 @@ type CommandAndOptions = {
  */
 export async function computeCustomCommandAndOptions(
 	options: CompanionOptionValues,
-	context: CompanionActionContext
+	context: CompanionActionContext,
 ): Promise<CommandAndOptions> {
 	const commandBytes = parseMessage(String(options['custom']))
 
@@ -176,7 +178,7 @@ export async function computeCustomCommandAndOptions(
 
 			return acc
 		},
-		{} as PartialCommandParams
+		{} as PartialCommandParams,
 	)
 
 	const command = new UserDefinedCommand(commandBytes, commandParams)

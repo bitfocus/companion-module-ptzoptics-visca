@@ -24,7 +24,7 @@ describe('too-short error response', () => {
 				CameraReplyBytes(TooShortError), // close
 				CommandFailedFatally([ErrorOfUnexpectedLengthMatcher, MatchVISCABytes(TooShortError)], 'close'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 
@@ -36,7 +36,7 @@ describe('too-short error response', () => {
 				CameraReplyBytes(TooShortError), // exposure-mode
 				InquiryFailedFatally([ErrorOfUnexpectedLengthMatcher, MatchVISCABytes(TooShortError)], 'exposure-mode'),
 			],
-			InstanceStatus.ConnectionFailure
+			InstanceStatus.ConnectionFailure,
 		)
 	})
 })

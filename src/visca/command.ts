@@ -366,7 +366,7 @@ export class UserDefinedInquiry extends Inquiry {
 export function responseMatches(
 	response: readonly number[],
 	mask: readonly number[],
-	values: readonly number[]
+	values: readonly number[],
 ): boolean {
 	if (response.length !== values.length) return false
 	for (let i = 0; i < response.length; i++) {

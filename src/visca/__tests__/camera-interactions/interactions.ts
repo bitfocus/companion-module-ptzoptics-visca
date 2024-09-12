@@ -1,5 +1,5 @@
-import { CompanionOptionValues, InstanceStatus } from '@companion-module/base'
-import { Command, Inquiry } from '../../command.js'
+import { type CompanionOptionValues, type InstanceStatus } from '@companion-module/base'
+import { type Command, type Inquiry } from '../../command.js'
 
 /**
  * A matcher defining the expected error message for a fatal or nonfatal failed
@@ -126,7 +126,7 @@ export function SendCommand(command: Command, id: string): SendCameraCommand
 export function SendCommand(
 	command: Command,
 	optsOrId: CompanionOptionValues | string,
-	optionalId?: string
+	optionalId?: string,
 ): SendCameraCommand {
 	let options, id
 	if (typeof optsOrId === 'string') {

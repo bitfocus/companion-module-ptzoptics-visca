@@ -1,5 +1,5 @@
 import { assertNever, type CompanionOptionValues, InstanceStatus, type LogLevel } from '@companion-module/base'
-import { Interaction, Match } from './interactions.js'
+import { type Interaction, type Match } from './interactions.js'
 import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
 import { prettyBytes } from '../../utils.js'
@@ -124,7 +124,7 @@ function requireFailWhenSucceeded(type: MessageType, fatal: boolean, match: Matc
  */
 function requireFatalFailureWhenFailed(type: MessageType, match: Match, message: string): void {
 	const msg = `Expected ${type} to fail fatally matching ${reprMatch(
-		match
+		match,
 	)}, instead failed nonfatally with message ${repr(message)}`
 	throw new Error(msg)
 }
@@ -135,7 +135,7 @@ function requireFatalFailureWhenFailed(type: MessageType, match: Match, message:
  */
 function requireNonfatalFailureWhenFatal(type: MessageType, match: Match, message: string): void {
 	const msg = `Expected ${type} to fail matching ${reprMatch(match)}, instead failed fatally with message ${repr(
-		message
+		message,
 	)}`
 	throw new Error(msg)
 }
@@ -198,7 +198,7 @@ async function verifyInteractions(
 	server: net.Server,
 	port: number,
 	interactions: readonly Interaction[],
-	finalStatus: InstanceStatus
+	finalStatus: InstanceStatus,
 ): Promise<void> {
 	const instance = new MockInstance()
 	const clientViscaPort = new VISCAPort(instance)
@@ -320,7 +320,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							requireSucceedWhenFailed('command', true, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -342,7 +342,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							requireNonfatalFailureWhenFatal('command', match, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -364,7 +364,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							checkMatch('command', match, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -388,7 +388,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							requireSucceedWhenFailed('inquiry', true, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -412,7 +412,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							requireNonfatalFailureWhenFatal('inquiry', match, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -436,7 +436,7 @@ async function verifyInteractions(
 						},
 						(reason: Error) => {
 							checkMatch('inquiry', match, reason.message)
-						}
+						},
 					)
 					break
 				}
@@ -530,7 +530,7 @@ async function verifyInteractions(
  */
 export async function RunCameraInteractionTest(
 	interactions: readonly Interaction[],
-	finalStatus: InstanceStatus
+	finalStatus: InstanceStatus,
 ): Promise<void> {
 	type ServerInfo = {
 		server: net.Server
@@ -559,7 +559,7 @@ export async function RunCameraInteractionTest(
 				LOG(`Server listening for incoming connections on port ${port}`)
 				resolve({ server, port: addr.port })
 			})
-		}
+		},
 	)
 
 	return verifyInteractions(server, port, interactions, finalStatus)

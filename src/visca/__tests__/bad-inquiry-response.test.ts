@@ -40,10 +40,10 @@ describe('inquiry response mismatch', () => {
 				CameraReplyBytes(BadReturn), // zoom-position
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(BadReturn), UserDefinedInquiryMatcher],
-					'zoom-position'
+					'zoom-position',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -56,10 +56,10 @@ describe('inquiry response mismatch', () => {
 				CameraReplyBytes(TooLongResponseBytes), // zoom-position
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(TooLongResponseBytes), UserDefinedInquiryMatcher],
-					'zoom-position'
+					'zoom-position',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -73,10 +73,10 @@ describe('inquiry response mismatch', () => {
 				CameraReplyBytes(MaskMismatchResponseBytes), // zoom-position
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(MaskMismatchResponseBytes), UserDefinedInquiryMatcher],
-					'zoom-position'
+					'zoom-position',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -89,10 +89,10 @@ describe('inquiry response mismatch', () => {
 				CameraReplyBytes(TooLongResponseBytes), // exposure-mode
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(TooLongResponseBytes), BlameModuleMatcher],
-					'exposure-mode'
+					'exposure-mode',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -105,10 +105,10 @@ describe('inquiry response mismatch', () => {
 				CameraReplyBytes(MaskMismatchResponseBytes), // exposure-mode
 				InquiryFailed(
 					[InquiryResponseIncompatibleMatcher, MatchVISCABytes(MaskMismatchResponseBytes), BlameModuleMatcher],
-					'exposure-mode'
+					'exposure-mode',
 				),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })

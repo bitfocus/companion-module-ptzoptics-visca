@@ -46,7 +46,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				// Swallow the error so that execution gracefully unwinds.
 				this.log('error', `Unhandled command rejection was suppressed: ${reason}`)
 				return
-			}
+			},
 		)
 	}
 
@@ -79,7 +79,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				// Swallow the error so that execution gracefully unwinds.
 				this.log('error', `Unhandled inquiry rejection was suppressed: ${reason}`)
 				return null
-			}
+			},
 		)
 	}
 
@@ -146,7 +146,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			`PTZOptics module configuration on ${desc}: ${JSON.stringify(config, (_k, v) => {
 				if (v === undefined) return { undefined: true }
 				return v
-			})}`
+			})}`,
 		)
 	}
 

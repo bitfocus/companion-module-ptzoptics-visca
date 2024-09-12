@@ -30,7 +30,7 @@ describe('VISCA port command buffer full', () => {
 				CameraReplyBytes(ACKCompletion(2)), // close again
 				CommandSucceeded('close'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 
@@ -46,7 +46,7 @@ describe('VISCA port command buffer full', () => {
 				CameraReplyBytes(ACKCompletion(2)), // toggle
 				CommandSucceeded('toggle'),
 			],
-			InstanceStatus.Ok
+			InstanceStatus.Ok,
 		)
 	})
 })
