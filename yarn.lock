@@ -423,9 +423,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@companion-module/tools@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "@companion-module/tools@npm:2.0.3"
+"@companion-module/tools@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "@companion-module/tools@npm:2.0.4"
   dependencies:
     "@eslint/js": "npm:^9.10.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -453,7 +453,7 @@ __metadata:
     companion-generate-manifest: scripts/generate-manifest.js
     companion-module-build: scripts/build.js
     companion-module-check: scripts/check.js
-  checksum: 10c0/b69b27071442c92f1df1aa1ddc860556502e2774b12d1cdcae0db162f7b0ca534b1d2050894e188b5c48edcf34e67a3ca7843bd6bb7cc7352abe0bbf4508d543
+  checksum: 10c0/ce795f8ede524b2984a5c4fc744267fc8b9dab8fa9602295f13348ce340cf9e8ec5ebbb1ab4cf415f8780ba8d89f4d67f936a4d5b9f0539ba9573cdbc129d6d4
   languageName: node
   linkType: hard
 
@@ -4847,7 +4847,7 @@ __metadata:
   resolution: "ptzoptics-visca@workspace:."
   dependencies:
     "@companion-module/base": "npm:~1.10.0"
-    "@companion-module/tools": "npm:^2.0.3"
+    "@companion-module/tools": "npm:^2.0.4"
     "@jest/globals": "npm:^29.7.0"
     "@types/node": "npm:^18.19.10"
     eslint: "npm:^9.10.0"
