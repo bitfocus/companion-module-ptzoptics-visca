@@ -438,23 +438,22 @@ export class VISCAPort {
 		const returnMessages = this.#readReturnMessages(socket)
 
 		let connectionReject: ((reason: Error) => void) | null = null
-		const open = new Promise<void>((resolve: () => void, reject: (reason: Error) => void) => {
-			connectionReject = reject
-
-			socket.on('connect', () => {
-				if (this.#connectionStatus.type === 'connecting') {
-					instance.log('debug', 'Connected')
-
-					instance.updateStatus(InstanceStatus.Ok)
-					this.#connectionStatus = { type: 'connected' }
-					resolve()
-				}
-			})
-		})
 
 		this.#connectionStatus = {
 			type: 'connecting',
-			open,
+			open: new Promise<void>((resolve: () => void, reject: (reason: Error) => void) => {
+				connectionReject = reject
+
+				socket.on('connect', () => {
+					if (this.#connectionStatus.type === 'connecting') {
+						instance.log('debug', 'Connected')
+
+						instance.updateStatus(InstanceStatus.Ok)
+						this.#connectionStatus = { type: 'connected' }
+						resolve()
+					}
+				})
+			}),
 			reject: connectionReject!,
 		}
 
