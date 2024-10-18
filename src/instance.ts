@@ -1,4 +1,9 @@
-import { type CompanionOptionValues, InstanceBase, type SomeCompanionConfigField } from '@companion-module/base'
+import {
+	type CompanionOptionValues,
+	InstanceBase,
+	InstanceStatus,
+	type SomeCompanionConfigField,
+} from '@companion-module/base'
 import { getActions } from './actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
@@ -129,7 +134,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	// When the module gets deleted
 	async destroy(): Promise<void> {
 		this.log('info', `destroying module: ${this.id}`)
-		this.#visca.close()
+		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
 	/**
@@ -167,8 +172,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	}
 
 	#initTCP(): void {
-		this.#visca.close()
-
 		if (this.#config.host !== '') {
 			// This initiates the connection without delaying to fully establish
 			// it as `await this.#visca.connect()` would do.

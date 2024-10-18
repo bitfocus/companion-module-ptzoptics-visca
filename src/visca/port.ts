@@ -366,10 +366,15 @@ export class VISCAPort {
 	}
 
 	/**
-	 * Close this port if it's currently open.  If provided, the optional reason
-	 * will be used to reject pending commands/inquiries.
+	 * Close this port.
+	 *
+	 * @param reason
+	 *   A reason-string used to reject either an in-progress connection attempt
+	 *   or any pending commands/inquiries.
+	 * @param status
+	 *   A status to update the associated instance to.
 	 */
-	close(reason = 'Socket was closed'): void {
+	close(reason: string, status: InstanceStatus): void {
 		let didClose = false
 		if (this.#socket !== null) {
 			didClose = true
@@ -382,7 +387,7 @@ export class VISCAPort {
 			this.#connectionStatus = { type: 'disconnected' }
 		}
 
-		this.#instance.updateStatus(InstanceStatus.Disconnected)
+		this.#instance.updateStatus(status)
 
 		if (didClose) {
 			// Empty out all pending commands, then resolve them all with fatal
@@ -415,14 +420,12 @@ export class VISCAPort {
 	 * await `connect()` after calling this function.
 	 */
 	open(host: string, port: number, debugLogging: boolean): void {
-		this.close()
+		this.close('Socket is being reopened', InstanceStatus.Connecting)
 
 		const socket = (this.#socket = new TCPHelper(host, port))
 		this.#debugLogging = debugLogging
 
 		const instance = this.#instance
-
-		instance.updateStatus(InstanceStatus.Connecting)
 
 		socket.on('status_change', (status: TCPHelperEvents['status_change'][0], message?: string) => {
 			const msg = `Status change: ${status}${typeof message === 'string' ? ` (${message})` : ''}`
@@ -463,8 +466,7 @@ export class VISCAPort {
 			.catch((reason: Error) => {
 				const processingErrorReason = reason.message
 				this.#instance.log('error', processingErrorReason)
-				this.close(processingErrorReason)
-				this.#instance.updateStatus(InstanceStatus.ConnectionFailure)
+				this.close(processingErrorReason, InstanceStatus.ConnectionFailure)
 			})
 			.finally(() => {
 				this.#instance.log('info', `Return message processing completed`)

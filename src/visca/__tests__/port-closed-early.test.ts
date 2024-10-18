@@ -14,7 +14,7 @@ import {
 	SendCommand,
 	SendInquiry,
 } from './camera-interactions/interactions.js'
-import { SocketClosedMatcher } from './camera-interactions/matchers.js'
+import { CloseVISCAPortEarlyMatcher } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
 
 describe('VISCA port closed early', () => {
@@ -28,8 +28,8 @@ describe('VISCA port closed early', () => {
 				CameraReplyBytes(ACK(2)), // focus-near
 				CloseVISCAPortEarly(),
 				InstanceStatusIs(InstanceStatus.Disconnected),
-				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
-				CommandFailedFatally(SocketClosedMatcher, 'focus-stop'),
+				CommandFailedFatally(CloseVISCAPortEarlyMatcher, 'focus-near'),
+				CommandFailedFatally(CloseVISCAPortEarlyMatcher, 'focus-stop'),
 			],
 			InstanceStatus.Disconnected,
 		)
@@ -46,8 +46,8 @@ describe('VISCA port closed early', () => {
 				CameraReplyBytes(ACK(2)), // focus-near
 				CloseVISCAPortEarly(),
 				InstanceStatusIs(InstanceStatus.Disconnected),
-				CommandFailedFatally(SocketClosedMatcher, 'focus-near'),
-				InquiryFailedFatally(SocketClosedMatcher, 'exposure-mode'),
+				CommandFailedFatally(CloseVISCAPortEarlyMatcher, 'focus-near'),
+				InquiryFailedFatally(CloseVISCAPortEarlyMatcher, 'exposure-mode'),
 			],
 			InstanceStatus.Disconnected,
 		)

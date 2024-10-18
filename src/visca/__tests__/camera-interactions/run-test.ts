@@ -447,12 +447,12 @@ async function verifyInteractions(
 					break
 				}
 				case 'close-visca-port': {
-					clientViscaPort.close()
+					clientViscaPort.close('close-visca-port', InstanceStatus.Disconnected)
 					cameraSocketCloseExpectsError = true
 					break
 				}
 				case 'wait-for-connection': {
-					const { currentStatus: beforeStatus } = instance
+					const beforeStatus = instance.currentStatus
 					if (![InstanceStatus.Connecting, InstanceStatus.Ok].includes(beforeStatus)) {
 						throw new Error(`Connection should be connecting or connected, instead was ${repr(beforeStatus)}`)
 					}
@@ -491,7 +491,7 @@ async function verifyInteractions(
 		}
 	} finally {
 		LOG('interaction testing finished')
-		clientViscaPort.close()
+		clientViscaPort.close('Interaction testing finished', InstanceStatus.Disconnected)
 
 		const { socketClosed: cameraSocketClosed } = await camera
 
