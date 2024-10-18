@@ -15,7 +15,7 @@ function LOG(msg: string): void {
 }
 
 /** Generate a debug representation of a value. */
-function repr(val: undefined | number | string | boolean | (string | number)[]): string {
+function repr(val: undefined | number | string | boolean | readonly (string | number)[]): string {
 	if (val === undefined) {
 		return 'undefined'
 	}
@@ -57,20 +57,58 @@ function checkInquirySucceeded(expectedResponse: CompanionOptionValues, actualRe
 	}
 }
 
+type LogWaiter = {
+	readonly regex: RegExp
+	readonly resolve: () => void
+}
+
 /**
  * A mock instance that performs `InstanceBase` logging and tracks status
  * updates.
  */
 class MockInstance implements PartialInstance {
+	priorStatuses: InstanceStatus[] = []
 	currentStatus = InstanceStatus.UnknownError
+
+	logWaiter: LogWaiter | null = null
 
 	log = (level: LogLevel, msg: string) => {
 		LOG(`Log (${level}): ${msg}`)
+		if (this.logWaiter && this.logWaiter.regex.test(msg)) {
+			this.logWaiter.resolve()
+			this.logWaiter = null
+		}
 	}
 
-	updateStatus(status: InstanceStatus, message?: string) {
+	updateStatus(status: InstanceStatus, message?: string): void {
 		LOG(`Status update: ${status}${typeof message === 'string' ? `, message ${message}` : ''}`)
 		this.currentStatus = status
+		this.priorStatuses.push(status)
+	}
+
+	checkPriorStatuses(expectedStatuses: readonly InstanceStatus[]): void {
+		if (
+			expectedStatuses.length !== this.priorStatuses.length ||
+			!expectedStatuses.every((expectedStatus: InstanceStatus, i: number) => this.priorStatuses[i] === expectedStatus)
+		) {
+			throw new Error(`Prior statuses ${repr(this.priorStatuses)} failed to match ${repr(expectedStatuses)}`)
+		}
+
+		this.priorStatuses.length = 0
+	}
+
+	async waitForLog(regex: RegExp): Promise<void> {
+		LOG(`Waiting for log message matching ${repr(regex.source)}...`)
+		if (this.logWaiter !== null) {
+			throw new Error("Shouldn't be waiting for multiple log messages")
+		}
+
+		return new Promise<void>((resolve: () => void) => {
+			this.logWaiter = {
+				regex,
+				resolve,
+			}
+		})
 	}
 }
 
@@ -446,6 +484,10 @@ async function verifyInteractions(
 					}
 					break
 				}
+				case 'check-prior-statuses': {
+					instance.checkPriorStatuses(interaction.statuses)
+					break
+				}
 				case 'close-visca-port': {
 					clientViscaPort.close('close-visca-port', InstanceStatus.Disconnected)
 					cameraSocketCloseExpectsError = true
@@ -463,6 +505,19 @@ async function verifyInteractions(
 					if (afterStatus !== InstanceStatus.Ok) {
 						throw new Error(`Instance status should be Ok after connect(), was ${repr(afterStatus)}`)
 					}
+					break
+				}
+				case 'camera-disconnect': {
+					const socket = (await camera).socket
+					// This is a graceful disconnect (as such things go), so
+					// VISCAPort won't observe it as a socket error, rather as
+					// a socket end.
+					socket.end()
+					break
+				}
+				case 'wait-for-log-message': {
+					const { regex } = interaction
+					await instance.waitForLog(regex)
 					break
 				}
 				default:

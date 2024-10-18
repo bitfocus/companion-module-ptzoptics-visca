@@ -173,8 +173,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 	#initTCP(): void {
 		if (this.#config.host !== '') {
-			// This initiates the connection without delaying to fully establish
-			// it as `await this.#visca.connect()` would do.
+			// Initiate the connection (closing any prior connection), but don't
+			// delay to fully establish it as `await this.#visca.connect()`
+			// would, because network vagaries might make this take a long time.
 			this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
 		}
 	}

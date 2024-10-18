@@ -1,5 +1,5 @@
-import { type CompanionOptionValues, type InstanceStatus } from '@companion-module/base'
-import { type Command, type Inquiry } from '../../command.js'
+import type { CompanionOptionValues, InstanceStatus } from '@companion-module/base'
+import type { Command, Inquiry } from '../../command.js'
 
 /**
  * A matcher defining the expected error message for a fatal or nonfatal failed
@@ -75,12 +75,26 @@ type InstanceStatusCheck = {
 	readonly status: InstanceStatus
 }
 
+type PriorStatusesCheck = {
+	readonly type: 'check-prior-statuses'
+	readonly statuses: readonly InstanceStatus[]
+}
+
 type CloseVISCAPort = {
 	readonly type: 'close-visca-port'
 }
 
 type WaitForConnection = {
 	readonly type: 'wait-for-connection'
+}
+
+type CameraDisconnect = {
+	readonly type: 'camera-disconnect'
+}
+
+type WaitLogMessage = {
+	readonly type: 'wait-for-log-message'
+	readonly regex: RegExp
 }
 
 /**
@@ -99,8 +113,11 @@ export type Interaction =
 	| InquiryFailure
 	| InquiryFatalFailure
 	| InstanceStatusCheck
+	| PriorStatusesCheck
 	| CloseVISCAPort
 	| WaitForConnection
+	| CameraDisconnect
+	| WaitLogMessage
 
 /**
  * Send a command that has options through the VISCA port.
@@ -285,6 +302,24 @@ export function InstanceStatusIs(status: InstanceStatus): InstanceStatusCheck {
 }
 
 /**
+ * Expect that the instance has transitioned through the given statuses so far
+ * in the test -- since the last time status changes were checked with this
+ * function, so that successive checks don't repeat a shared prefix.
+ *
+ * Be careful to perform this only after a synchronizing interaction!  For
+ * example, if this is used to assert a connection failure, it should be used
+ * only after a prior operation that causes the status change to occur has
+ * happened -- and no further operations that might affect the status have
+ * happened.
+ *
+ * @param statuses
+ *   The expected statuses.
+ */
+export function CheckPriorStatuses(statuses: readonly InstanceStatus[]): PriorStatusesCheck {
+	return { type: 'check-prior-statuses', statuses }
+}
+
+/**
  * Manually close the VISCA port spun up by this test.  (The automatic close at
  * finish of interactions will simply do nothing.)
  */
@@ -304,4 +339,30 @@ export function CloseVISCAPortEarly(): CloseVISCAPort {
  */
 export function WaitUntilConnectedToCamera(): WaitForConnection {
 	return { type: 'wait-for-connection' }
+}
+
+/**
+ * Make the camera close its TCP connection to the port.
+ *
+ * The port will fall into connection-failed state, but it then should attempt
+ * to restart the TCP connection to get the instance working again (after
+ * discarding any pending commands/inquiries).
+ */
+export function CameraDisconnection(): CameraDisconnect {
+	return { type: 'camera-disconnect' }
+}
+
+/**
+ * Wait until a log message that matches `regex` is logged.
+ *
+ * Note that by the time this interaction completes, additional log messages may
+ * have been logged.  Therefore this interaction is best used to guarantee *at
+ * least* a particular degree of progress, without guaranteeing that no
+ * further progress has been made.
+ *
+ * @param regex
+ * 	  The regular expression to test logged messages against.
+ */
+export function WaitForLogMessage(regex: RegExp): WaitLogMessage {
+	return { type: 'wait-for-log-message', regex }
 }

@@ -27,6 +27,7 @@ export const ErrorOfUnexpectedLengthMatcher = /^Encountered error response of un
 export const UnrecognizedErrorMatcher = /^Received error response to \[[0-9A-Z ]+\] with unrecognized format/
 
 export const CloseVISCAPortEarlyMatcher = 'close-visca-port'
+export const CameraClosedConnectionMatcher = 'Network error: camera closed its side of the connection'
 
 export const AttemptSendInvalidMatcher = /^Attempt to send invalid /
 

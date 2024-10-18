@@ -8,6 +8,7 @@ import {
 import { checkCommandBytes, type Command, type Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { prettyBytes } from './utils.js'
+import { promiseWithResolvers } from './utils.js'
 
 const BLAME_MODULE =
 	'This is likely a bug in the ptzoptics-visca Companion module.  Please ' +
@@ -272,8 +273,15 @@ type DisconnectedStatus = { type: 'disconnected' }
 
 type ConnectingStatus = {
 	type: 'connecting'
+
+	/**
+	 * A promise that resolves when the port connection attempt succeeds or
+	 * rejects when the attempt is canceled because the port is closed.
+	 */
 	open: Promise<void>
-	reject: (reason: Error) => void
+
+	/** A function that can be used to reject `open`. */
+	reject: (this: void, reason: Error) => void
 }
 
 type ConnectedStatus = { type: 'connected' }
@@ -294,10 +302,18 @@ export class VISCAPort {
 	#socket: TCPHelper | null = null
 
 	/**
-	 * The connection status of a port.  Ports begin life disconnected, then
-	 * proceed to connecting with associated promise to wait on for connection
-	 * to complete, then are either connected or revert to disconnected when
-	 * that promise settles.
+	 * The connection status of a port.
+	 *
+	 * Ports begin life disconnected, then proceed to connecting with associated
+	 * promise to wait on for connection to complete, then proceed to connected
+	 * or revert to disconnected when that promise settles.
+	 *
+	 * When the connection is closed, or if the connection encounters a VISCA
+	 * coherency error that requires the connection be closed because VISCA
+	 * responses can no longer be unambiguously interpreted, status reverts to
+	 * disconnected.  On the other hand, if the connection closes because of a
+	 * network issue, the port will attempt to reestablish the connection until
+	 * it succeeds or the port is closed.
 	 */
 	#connectionStatus: ConnectionStatus = { type: 'disconnected' }
 
@@ -366,15 +382,19 @@ export class VISCAPort {
 	}
 
 	/**
-	 * Close this port.
+	 * Close this port if it's either open or in the process of reconnecting
+	 * after a network error, rejecting any pending connection attempts,
+	 * commands, and inquiries.  (This will do nothing if the port is already
+	 * closed.)  Also update the status of the associated instance.
 	 *
 	 * @param reason
 	 *   A reason-string used to reject either an in-progress connection attempt
 	 *   or any pending commands/inquiries.
 	 * @param status
-	 *   A status to update the associated instance to.
+	 *   The status to update the associated instance to.
 	 */
 	close(reason: string, status: InstanceStatus): void {
+		const instance = this.#instance
 		let didClose = false
 		if (this.#socket !== null) {
 			didClose = true
@@ -382,12 +402,22 @@ export class VISCAPort {
 			this.#socket.destroy()
 			this.#socket = null
 			if (this.#connectionStatus.type === 'connecting') {
-				this.#connectionStatus.reject(new Error('Port closed before a connection was established'))
+				const { open, reject } = this.#connectionStatus
+
+				// Log the connection attempt being aborted, but also ensure
+				// that `open` never goes completely unhandled if the port is
+				// closed with no commands/inquiries sent and `connect()` never
+				// called.
+				open.catch((reason: Error) => {
+					instance.log('error', `Error attempting to connect to camera: ${reason.message}`)
+				})
+
+				reject(new Error('Port closed before a connection was established'))
 			}
 			this.#connectionStatus = { type: 'disconnected' }
 		}
 
-		this.#instance.updateStatus(status)
+		instance.updateStatus(status)
 
 		if (didClose) {
 			// Empty out all pending commands, then resolve them all with fatal
@@ -410,7 +440,8 @@ export class VISCAPort {
 	}
 
 	/**
-	 * Open this port connecting to the given host:port.
+	 * Open this port connecting to the given host:port (first closing it if
+	 * it's currently open).
 	 *
 	 * This operation initiates a connection to the camera and reading of return
 	 * messages from it, but it doesn't delay for the connection to actually be
@@ -422,51 +453,128 @@ export class VISCAPort {
 	open(host: string, port: number, debugLogging: boolean): void {
 		this.close('Socket is being reopened', InstanceStatus.Connecting)
 
-		const socket = (this.#socket = new TCPHelper(host, port))
-		this.#debugLogging = debugLogging
-
 		const instance = this.#instance
 
+		// Attempt to reconnect on error so that transient connection failures
+		// will be recovered from (albeit with any incomplete commands/inquiries
+		// dropped, because we don't know whether we're in a state where it's
+		// right to reattempt them).  However, VISCA protocol errors that impede
+		// interpreting subsequent VISCA messages will not be recovered, because
+		// they may be caused by conditions that will be present on reconnection
+		// and might trigger an infinite error loop.
+		const socket = new TCPHelper(host, port, { reconnect: true })
+
 		type TCPStatuses = TCPHelperEvents['status_change'][0]
-		socket.on('status_change', (status: TCPStatuses, message?: string) => {
-			const msg = `Status change: ${status}${typeof message === 'string' ? ` (${message})` : ''}`
-			instance.log('debug', msg)
+		socket.on('status_change', (status: TCPStatuses, message = '') => {
+			const maybeExplanation = message && ` (${message})`
+			instance.log('debug', `Socket status change: ${status}${maybeExplanation}`)
 		})
+
+		const onSocketComplete = (closeReason: string) => {
+			const connectionStatus = this.#connectionStatus.type
+			switch (connectionStatus) {
+				// Ignore connection errors (such as "Connection refused") that
+				// occur while the module is attempting to establish the initial
+				// connection to the camera (including on "reconnect" attempts,
+				// as requested above, if the first try fails).  This lets users
+				// start Companion and their cameras in either order, rather
+				// than forcing them to start one first, then the other.
+				case 'connecting':
+					break
+
+				case 'connected':
+				case 'disconnected':
+					// Errors not during the initial connection attempt should
+					// close the port.
+					this.close(closeReason, InstanceStatus.ConnectionFailure)
+
+					// ..and then we should try to reopen the port.  This won't
+					// retry commands/inquiries that were previously pending: we
+					// don't know to what extent they might have been partially
+					// (or completely!) performed, so it's up to the user to
+					// decide how to dig themselves out of this hole.
+					this.open(host, port, debugLogging)
+					break
+
+				default:
+					assertNever(connectionStatus)
+					break
+			}
+		}
 
 		type SocketError = TCPHelperEvents['error'][0]
 		socket.on('error', (err: SocketError) => {
-			// Make sure that we log and update Companion connection status for
-			// a network failure.
-			instance.log('error', `Network error: ${err.message}`)
-			instance.updateStatus(InstanceStatus.ConnectionFailure)
+			const error = `Network error: ${err.message}`
+			instance.log('error', error)
+
+			onSocketComplete(error)
 		})
 
-		const returnMessages = this.#readReturnMessages(socket)
+		socket.on('end', () => {
+			const error = 'Network error: camera closed its side of the connection'
+			instance.log('error', error)
 
-		let connectionReject: ((reason: Error) => void) | null = null
+			onSocketComplete(error)
+		})
 
+		const {
+			promise: connectionOpenedPromise,
+			resolve: connectionResolve,
+			reject: connectionReject,
+		} = promiseWithResolvers<void>()
+
+		socket.once('connect', () => {
+			const connectionStatus = this.#connectionStatus.type
+			if (connectionStatus === 'connecting') {
+				instance.log('debug', 'Connected')
+
+				instance.updateStatus(InstanceStatus.Ok)
+				this.#connectionStatus = { type: 'connected' }
+				connectionResolve()
+				return
+			}
+
+			// The remaining cases are internal logic errors, so close and don't
+			// try to reconnect.
+			let error
+			let status = InstanceStatus.ConnectionFailure
+			switch (connectionStatus) {
+				case 'disconnected':
+					error = 'Unexpected connection received while not connecting'
+					break
+				case 'connected':
+					error = 'Received multiple connection events'
+					break
+				default:
+					assertNever(connectionStatus)
+					error = 'Logic error handling connection'
+					status = InstanceStatus.UnknownError
+					break
+			}
+			instance.log('error', error)
+			this.close(error, status)
+		})
+
+		this.#debugLogging = debugLogging
+		this.#socket = socket
 		this.#connectionStatus = {
 			type: 'connecting',
-			open: new Promise<void>((resolve: () => void, reject: (reason: Error) => void) => {
-				connectionReject = reject
-
-				socket.on('connect', () => {
-					if (this.#connectionStatus.type === 'connecting') {
-						instance.log('debug', 'Connected')
-
-						instance.updateStatus(InstanceStatus.Ok)
-						this.#connectionStatus = { type: 'connected' }
-						resolve()
-					}
-				})
-			}),
-			reject: connectionReject!,
+			open: connectionOpenedPromise,
+			reject: connectionReject,
 		}
 
 		// Process return messages consistent with the commands/inquiries that
 		// have been sent.
+		const returnMessages = this.#readReturnMessages(socket)
 		this.#processReturnMessages(socket, returnMessages)
 			.catch((reason: Error) => {
+				// This is a transport-level failure where VISCA messages from
+				// the camera indicate some serious misunderstanding is afoot.
+				// Close the port (incidentally disconnecting the `'error'`
+				// handler above), and don't restart the connection: this could
+				// result in performing the exact action that triggered the
+				// transport-level failure, causing an infinite
+				// start-error-stop-restart loop.
 				const processingErrorReason = reason.message
 				this.#instance.log('error', processingErrorReason)
 				this.close(processingErrorReason, InstanceStatus.ConnectionFailure)
@@ -485,11 +593,13 @@ export class VISCAPort {
 		const status = this.#connectionStatus
 		switch (status.type) {
 			case 'disconnected':
-				throw new Error('Port has not been opened')
-			case 'connected':
-				return
+				throw new Error("Port isn't opened")
+			// @ts-expect-error intentional fallthrough
 			case 'connecting':
 				await status.open
+			// falls through, should be connected now
+
+			case 'connected':
 				return
 			default:
 				assertNever(status)
