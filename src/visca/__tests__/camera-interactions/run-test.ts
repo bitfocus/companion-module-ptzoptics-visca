@@ -151,9 +151,6 @@ function requireSucceedWhenFailed(type: MessageType, fatal: boolean, message: st
 
 /** A mock camera for a single `RunCameraInteractionTest`. */
 type Camera = {
-	/** The server that implements this "camera". */
-	server: net.Server
-
 	/**
 	 * The socket corresponding to the incoming client connection to this
 	 * "camera" during a `RunCameraInteractionTest`.  Bytes written to this
@@ -244,7 +241,7 @@ async function verifyInteractions(
 				return cameraIncomingBytes.splice(0, amount)
 			}
 
-			const camera = { server, socket, readIncomingBytes, socketClosed }
+			const camera = { socket, readIncomingBytes, socketClosed }
 			resolve(camera)
 		})
 	})
@@ -496,7 +493,7 @@ async function verifyInteractions(
 		LOG('interaction testing finished')
 		clientViscaPort.close()
 
-		const { socketClosed: cameraSocketClosed, server } = await camera
+		const { socketClosed: cameraSocketClosed } = await camera
 
 		const hadErrorClosingCameraSocket = await cameraSocketClosed
 
