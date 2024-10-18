@@ -427,11 +427,14 @@ export class VISCAPort {
 
 		const instance = this.#instance
 
-		socket.on('status_change', (status: TCPHelperEvents['status_change'][0], message?: string) => {
+		type TCPStatuses = TCPHelperEvents['status_change'][0]
+		socket.on('status_change', (status: TCPStatuses, message?: string) => {
 			const msg = `Status change: ${status}${typeof message === 'string' ? ` (${message})` : ''}`
 			instance.log('debug', msg)
 		})
-		socket.on('error', (err) => {
+
+		type SocketError = TCPHelperEvents['error'][0]
+		socket.on('error', (err: SocketError) => {
 			// Make sure that we log and update Companion connection status for
 			// a network failure.
 			instance.log('error', `Network error: ${err.message}`)
