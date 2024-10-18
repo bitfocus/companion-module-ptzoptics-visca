@@ -394,11 +394,11 @@ export class VISCAPort {
 			// errors.  Start with commands that have received an ACK, because
 			// they necessarily were received before messages still awaiting an
 			// initial response.
-			const waitingForCompletion = [...this.#waitingForCompletion.entries()]
+			const waitingForCompletion = [...this.#waitingForCompletion.values()]
 			this.#waitingForCompletion.clear()
 			const waitingForInitialResponse = this.#waitingForInitialResponse.splice(0)
 
-			for (const [_socket, pendingCommands] of waitingForCompletion) {
+			for (const pendingCommands of waitingForCompletion) {
 				for (const pendingCommand of pendingCommands) {
 					pendingCommand.fatalError(reason)
 				}
