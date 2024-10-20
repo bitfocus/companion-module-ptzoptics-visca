@@ -7,9 +7,10 @@ import { type Command, type Inquiry } from '../../command.js'
  *
  *   * A string matches if it is equal to the message.
  *   * A single RegExp matches if the regular expression matches.
- *   * An array of RegExps matches if all regular expressions in the array match.
+ *   * An array of RegExps matches if all regular expressions in the array
+ *     match.
  */
-export type Match = string | RegExp | RegExp[]
+export type Match = string | RegExp | readonly RegExp[]
 
 type SendCameraCommand = {
 	readonly type: 'send-camera-command'
