@@ -261,6 +261,9 @@ export interface PartialInstance {
 
 	/** See {@link PtzOpticsInstance.updateStatus}. */
 	updateStatus: PtzOpticsInstance['updateStatus']
+
+	/** See {@link PtzOpticsInstance.debugLogging}. */
+	readonly debugLogging: boolean
 }
 
 /**
@@ -319,9 +322,6 @@ export class VISCAPort {
 
 	/** The instance that created this port. */
 	#instance: PartialInstance
-
-	/** Log extra information about message/response processing. */
-	#debugLogging = false
 
 	/**
 	 * Commmands *and* inquiries sent to the camera but that the camera hasn't
@@ -450,7 +450,7 @@ export class VISCAPort {
 	 * established, if needed.  If you require the connection to be established,
 	 * await `connect()` after calling this function.
 	 */
-	open(host: string, port: number, debugLogging: boolean): void {
+	open(host: string, port: number): void {
 		this.close('Socket is being reopened', InstanceStatus.Connecting)
 
 		const instance = this.#instance
@@ -493,7 +493,7 @@ export class VISCAPort {
 					// don't know to what extent they might have been partially
 					// (or completely!) performed, so it's up to the user to
 					// decide how to dig themselves out of this hole.
-					this.open(host, port, debugLogging)
+					this.open(host, port)
 					break
 
 				default:
@@ -555,7 +555,6 @@ export class VISCAPort {
 			this.close(error, status)
 		})
 
-		this.#debugLogging = debugLogging
 		this.#socket = socket
 		this.#connectionStatus = {
 			type: 'connecting',
@@ -685,7 +684,7 @@ export class VISCAPort {
 			}
 
 			const returnMessage = receivedData.splice(0, terminatorOffset + 1)
-			if (this.#debugLogging) {
+			if (this.#instance.debugLogging) {
 				this.#instance.log('info', `RECV: ${prettyBytes(returnMessage)}`)
 			}
 			yield returnMessage
@@ -775,7 +774,7 @@ export class VISCAPort {
 				const { i, command } = result
 
 				const socket = secondByte & 0xf
-				if (this.#debugLogging) {
+				if (this.#instance.debugLogging) {
 					this.#instance.log('info', `Processing ${prettyBytes(command.bytes)} ACK in socket ${socket}`)
 				}
 
@@ -803,7 +802,7 @@ export class VISCAPort {
 					// (also emptying its socket) and resolve the corresponding
 					// command's promise.
 					const socket = secondByte & 0x0f
-					if (this.#debugLogging) {
+					if (this.#instance.debugLogging) {
 						this.#instance.log('info', `Completion in socket ${socket}`)
 					}
 
@@ -909,7 +908,7 @@ export class VISCAPort {
 						'relevant camera mode before executing this command.'
 					command.nonfatalError(reason)
 
-					if (this.#debugLogging) {
+					if (this.#instance.debugLogging) {
 						this.#instance.log('info', 'Removing non-executable command from #waitingForInitialResponse')
 					}
 
@@ -1133,7 +1132,7 @@ export class VISCAPort {
 
 	/** Write the supplied bytes to the socket. */
 	async #sendBytes(socket: TCPHelper, message: readonly number[]): Promise<void | Error> {
-		if (this.#debugLogging) {
+		if (this.#instance.debugLogging) {
 			this.#instance.log('info', `SEND: ${prettyBytes(message)}...`)
 		}
 		const sent = await socket.send(Buffer.from(message))

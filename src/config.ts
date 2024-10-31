@@ -1,9 +1,17 @@
-import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
+import { type InputValue, Regex, type SomeCompanionConfigField } from '@companion-module/base'
 
+/**
+ * The `TConfig` object type used to store instance configuration info.
+ *
+ * Nothing ensures that Companion config objects conform to the `TConfig` type
+ * specified by a module.  Therefore we leave this type underdefined, not
+ * well-defined, so that configuration info will be defensively processed.  (We
+ * use `PtzOpticsOptions` to store configuration choices as well-typed values
+ * for the long haul.  See the `options.ts:optionsFromConfig` destructuring
+ * parameter for a list of the field/types we expect to find in config objects.)
+ */
 export interface PtzOpticsConfig {
-	host: string
-	port: string
-	debugLogging: boolean
+	[key: string]: InputValue | undefined
 }
 
 /**

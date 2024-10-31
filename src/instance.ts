@@ -9,13 +9,23 @@ import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
 import type { Command, Inquiry } from './visca/command.js'
 import { VISCAPort } from './visca/port.js'
+import {
+	canUpdateOptionsWithoutRestarting,
+	noCameraOptions,
+	optionsFromConfig,
+	type PtzOpticsOptions,
+} from './options.js'
 
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
-	#config: PtzOpticsConfig = {
-		host: '',
-		port: '5678',
-		debugLogging: false,
+	/** Options dictating the behavior of this instance. */
+	#options: PtzOpticsOptions = noCameraOptions()
+
+	/** Whether debug logging is enabled on this instance or not. */
+	get debugLogging(): boolean {
+		return this.#options.debugLogging
 	}
+
+	/** A port to use to communicate with the represented camera. */
 	#visca
 
 	/**
@@ -137,6 +147,37 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
+	async init(config: PtzOpticsConfig): Promise<void> {
+		this.#logConfig(config, 'init()')
+
+		this.setActionDefinitions(getActions(this))
+		this.setPresetDefinitions(getPresets())
+
+		return this.configUpdated(config)
+	}
+
+	async configUpdated(config: PtzOpticsConfig): Promise<void> {
+		this.#logConfig(config, 'configUpdated()')
+
+		const oldOptions = this.#options
+
+		const newOptions = optionsFromConfig(config)
+		this.#options = newOptions
+
+		if (canUpdateOptionsWithoutRestarting(oldOptions, newOptions)) {
+			return
+		}
+
+		if (this.#options.host === null) {
+			this.#visca.close('no host specified', InstanceStatus.Disconnected)
+		} else {
+			// Initiate the connection (closing any prior connection), but don't
+			// delay to fully establish it as `await this.#visca.connect()`
+			// would, because network vagaries might make this take a long time.
+			this.#visca.open(this.#options.host, this.#options.port)
+		}
+	}
+
 	/**
 	 * Write a copy of the given module config information to logs.
 	 *
@@ -145,7 +186,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 * @param desc
 	 *   A description of the event occasioning the logging.
 	 */
-	logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
+	#logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
 		this.log(
 			'info',
 			`PTZOptics module configuration on ${desc}: ${JSON.stringify(config, (_k, v) => {
@@ -153,48 +194,5 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				return v
 			})}`,
 		)
-	}
-
-	async init(config: PtzOpticsConfig): Promise<void> {
-		this.logConfig(config, 'init()')
-
-		this.#config = config
-
-		this.setActionDefinitions(getActions(this))
-		this.setPresetDefinitions(getPresets())
-
-		// Create the TCP socket and start connecting to the camera.  (Don't
-		// delay until the connection is established, tho: init() must complete
-		// in a relatively short time or else Companion will kill the connection
-		// and restart it, resulting in the module/connection in effect
-		// repeatedly banging its head against a wall.)
-		this.#initTCP()
-	}
-
-	#initTCP(): void {
-		if (this.#config.host !== '') {
-			// Initiate the connection (closing any prior connection), but don't
-			// delay to fully establish it as `await this.#visca.connect()`
-			// would, because network vagaries might make this take a long time.
-			this.#visca.open(this.#config.host, Number(this.#config.port), this.#config.debugLogging)
-		}
-	}
-
-	async configUpdated(config: PtzOpticsConfig): Promise<void> {
-		this.logConfig(config, 'configUpdated()')
-
-		// Reset the connection if the connection is closed or any configuration
-		// changed.
-		const resetConnection =
-			this.#visca.closed ||
-			this.#config.host !== config.host ||
-			this.#config.port !== config.port ||
-			this.#config.debugLogging !== config.debugLogging
-
-		this.#config = config
-
-		if (resetConnection) {
-			this.#initTCP()
-		}
 	}
 }

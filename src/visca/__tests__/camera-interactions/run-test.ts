@@ -86,6 +86,8 @@ class MockInstance implements PartialInstance {
 		this.priorStatuses.push(status)
 	}
 
+	readonly debugLogging = true // log everything during tests
+
 	checkPriorStatuses(expectedStatuses: readonly InstanceStatus[]): void {
 		if (
 			expectedStatuses.length !== this.priorStatuses.length ||
@@ -291,7 +293,7 @@ async function verifyInteractions(
 	// NOTE: This doesn't wait for the connection to be fully established.
 	//       Operations must either implicitly wait for it to be established or
 	//       `connect()` must be awaited.
-	clientViscaPort.open('127.0.0.1', port, true)
+	clientViscaPort.open('127.0.0.1', port)
 
 	try {
 		const sentCommands: Map<string, Promise<void | Error>> = new Map()
