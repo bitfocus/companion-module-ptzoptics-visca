@@ -61,7 +61,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 	function createPanTiltCallback(direction: readonly [number, number]) {
 		return async (_event: CompanionActionEvent) => {
 			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-			void sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
+			sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
 		}
 	}
 
@@ -115,7 +115,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'P/T Home',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(PanTiltHome)
+				instance.sendCommand(PanTiltHome)
 			},
 		},
 		[PtzOpticsActionId.PanTiltSetSpeed]: {
@@ -152,42 +152,42 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'Zoom In',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(ZoomIn)
+				instance.sendCommand(ZoomIn)
 			},
 		},
 		[PtzOpticsActionId.StartZoomOut]: {
 			name: 'Zoom Out',
 			options: [],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(ZoomOut, event.options)
+				instance.sendCommand(ZoomOut, event.options)
 			},
 		},
 		[PtzOpticsActionId.StopZoom]: {
 			name: 'Zoom Stop',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(ZoomStop)
+				instance.sendCommand(ZoomStop)
 			},
 		},
 		[PtzOpticsActionId.StartFocusNearer]: {
 			name: 'Focus Near',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusNearStandard)
+				instance.sendCommand(FocusNearStandard)
 			},
 		},
 		[PtzOpticsActionId.StartFocusFarther]: {
 			name: 'Focus Far',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusFarStandard)
+				instance.sendCommand(FocusFarStandard)
 			},
 		},
 		[PtzOpticsActionId.StopFocus]: {
 			name: 'Focus Stop',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusStop)
+				instance.sendCommand(FocusStop)
 			},
 		},
 		[PtzOpticsActionId.SelectFocusMode]: {
@@ -202,7 +202,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusMode, event.options)
+				instance.sendCommand(FocusMode, event.options)
 			},
 			learn: async (_event: CompanionActionEvent) => {
 				const opts = await instance.sendInquiry(FocusModeInquiry)
@@ -214,14 +214,14 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'Focus Lock',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusLock)
+				instance.sendCommand(FocusLock)
 			},
 		},
 		[PtzOpticsActionId.UnlockFocus]: {
 			name: 'Focus Unlock',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(FocusUnlock)
+				instance.sendCommand(FocusUnlock)
 			},
 		},
 		[PtzOpticsActionId.SelectExposureMode]: {
@@ -236,7 +236,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(ExposureMode, event.options)
+				instance.sendCommand(ExposureMode, event.options)
 			},
 			learn: async (_event: CompanionActionEvent) => {
 				const opts = await instance.sendInquiry(ExposureModeInquiry)
@@ -248,14 +248,14 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 			name: 'Iris Up',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(IrisUp)
+				instance.sendCommand(IrisUp)
 			},
 		},
 		[PtzOpticsActionId.IrisDown]: {
 			name: 'Iris Down',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(IrisDown)
+				instance.sendCommand(IrisDown)
 			},
 		},
 		[PtzOpticsActionId.SetIris]: {
@@ -270,21 +270,21 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(IrisSet, event.options)
+				instance.sendCommand(IrisSet, event.options)
 			},
 		},
 		[PtzOpticsActionId.ShutterUp]: {
 			name: 'Shutter Up',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(ShutterUp)
+				instance.sendCommand(ShutterUp)
 			},
 		},
 		[PtzOpticsActionId.ShutterDown]: {
 			name: 'Shutter Down',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(ShutterDown)
+				instance.sendCommand(ShutterDown)
 			},
 		},
 		[PtzOpticsActionId.SetShutter]: {
@@ -299,7 +299,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(ShutterSet, event.options)
+				instance.sendCommand(ShutterSet, event.options)
 			},
 		},
 		[PtzOpticsActionId.SetPreset]: {
@@ -315,7 +315,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(PresetSave, event.options)
+				instance.sendCommand(PresetSave, event.options)
 			},
 		},
 		[PtzOpticsActionId.SetPresetFromVar]: {
@@ -335,7 +335,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				if (typeof errorOrValue === 'string') {
 					instance.log('error', errorOrValue)
 				} else {
-					void instance.sendCommand(PresetSave, errorOrValue)
+					instance.sendCommand(PresetSave, errorOrValue)
 				}
 			},
 		},
@@ -352,7 +352,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(PresetRecall, event.options)
+				instance.sendCommand(PresetRecall, event.options)
 			},
 		},
 		[PtzOpticsActionId.RecallPresetFromVar]: {
@@ -372,7 +372,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				if (typeof errorOrValue === 'string') {
 					instance.log('error', errorOrValue)
 				} else {
-					void instance.sendCommand(PresetRecall, errorOrValue)
+					instance.sendCommand(PresetRecall, errorOrValue)
 				}
 			},
 		},
@@ -397,7 +397,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(PresetDriveSpeed, event.options)
+				instance.sendCommand(PresetDriveSpeed, event.options)
 			},
 		},
 		[PtzOpticsActionId.CameraPowerState]: {
@@ -412,7 +412,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(CameraPower, event.options)
+				instance.sendCommand(CameraPower, event.options)
 			},
 		},
 		[PtzOpticsActionId.OSD]: {
@@ -430,7 +430,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				let shouldToggle = false
 				switch (options[OnScreenDisplayOption.id]) {
 					case 'close':
-						void instance.sendCommand(OnScreenDisplayClose)
+						instance.sendCommand(OnScreenDisplayClose)
 						return
 					case 'toggle':
 						shouldToggle = true
@@ -443,7 +443,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				}
 
 				if (shouldToggle) {
-					void instance.sendCommand(OnScreenDisplayToggle)
+					instance.sendCommand(OnScreenDisplayToggle)
 				}
 			},
 			learn: async (_event: CompanionActionEvent) => {
@@ -464,21 +464,21 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(OnScreenDisplayNavigate, event.options)
+				instance.sendCommand(OnScreenDisplayNavigate, event.options)
 			},
 		},
 		[PtzOpticsActionId.OSDEnter]: {
 			name: 'OSD Enter',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(OnScreenDisplayEnter)
+				instance.sendCommand(OnScreenDisplayEnter)
 			},
 		},
 		[PtzOpticsActionId.OSDBack]: {
 			name: 'OSD Back',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(OnScreenDisplayBack)
+				instance.sendCommand(OnScreenDisplayBack)
 			},
 		},
 		[PtzOpticsActionId.SelectWhiteBalance]: {
@@ -493,14 +493,14 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(WhiteBalance, event.options)
+				instance.sendCommand(WhiteBalance, event.options)
 			},
 		},
 		[PtzOpticsActionId.WhiteBalanceOnePushTrigger]: {
 			name: 'White balance one push trigger',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
-				void instance.sendCommand(WhiteBalanceOnePushTrigger)
+				instance.sendCommand(WhiteBalanceOnePushTrigger)
 			},
 		},
 		[PtzOpticsActionId.SelectAutoWhiteBalanceSensitivity]: {
@@ -515,7 +515,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
+				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		[PtzOpticsActionId.AutoTracking]: {
@@ -530,7 +530,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				},
 			],
 			callback: async (event: CompanionActionEvent) => {
-				void instance.sendCommand(AutoTracking, event.options)
+				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
 		[PtzOpticsActionId.SendCustomCommand]: generateCustomCommandAction(instance),

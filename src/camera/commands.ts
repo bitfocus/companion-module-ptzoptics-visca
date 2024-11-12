@@ -40,15 +40,15 @@ export const PanTiltDirection: { readonly [key in PanTiltAction]: readonly [numb
 	[PanTiltAction.Stop]: [0x03, 0x03],
 }
 
-export async function sendPanTiltCommand(
+export function sendPanTiltCommand(
 	instance: PtzOpticsInstance,
 	direction: readonly [number, number],
 	panSpeed: number,
 	tiltSpeed: number,
-): Promise<void> {
+): void {
 	const bytes = [0x81, 0x01, 0x06, 0x01, panSpeed, tiltSpeed, ...direction, 0xff]
 	const command = new ModuleDefinedCommand(bytes)
-	return instance.sendCommand(command)
+	instance.sendCommand(command)
 }
 
 export const PanTiltHome = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x04, 0xff])

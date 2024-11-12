@@ -229,7 +229,7 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 		],
 		callback: async ({ options }, context) => {
 			const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
-			void instance.sendCommand(command, commandOpts)
+			instance.sendCommand(command, commandOpts)
 		},
 	}
 }

@@ -38,18 +38,12 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 * @param options
 	 *    Compatible options to use to fill in any parameters in `command`; may
 	 *    be omitted if `command` has no parameters.
-	 * @returns
-	 *    A promise that resolves after the response to `command` (which may be
-	 *    an error response) has been processed.  If `command`'s response was an
-	 *    an error not implicating overall connection stability, the promise
-	 *    resolves `undefined``.  Otherwise it resolves an object whose properties are
-	 *    choices corresponding to the parameters in the response.
 	 */
-	async sendCommand(command: Command, options: CompanionOptionValues = {}): Promise<void> {
+	sendCommand(command: Command, options: CompanionOptionValues = {}): void {
 		// `sendCommand` implicitly waits for the connection to be fully
 		// established, so it's unnecessary to resolve `this.#visca.connect()`
 		// here.
-		return this.#visca.sendCommand(command, options).then(
+		this.#visca.sendCommand(command, options).then(
 			(result: void | Error) => {
 				if (typeof result === 'undefined') {
 					return
