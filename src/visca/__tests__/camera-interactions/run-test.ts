@@ -406,15 +406,15 @@ async function verifyInteractions(
 					break
 				}
 				case 'inquiry-succeeded': {
-					if (sentInquiries.length === 0) {
+					const { response: expectedResponse, id } = interaction
+					const inquiryInfo = sentInquiries.shift()
+					if (inquiryInfo === undefined) {
 						throw new Error('No unexamined sent inquiries to examine')
 					}
-					const { response: expectedResponse, id } = interaction
-					const { inquiry, id: actualId } = sentInquiries[0]
+					const { inquiry, id: actualId } = inquiryInfo
 					if (id !== actualId) {
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
-					void sentInquiries.shift()
 					await inquiry.then(
 						(res: CompanionOptionValues | Error) => {
 							if (res instanceof Error) {
@@ -430,15 +430,15 @@ async function verifyInteractions(
 					break
 				}
 				case 'inquiry-failed': {
-					if (sentInquiries.length === 0) {
+					const { match, id } = interaction
+					const inquiryInfo = sentInquiries.shift()
+					if (inquiryInfo === undefined) {
 						throw new Error('No unexamined sent inquiry to examine')
 					}
-					const { match, id } = interaction
-					const { inquiry, id: actualId } = sentInquiries[0]
+					const { inquiry, id: actualId } = inquiryInfo
 					if (id !== actualId) {
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
-					void sentInquiries.shift()
 					await inquiry.then(
 						(res: CompanionOptionValues | Error) => {
 							if (res instanceof Error) {
@@ -454,15 +454,15 @@ async function verifyInteractions(
 					break
 				}
 				case 'inquiry-failed-fatally': {
-					if (sentInquiries.length === 0) {
+					const { match, id } = interaction
+					const inquiryInfo = sentInquiries.shift()
+					if (inquiryInfo === undefined) {
 						throw new Error('No unexamined sent inquiry to examine')
 					}
-					const { match, id } = interaction
-					const { inquiry, id: actualId } = sentInquiries[0]
+					const { inquiry, id: actualId } = inquiryInfo
 					if (id !== actualId) {
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
-					void sentInquiries.shift()
 					await inquiry.then(
 						(res: CompanionOptionValues | Error) => {
 							if (res instanceof Error) {
