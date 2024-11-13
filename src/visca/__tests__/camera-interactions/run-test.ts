@@ -2,7 +2,7 @@ import { assertNever, type CompanionOptionValues, InstanceStatus, type LogLevel 
 import { type Interaction, type Match } from './interactions.js'
 import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
-import { prettyBytes } from '../../utils.js'
+import { prettyBytes } from '../../../utils/pretty.js'
 
 /** Turn on extra logging in performing test interactions to debug tests. */
 const DEBUG_LOGGING = true

@@ -7,8 +7,8 @@ import {
 } from '@companion-module/base'
 import { checkCommandBytes, type Command, type Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
-import { prettyBytes } from './utils.js'
-import { promiseWithResolvers } from './utils.js'
+import { prettyBytes } from '../utils/pretty.js'
+import { promiseWithResolvers } from '../utils/promise-with-resolvers.js'
 
 const BLAME_MODULE =
 	'This is likely a bug in the ptzoptics-visca Companion module.  Please ' +

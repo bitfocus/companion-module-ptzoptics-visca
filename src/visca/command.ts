@@ -1,5 +1,6 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import { checkBytes, prettyBytes } from './utils.js'
+import { checkBytes } from '../utils/byte.js'
+import { prettyBytes } from '../utils/pretty.js'
 
 // TERMINOLOGY NOTE:
 // Eight bits is a byte.  The upper or lower four-bit half of a byte is a
