@@ -1,14 +1,30 @@
+// @ts-check
+
 import { generateEslintConfig } from '@companion-module/tools/eslint/config.mjs'
 
 const baseConfig = await generateEslintConfig({
 	enableJest: true,
 	enableTypescript: true,
-	ignores: [
-		// This file isn't part of the build, so eslint errors if we try to lint
-		// it.
-		'jest.config.ts',
-	],
 })
+
+/**
+ * @param {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>['files']} files
+ * @param {readonly string[]} allowModules
+ * @returns {import('eslint').Linter.Config<import('eslint').Linter.RulesRecord>}
+ */
+function permitLimitedUnpublishedImports(files, allowModules) {
+	return {
+		files,
+		rules: {
+			'n/no-unpublished-import': [
+				'error',
+				{
+					allowModules,
+				},
+			],
+		},
+	}
+}
 
 const customConfig = [
 	...baseConfig,
@@ -17,12 +33,7 @@ const customConfig = [
 		ignores: ['eslint.config.*'],
 		rules: {
 			'n/no-missing-import': 'off',
-			'n/no-unpublished-import': [
-				'error',
-				{
-					allowModules: ['@jest/globals'],
-				},
-			],
+			'n/no-unpublished-import': 'error',
 			'@typescript-eslint/strict-boolean-expressions': 'error',
 			eqeqeq: 'error',
 			radix: 'error',
@@ -34,6 +45,13 @@ const customConfig = [
 			],
 		},
 	},
+
+	permitLimitedUnpublishedImports(
+		['src/**/*spec.ts', 'src/**/*test.ts', 'src/**/__tests__/*', 'src/**/__mocks__/*'],
+		['@jest/globals'],
+	),
+	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
+	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
 ]
 
 export default customConfig
