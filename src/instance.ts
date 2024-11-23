@@ -27,7 +27,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	}
 
 	/** A port to use to communicate with the represented camera. */
-	#visca
+	#visca = new VISCAPort(this)
 
 	/**
 	 * Send the given command to the camera, filling in any parameters from the
@@ -123,12 +123,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 	decreasePanTiltSpeed(): void {
 		if (this.#speed > 0x01) this.#speed--
-	}
-
-	constructor(internal: unknown) {
-		super(internal)
-
-		this.#visca = new VISCAPort(this)
 	}
 
 	// Return config fields for web config of the module instance
