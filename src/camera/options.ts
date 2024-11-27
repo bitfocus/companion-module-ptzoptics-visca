@@ -291,7 +291,7 @@ for (let i = 0; i < 255; ++i) {
 export const PresetSaveOption = {
 	id: 'val',
 	choices: PRESET_CHOICES,
-	default: 'FD', // preset 253 is likely unused so is as safe a default as any
+	default: 'fd', // preset 253 is likely unused so is as safe a default as any
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
