@@ -278,7 +278,7 @@ export function twoDigitHex(n: number): string {
  * for various purposes and so are considered invalid.
  */
 export function isValidPreset(n: number): boolean {
-	return n < 90 || (n > 99 && n < 255)
+	return (0 <= n && n < 90) || (99 < n && n < 255)
 }
 
 const PRESET_CHOICES = []
@@ -288,19 +288,40 @@ for (let i = 0; i < 255; ++i) {
 	}
 }
 
+/**
+ * The id of the option that identifies the preset in preset recall/save actions
+ * when the use-variables checkbox is unchecked.
+ *
+ * (It would be better to define this in `actions/presets.ts`, but that would
+ * create a cyclic dependency resulting in various exports not having their
+ * intended values at runtime.)
+ */
+export const PresetValueOptionId = 'val'
+
+/**
+ * The preset default for a preset-set option.  (253 is chosen because it's
+ * reasonably likely to be unused, so if the user accidentally forgets to change
+ * it he's unlikely to destroy an existing preset.)
+ */
+export const PresetSetDefault = 253
+
 export const PresetSaveOption = {
-	id: 'val',
+	id: PresetValueOptionId,
 	choices: PRESET_CHOICES,
-	default: 'fd', // preset 253 is likely unused so is as safe a default as any
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},
 }
 
+/**
+ * The preset default for a preset-recall option.  (0 is used because it's the
+ * home setting and so can be expected to be reasonably defined.)
+ */
+export const PresetRecallDefault = 0
+
 export const PresetRecallOption = {
-	id: 'val',
+	id: PresetValueOptionId,
 	choices: PRESET_CHOICES,
-	default: '00', // preset 0 recalls the home setting
 	choiceToParam: (choice: string): number => {
 		return parseInt(choice, 16)
 	},

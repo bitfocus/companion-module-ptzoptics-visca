@@ -1,10 +1,10 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { MiscellaneousActionId } from './actions/miscellaneous.js'
 import { ExposureActionId } from './actions/exposure.js'
 import { FocusActionId } from './actions/focus.js'
+import { MiscellaneousActionId } from './actions/miscellaneous.js'
 import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
-import { PresetActionId } from './actions/presets.js'
+import { PresetActionId, PresetUseVariablesOptionId, PresetVariableOptionId } from './actions/presets.js'
 import { WhiteBalanceActionId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
 import {
@@ -17,7 +17,13 @@ import {
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
-import { isValidPreset, OnScreenDisplayNavigateOption, OnScreenDisplayOption, twoDigitHex } from './camera/options.js'
+import {
+	isValidPreset,
+	OnScreenDisplayNavigateOption,
+	OnScreenDisplayOption,
+	PresetValueOptionId,
+	twoDigitHex,
+} from './camera/options.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
@@ -978,9 +984,11 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PresetActionId.SetPreset,
+								actionId: PresetActionId.SavePset,
 								options: {
-									val: twoDigitHex(save),
+									[PresetUseVariablesOptionId]: false,
+									[PresetValueOptionId]: twoDigitHex(save),
+									[PresetVariableOptionId]: `${save}`,
 								},
 							},
 						],
@@ -1009,9 +1017,11 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PresetActionId.RecallPreset,
+								actionId: PresetActionId.RecallPset,
 								options: {
-									val: twoDigitHex(recall),
+									[PresetUseVariablesOptionId]: false,
+									[PresetValueOptionId]: twoDigitHex(recall),
+									[PresetVariableOptionId]: `${recall}`,
 								},
 							},
 						],

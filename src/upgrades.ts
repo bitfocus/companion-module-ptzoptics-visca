@@ -5,6 +5,7 @@ import type {
 	CompanionUpgradeContext,
 } from '@companion-module/base'
 import { tryUpdateCustomCommandsWithCommandParamOptions } from './actions/custom-command.js'
+import { tryUpdateRecallSetPresetActions } from './actions/presets.js'
 import { tryUpdateConfigWithDebugLogging, type PtzOpticsConfig } from './config.js'
 
 function ActionUpdater(
@@ -34,4 +35,5 @@ function ConfigUpdater(
 export const UpgradeScripts = [
 	ActionUpdater(tryUpdateCustomCommandsWithCommandParamOptions),
 	ConfigUpdater(tryUpdateConfigWithDebugLogging),
+	ActionUpdater(tryUpdateRecallSetPresetActions),
 ]
