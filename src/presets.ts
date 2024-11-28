@@ -1,5 +1,5 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { PtzOpticsActionId } from './actions/actionid.js'
+import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
@@ -10,7 +10,8 @@ import {
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
-import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from './camera/options.js'
+import { isValidPreset, OnScreenDisplayNavigateOption, OnScreenDisplayOption, twoDigitHex } from './camera/options.js'
+import { PresetActionId } from './actions/presets.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
@@ -956,7 +957,7 @@ export function getPresets(): CompanionPresetDefinitions {
 
 	// generates presets for saving camera presets
 	for (let save = 0; save < 255; save++) {
-		if (save < 90 || save > 99) {
+		if (isValidPreset(save)) {
 			presets['save_preset_' + save + '_preset'] = {
 				type: 'button',
 				category: 'Save Preset',
@@ -971,9 +972,9 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PtzOpticsActionId.SetPreset,
+								actionId: PresetActionId.SetPreset,
 								options: {
-									val: ('0' + save.toString(16)).slice(-2),
+									val: twoDigitHex(save),
 								},
 							},
 						],
@@ -987,7 +988,7 @@ export function getPresets(): CompanionPresetDefinitions {
 
 	// generates presets for recalling camera presets
 	for (let recall = 0; recall < 255; recall++) {
-		if (recall < 90 || recall > 99) {
+		if (isValidPreset(recall)) {
 			presets['recall_preset_' + recall + '_preset'] = {
 				type: 'button',
 				category: 'Recall Preset',
@@ -1002,9 +1003,9 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PtzOpticsActionId.RecallPreset,
+								actionId: PresetActionId.RecallPreset,
 								options: {
-									val: ('0' + recall.toString(16)).slice(-2),
+									val: twoDigitHex(recall),
 								},
 							},
 						],

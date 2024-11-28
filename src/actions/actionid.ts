@@ -1,4 +1,15 @@
-export enum PtzOpticsActionId {
+import type { CompanionActionDefinition } from '@companion-module/base'
+import type { PresetActionId } from './presets.js'
+
+/**
+ * The type of action definitions for all actions within the specified action
+ * set.
+ */
+export type ActionDefinitions<ActionSet extends string> = {
+	[actionId in ActionSet]: CompanionActionDefinition
+}
+
+export enum OtherActionId {
 	PanTiltLeft = 'left',
 	PanTiltRight = 'right',
 	PanTiltUp = 'up',
@@ -28,11 +39,6 @@ export enum PtzOpticsActionId {
 	ShutterUp = 'shutU',
 	ShutterDown = 'shutD',
 	SetShutter = 'shutS',
-	SetPreset = 'savePset',
-	SetPresetFromVar = 'savePsetFromVar',
-	RecallPreset = 'recallPset',
-	RecallPresetFromVar = 'recallPsetFromVar',
-	SetPresetDriveSpeed = 'speedPset',
 	CameraPowerState = 'power',
 	OSD = 'onScreenDisplay',
 	OSDNavigate = 'onScreenDisplayNavigate',
@@ -44,3 +50,9 @@ export enum PtzOpticsActionId {
 	AutoTracking = 'autoTracking',
 	SendCustomCommand = 'custom',
 }
+
+export type PtzOpticsActionId =
+	// Force to separate lines
+	| OtherActionId
+	// Force to separate lines
+	| PresetActionId

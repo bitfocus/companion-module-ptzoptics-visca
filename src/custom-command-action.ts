@@ -5,7 +5,7 @@ import type {
 	CompanionInputFieldTextInput,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import { PtzOpticsActionId } from './actions/actionid.js'
+import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
 import type { PtzOpticsInstance } from './instance.js'
 import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from './visca/command.js'
 

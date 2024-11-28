@@ -1,9 +1,9 @@
-import { describe, expect, test } from '@jest/globals'
-import { parsePresetVariableOption } from './preset-by-number.js'
 import type { CompanionOptionValues } from '@companion-module/base'
-import { PresetRecall, PresetSave } from './camera/commands.js'
-import { MockContext } from './__tests__/mock-context.js'
-import type { Command } from './visca/command.js'
+import { describe, expect, test } from '@jest/globals'
+import { PresetRecall, PresetSave } from '../camera/commands.js'
+import { parsePresetVariableOption } from './presets.js'
+import { MockContext } from '../__tests__/mock-context.js'
+import type { Command } from '../visca/command.js'
 
 function optionsWithPresetOption(text: string): CompanionOptionValues {
 	return { val: text }

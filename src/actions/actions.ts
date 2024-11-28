@@ -1,5 +1,5 @@
-import type { CompanionActionDefinitions, CompanionActionEvent } from '@companion-module/base'
-import { PtzOpticsActionId } from './actionid.js'
+import type { CompanionActionEvent } from '@companion-module/base'
+import { type ActionDefinitions, type OtherActionId, OtherActionId as PtzOpticsActionId } from './actionid.js'
 import {
 	AutoTracking,
 	AutoWhiteBalanceSensitivity,
@@ -22,9 +22,6 @@ import {
 	PanTiltAction,
 	PanTiltDirection,
 	PanTiltHome,
-	PresetDriveSpeed,
-	PresetRecall,
-	PresetSave,
 	ShutterDown,
 	ShutterSet,
 	ShutterUp,
@@ -46,18 +43,13 @@ import {
 	OnScreenDisplayNavigateOption,
 	OnScreenDisplayOption,
 	PanTiltSetSpeedOption,
-	PresetDriveNumberOption,
-	PresetDriveSpeedOption,
-	PresetRecallOption,
-	PresetSaveOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from '../camera/options.js'
 import { generateCustomCommandAction } from '../custom-command-action.js'
 import type { PtzOpticsInstance } from '../instance.js'
-import { parsePresetVariableOption } from '../preset-by-number.js'
 
-export function getActions(instance: PtzOpticsInstance): CompanionActionDefinitions {
+export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<OtherActionId> {
 	function createPanTiltCallback(direction: readonly [number, number]) {
 		return async (_event: CompanionActionEvent) => {
 			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
@@ -65,7 +57,7 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 		}
 	}
 
-	const actionDefinitions: CompanionActionDefinitions = {
+	return {
 		[PtzOpticsActionId.PanTiltLeft]: {
 			name: 'Pan Left',
 			options: [],
@@ -302,104 +294,6 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 				instance.sendCommand(ShutterSet, event.options)
 			},
 		},
-		[PtzOpticsActionId.SetPreset]: {
-			name: 'Save Preset',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Preset number',
-					id: PresetSaveOption.id,
-					choices: PresetSaveOption.choices,
-					minChoicesForSearch: 1,
-					default: PresetSaveOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(PresetSave, event.options)
-			},
-		},
-		[PtzOpticsActionId.SetPresetFromVar]: {
-			name: 'Save Preset (by number)',
-			options: [
-				{
-					type: 'textinput',
-					label: 'Preset number',
-					id: PresetSaveOption.id,
-					useVariables: true,
-					tooltip: 'Preset number range of 0-89, 100-254',
-					default: '0',
-				},
-			],
-			callback: async ({ options }, context) => {
-				const errorOrValue = await parsePresetVariableOption(options, context)
-				if (typeof errorOrValue === 'string') {
-					instance.log('error', errorOrValue)
-				} else {
-					instance.sendCommand(PresetSave, errorOrValue)
-				}
-			},
-		},
-		[PtzOpticsActionId.RecallPreset]: {
-			name: 'Recall Preset',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Preset number',
-					id: PresetRecallOption.id,
-					choices: PresetRecallOption.choices,
-					minChoicesForSearch: 1,
-					default: PresetRecallOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(PresetRecall, event.options)
-			},
-		},
-		[PtzOpticsActionId.RecallPresetFromVar]: {
-			name: 'Recall Preset (by number)',
-			options: [
-				{
-					type: 'textinput',
-					label: 'Preset number',
-					id: PresetRecallOption.id,
-					useVariables: true,
-					tooltip: 'Preset number range of 0-89, 100-254',
-					default: '0',
-				},
-			],
-			callback: async ({ options }, context) => {
-				const errorOrValue = await parsePresetVariableOption(options, context)
-				if (typeof errorOrValue === 'string') {
-					instance.log('error', errorOrValue)
-				} else {
-					instance.sendCommand(PresetRecall, errorOrValue)
-				}
-			},
-		},
-		[PtzOpticsActionId.SetPresetDriveSpeed]: {
-			name: 'Preset Drive Speed',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Preset number',
-					id: PresetDriveNumberOption.id,
-					choices: PresetDriveNumberOption.choices,
-					minChoicesForSearch: 1,
-					default: PresetDriveNumberOption.default,
-				},
-				{
-					type: 'dropdown',
-					label: 'Speed setting',
-					id: PresetDriveSpeedOption.id,
-					choices: PresetDriveSpeedOption.choices,
-					minChoicesForSearch: 1,
-					default: PresetDriveSpeedOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(PresetDriveSpeed, event.options)
-			},
-		},
 		[PtzOpticsActionId.CameraPowerState]: {
 			name: 'Power Camera',
 			options: [
@@ -535,6 +429,4 @@ export function getActions(instance: PtzOpticsInstance): CompanionActionDefiniti
 		},
 		[PtzOpticsActionId.SendCustomCommand]: generateCustomCommandAction(instance),
 	}
-
-	return actionDefinitions
 }
