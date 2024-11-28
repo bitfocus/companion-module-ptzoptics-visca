@@ -1,5 +1,5 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { PtzOpticsActionId } from './actions-enum.js'
+import { PtzOpticsActionId } from './actions/actionid.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
