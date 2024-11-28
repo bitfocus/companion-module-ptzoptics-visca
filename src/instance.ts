@@ -4,7 +4,7 @@ import {
 	InstanceStatus,
 	type SomeCompanionConfigField,
 } from '@companion-module/base'
-import { getActions } from './actions/all-actions.js'
+import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import { getPresets } from './presets.js'
 import type { Command, Inquiry } from './visca/command.js'
