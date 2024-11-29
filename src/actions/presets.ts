@@ -1,9 +1,5 @@
-import type {
-	CompanionActionContext,
-	CompanionActionDefinition,
-	CompanionActionEvent,
-	CompanionOptionValues,
-} from '@companion-module/base'
+import type { CompanionActionContext, CompanionActionEvent, CompanionOptionValues } from '@companion-module/base'
+import type { ActionDefinitions } from './actionid.js'
 import { PresetDriveSpeed, PresetRecall, PresetSave } from '../camera/commands.js'
 import {
 	isValidPreset,
@@ -49,7 +45,7 @@ export async function parsePresetVariableOption(
 	}
 }
 
-export function presetActions(instance: PtzOpticsInstance): Record<PresetActionId, CompanionActionDefinition> {
+export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<PresetActionId> {
 	return {
 		[PresetActionId.SetPreset]: {
 			name: 'Save Preset',

@@ -1,4 +1,5 @@
-import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
+import type { CompanionActionEvent } from '@companion-module/base'
+import type { ActionDefinitions } from './actionid.js'
 import { ZoomIn, ZoomOut, ZoomStop } from '../camera/commands.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
@@ -8,7 +9,7 @@ export enum ZoomActionId {
 	StopZoom = 'zoomS',
 }
 
-export function zoomActions(instance: PtzOpticsInstance): Record<ZoomActionId, CompanionActionDefinition> {
+export function zoomActions(instance: PtzOpticsInstance): ActionDefinitions<ZoomActionId> {
 	return {
 		[ZoomActionId.StartZoomIn]: {
 			name: 'Zoom In',

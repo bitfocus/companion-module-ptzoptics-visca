@@ -1,4 +1,5 @@
-import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
+import type { CompanionActionEvent } from '@companion-module/base'
+import type { ActionDefinitions } from './actionid.js'
 import { AutoTracking, CameraPower } from '../camera/commands.js'
 import { AutoTrackingOption, CameraPowerOption } from '../camera/options.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -8,9 +9,7 @@ export enum MiscellaneousActionId {
 	CameraPowerState = 'power',
 }
 
-export function miscellaneousActions(
-	instance: PtzOpticsInstance,
-): Record<MiscellaneousActionId, CompanionActionDefinition> {
+export function miscellaneousActions(instance: PtzOpticsInstance): ActionDefinitions<MiscellaneousActionId> {
 	return {
 		[MiscellaneousActionId.CameraPowerState]: {
 			name: 'Power Camera',

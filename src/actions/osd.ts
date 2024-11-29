@@ -1,4 +1,5 @@
-import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
+import type { CompanionActionEvent } from '@companion-module/base'
+import type { ActionDefinitions } from './actionid.js'
 import {
 	OnScreenDisplayBack,
 	OnScreenDisplayClose,
@@ -17,7 +18,7 @@ export enum OSDActionId {
 	OSDBack = 'onScreenDisplayBack',
 }
 
-export function osdActions(instance: PtzOpticsInstance): Record<OSDActionId, CompanionActionDefinition> {
+export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDActionId> {
 	return {
 		[OSDActionId.OSD]: {
 			name: 'OSD Open/Close',

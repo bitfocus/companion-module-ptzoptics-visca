@@ -1,5 +1,4 @@
-import type { CompanionActionDefinition } from '@companion-module/base'
-import type { PtzOpticsActionId } from './actionid.js'
+import type { ActionDefinitions, PtzOpticsActionId } from './actionid.js'
 import { customCommandActions } from './custom-command.js'
 import { exposureActions } from './exposure.js'
 import { focusActions } from './focus.js'
@@ -11,7 +10,7 @@ import { presetActions } from './presets.js'
 import { whiteBalanceActions } from './white-balance.js'
 import { zoomActions } from './zoom.js'
 
-export function getActions(instance: PtzOpticsInstance): Record<PtzOpticsActionId, CompanionActionDefinition> {
+export function getActions(instance: PtzOpticsInstance): ActionDefinitions<PtzOpticsActionId> {
 	return {
 		...customCommandActions(instance),
 		...exposureActions(instance),
