@@ -5,12 +5,6 @@ import {
 	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
-	FocusFarStandard,
-	FocusLock,
-	FocusMode,
-	FocusNearStandard,
-	FocusStop,
-	FocusUnlock,
 	IrisDown,
 	IrisSet,
 	IrisUp,
@@ -20,13 +14,12 @@ import {
 	WhiteBalance,
 	WhiteBalanceOnePushTrigger,
 } from '../camera/commands.js'
-import { ExposureModeInquiry, FocusModeInquiry } from '../camera/inquiries.js'
+import { ExposureModeInquiry } from '../camera/inquiries.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
-	FocusModeOption,
 	IrisSetOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
@@ -36,61 +29,6 @@ import type { PtzOpticsInstance } from '../instance.js'
 
 export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<OtherActionId> {
 	return {
-		[PtzOpticsActionId.StartFocusNearer]: {
-			name: 'Focus Near',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(FocusNearStandard)
-			},
-		},
-		[PtzOpticsActionId.StartFocusFarther]: {
-			name: 'Focus Far',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(FocusFarStandard)
-			},
-		},
-		[PtzOpticsActionId.StopFocus]: {
-			name: 'Focus Stop',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(FocusStop)
-			},
-		},
-		[PtzOpticsActionId.SelectFocusMode]: {
-			name: 'Focus Mode',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Auto/manual focus',
-					id: FocusModeOption.id,
-					choices: FocusModeOption.choices,
-					default: FocusModeOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(FocusMode, event.options)
-			},
-			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendInquiry(FocusModeInquiry)
-				if (opts === null) return undefined
-				return { ...opts }
-			},
-		},
-		[PtzOpticsActionId.LockFocus]: {
-			name: 'Focus Lock',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(FocusLock)
-			},
-		},
-		[PtzOpticsActionId.UnlockFocus]: {
-			name: 'Focus Unlock',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(FocusUnlock)
-			},
-		},
 		[PtzOpticsActionId.SelectExposureMode]: {
 			name: 'Exposure Mode',
 			options: [

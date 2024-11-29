@@ -1,5 +1,6 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
+import { FocusActionId } from './actions/focus.js'
 import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import { PresetActionId } from './actions/presets.js'
@@ -411,13 +412,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.StartFocusNearer,
+						actionId: FocusActionId.StartFocusNearer,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.StopFocus,
+						actionId: FocusActionId.StopFocus,
 						options: {},
 					},
 				],
@@ -440,13 +441,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.StartFocusFarther,
+						actionId: FocusActionId.StartFocusFarther,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.StopFocus,
+						actionId: FocusActionId.StopFocus,
 						options: {},
 					},
 				],
@@ -469,7 +470,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectFocusMode,
+						actionId: FocusActionId.SelectFocusMode,
 						options: {
 							bol: 0,
 						},
@@ -477,7 +478,7 @@ export function getPresets(): CompanionPresetDefinitions {
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.SelectFocusMode,
+						actionId: FocusActionId.SelectFocusMode,
 						options: {
 							bol: 1,
 						},
@@ -502,7 +503,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.LockFocus,
+						actionId: FocusActionId.LockFocus,
 						options: {},
 					},
 				],
@@ -526,7 +527,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.UnlockFocus,
+						actionId: FocusActionId.UnlockFocus,
 						options: {},
 					},
 				],
