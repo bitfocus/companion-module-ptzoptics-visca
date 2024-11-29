@@ -2,6 +2,7 @@ import type { CompanionActionDefinition } from '@companion-module/base'
 import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
 import type { PresetActionId } from './presets.js'
+import type { ZoomActionId } from './zoom.js'
 
 /**
  * The type of action definitions for all actions within the specified action
@@ -12,9 +13,6 @@ export type ActionDefinitions<ActionSet extends string> = {
 }
 
 export enum OtherActionId {
-	StartZoomIn = 'zoomI',
-	StartZoomOut = 'zoomO',
-	StopZoom = 'zoomS',
 	StartFocusNearer = 'focusN',
 	StartFocusFarther = 'focusF',
 	StopFocus = 'focusS',
@@ -43,3 +41,4 @@ export type PtzOpticsActionId =
 	| OSDActionId
 	| PanTiltActionId
 	| PresetActionId
+	| ZoomActionId

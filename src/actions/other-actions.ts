@@ -19,9 +19,6 @@ import {
 	ShutterUp,
 	WhiteBalance,
 	WhiteBalanceOnePushTrigger,
-	ZoomIn,
-	ZoomOut,
-	ZoomStop,
 } from '../camera/commands.js'
 import { ExposureModeInquiry, FocusModeInquiry } from '../camera/inquiries.js'
 import {
@@ -39,27 +36,6 @@ import type { PtzOpticsInstance } from '../instance.js'
 
 export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<OtherActionId> {
 	return {
-		[PtzOpticsActionId.StartZoomIn]: {
-			name: 'Zoom In',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(ZoomIn)
-			},
-		},
-		[PtzOpticsActionId.StartZoomOut]: {
-			name: 'Zoom Out',
-			options: [],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(ZoomOut, event.options)
-			},
-		},
-		[PtzOpticsActionId.StopZoom]: {
-			name: 'Zoom Stop',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(ZoomStop)
-			},
-		},
 		[PtzOpticsActionId.StartFocusNearer]: {
 			name: 'Focus Near',
 			options: [],

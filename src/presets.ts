@@ -3,6 +3,7 @@ import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
 import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import { PresetActionId } from './actions/presets.js'
+import { ZoomActionId } from './actions/zoom.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
@@ -352,13 +353,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.StartZoomIn,
+						actionId: ZoomActionId.StartZoomIn,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.StopZoom,
+						actionId: ZoomActionId.StopZoom,
 						options: {},
 					},
 				],
@@ -381,13 +382,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.StartZoomOut,
+						actionId: ZoomActionId.StartZoomOut,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.StopZoom,
+						actionId: ZoomActionId.StopZoom,
 						options: {},
 					},
 				],
