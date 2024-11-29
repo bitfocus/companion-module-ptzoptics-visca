@@ -1,6 +1,5 @@
 import type {
 	CompanionActionContext,
-	CompanionActionDefinition,
 	CompanionActionInfo,
 	CompanionInputFieldTextInput,
 	CompanionOptionValues,
@@ -197,50 +196,43 @@ export async function computeCustomCommandAndOptions(
 	return { command, options: commandOpts }
 }
 
-/**
- * Generate an action definition for the "Custom command" action.
- */
-export function generateCustomCommandAction(instance: PtzOpticsInstance): CompanionActionDefinition {
+export function customCommandActions(instance: PtzOpticsInstance): ActionDefinitions<CustomCommandActionId> {
 	const PARAMETER_LIST_REGEX = '/^(?:[0-9]+(?:, ?[0-9]+)*(?:; ?[0-9]+(?:, ?[0-9]+)*)*|)$/'
 
 	return {
-		name: 'Custom command',
-		description:
-			'Send a command of custom bytes (with embedded parameters filled ' +
-			'by user-defined expression) to the camera.  The camera must ' +
-			'respond with the standard ACK + Completion response to the ' +
-			'command or with an error.  Refer to PTZOptics VISCA over IP ' +
-			'command documentation for command structure details.',
-		options: [
-			{
-				type: 'textinput',
-				label: 'Bytes of the command (set all parameter half-bytes to zeroes)',
-				id: 'custom',
-				regex: COMMAND_REGEX,
+		[CustomCommandActionId.SendCustomCommand]: {
+			name: 'Custom command',
+			description:
+				'Send a command of custom bytes (with embedded parameters filled ' +
+				'by user-defined expression) to the camera.  The camera must ' +
+				'respond with the standard ACK + Completion response to the ' +
+				'command or with an error.  Refer to PTZOptics VISCA over IP ' +
+				'command documentation for command structure details.',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Bytes of the command (set all parameter half-bytes to zeroes)',
+					id: 'custom',
+					regex: COMMAND_REGEX,
+				},
+				{
+					type: 'textinput',
+					label: 'Parameter locations in command',
+					id: CommandParametersOptionId,
+					regex: PARAMETER_LIST_REGEX,
+					tooltip:
+						'The parameter list must be separated by semicolons.  ' +
+						'Each parameter should be a comma-separated sequence of ' +
+						'half-byte offsets into the command.  Offsets must not ' +
+						'be reused.',
+					default: CommandParametersDefault,
+				},
+				...generateInputsForCommandParameters(),
+			],
+			callback: async ({ options }, context) => {
+				const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
+				instance.sendCommand(command, commandOpts)
 			},
-			{
-				type: 'textinput',
-				label: 'Parameter locations in command',
-				id: CommandParametersOptionId,
-				regex: PARAMETER_LIST_REGEX,
-				tooltip:
-					'The parameter list must be separated by semicolons.  ' +
-					'Each parameter should be a comma-separated sequence of ' +
-					'half-byte offsets into the command.  Offsets must not ' +
-					'be reused.',
-				default: CommandParametersDefault,
-			},
-			...generateInputsForCommandParameters(),
-		],
-		callback: async ({ options }, context) => {
-			const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
-			instance.sendCommand(command, commandOpts)
 		},
-	}
-}
-
-export function customCommandActions(instance: PtzOpticsInstance): ActionDefinitions<CustomCommandActionId> {
-	return {
-		[CustomCommandActionId.SendCustomCommand]: generateCustomCommandAction(instance),
 	}
 }
