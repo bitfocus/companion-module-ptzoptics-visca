@@ -1,5 +1,6 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
+import { ExposureActionId } from './actions/exposure.js'
 import { FocusActionId } from './actions/focus.js'
 import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
@@ -552,7 +553,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectExposureMode,
+						actionId: ExposureActionId.SelectExposureMode,
 						options: {
 							val: 0,
 						},
@@ -563,7 +564,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectExposureMode,
+						actionId: ExposureActionId.SelectExposureMode,
 						options: {
 							val: 1,
 						},
@@ -589,7 +590,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.IrisUp,
+						actionId: ExposureActionId.IrisUp,
 						options: {},
 					},
 				],
@@ -613,7 +614,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.IrisDown,
+						actionId: ExposureActionId.IrisDown,
 						options: {},
 					},
 				],
@@ -637,7 +638,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.ShutterUp,
+						actionId: ExposureActionId.ShutterUp,
 						options: {},
 					},
 				],
@@ -661,7 +662,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.ShutterDown,
+						actionId: ExposureActionId.ShutterDown,
 						options: {},
 					},
 				],
