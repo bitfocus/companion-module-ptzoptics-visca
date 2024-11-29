@@ -1,5 +1,6 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
+import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import { PresetActionId } from './actions/presets.js'
 import {
@@ -861,7 +862,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.OSD,
+						actionId: OSDActionId.OSD,
 						options: {
 							[OnScreenDisplayOption.id]: 'toggle',
 						},
@@ -895,7 +896,7 @@ export function getPresets(): CompanionPresetDefinitions {
 				{
 					down: [
 						{
-							actionId: PtzOpticsActionId.OSDNavigate,
+							actionId: OSDActionId.OSDNavigate,
 							options: {
 								[OnScreenDisplayNavigateOption.id]: DIRECTION,
 							},
@@ -922,7 +923,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.OSDEnter,
+						actionId: OSDActionId.OSDEnter,
 						options: {},
 					},
 				],
@@ -946,7 +947,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.OSDBack,
+						actionId: OSDActionId.OSDBack,
 						options: {},
 					},
 				],

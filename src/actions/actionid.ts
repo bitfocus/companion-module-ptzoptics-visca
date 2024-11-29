@@ -1,4 +1,5 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
+import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
 import type { PresetActionId } from './presets.js'
 
@@ -28,10 +29,6 @@ export enum OtherActionId {
 	ShutterDown = 'shutD',
 	SetShutter = 'shutS',
 	CameraPowerState = 'power',
-	OSD = 'onScreenDisplay',
-	OSDNavigate = 'onScreenDisplayNavigate',
-	OSDEnter = 'onScreenDisplayEnter',
-	OSDBack = 'onScreenDisplayBack',
 	SelectWhiteBalance = 'wb',
 	WhiteBalanceOnePushTrigger = 'wbOPT',
 	SelectAutoWhiteBalanceSensitivity = 'awbS',
@@ -43,5 +40,6 @@ export type PtzOpticsActionId =
 	// Force to separate lines
 	| OtherActionId
 	// Force to separate lines
+	| OSDActionId
 	| PanTiltActionId
 	| PresetActionId

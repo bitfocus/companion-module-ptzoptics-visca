@@ -14,11 +14,6 @@ import {
 	IrisDown,
 	IrisSet,
 	IrisUp,
-	OnScreenDisplayBack,
-	OnScreenDisplayClose,
-	OnScreenDisplayEnter,
-	OnScreenDisplayNavigate,
-	OnScreenDisplayToggle,
 	ShutterDown,
 	ShutterSet,
 	ShutterUp,
@@ -28,7 +23,7 @@ import {
 	ZoomOut,
 	ZoomStop,
 } from '../camera/commands.js'
-import { ExposureModeInquiry, FocusModeInquiry, OnScreenDisplayInquiry } from '../camera/inquiries.js'
+import { ExposureModeInquiry, FocusModeInquiry } from '../camera/inquiries.js'
 import {
 	AutoTrackingOption,
 	AutoWhiteBalanceSensitivityOption,
@@ -36,8 +31,6 @@ import {
 	ExposureModeOption,
 	FocusModeOption,
 	IrisSetOption,
-	OnScreenDisplayNavigateOption,
-	OnScreenDisplayOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from '../camera/options.js'
@@ -213,72 +206,6 @@ export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<Oth
 			],
 			callback: async (event: CompanionActionEvent) => {
 				instance.sendCommand(CameraPower, event.options)
-			},
-		},
-		[PtzOpticsActionId.OSD]: {
-			name: 'OSD Open/Close',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Activate OSD menu',
-					id: OnScreenDisplayOption.id,
-					choices: [...OnScreenDisplayOption.choices, { id: 'toggle', label: 'Toggle' }],
-					default: 'toggle',
-				},
-			],
-			callback: async ({ options }) => {
-				let shouldToggle = false
-				switch (options[OnScreenDisplayOption.id]) {
-					case 'close':
-						instance.sendCommand(OnScreenDisplayClose)
-						return
-					case 'toggle':
-						shouldToggle = true
-						break
-					case 'open': {
-						const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
-						if (opts === null) return
-						shouldToggle = opts[OnScreenDisplayOption.id] !== 'open'
-					}
-				}
-
-				if (shouldToggle) {
-					instance.sendCommand(OnScreenDisplayToggle)
-				}
-			},
-			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
-				if (opts === null) return undefined
-				return { ...opts }
-			},
-		},
-		[PtzOpticsActionId.OSDNavigate]: {
-			name: 'Navigate OSD Camera menu',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Direction',
-					id: OnScreenDisplayNavigateOption.id,
-					choices: OnScreenDisplayNavigateOption.choices,
-					default: 'down',
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(OnScreenDisplayNavigate, event.options)
-			},
-		},
-		[PtzOpticsActionId.OSDEnter]: {
-			name: 'OSD Enter',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(OnScreenDisplayEnter)
-			},
-		},
-		[PtzOpticsActionId.OSDBack]: {
-			name: 'OSD Back',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(OnScreenDisplayBack)
 			},
 		},
 		[PtzOpticsActionId.SelectWhiteBalance]: {
