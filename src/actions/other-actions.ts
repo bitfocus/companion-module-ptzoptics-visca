@@ -2,7 +2,6 @@ import type { CompanionActionEvent } from '@companion-module/base'
 import { type ActionDefinitions, type OtherActionId, OtherActionId as PtzOpticsActionId } from './actionid.js'
 import {
 	AutoTracking,
-	AutoWhiteBalanceSensitivity,
 	CameraPower,
 	ExposureMode,
 	IrisDown,
@@ -11,18 +10,14 @@ import {
 	ShutterDown,
 	ShutterSet,
 	ShutterUp,
-	WhiteBalance,
-	WhiteBalanceOnePushTrigger,
 } from '../camera/commands.js'
 import { ExposureModeInquiry } from '../camera/inquiries.js'
 import {
 	AutoTrackingOption,
-	AutoWhiteBalanceSensitivityOption,
 	CameraPowerOption,
 	ExposureModeOption,
 	IrisSetOption,
 	ShutterSetOption,
-	WhiteBalanceOption,
 } from '../camera/options.js'
 import { generateCustomCommandAction } from '../custom-command-action.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -120,43 +115,6 @@ export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<Oth
 			],
 			callback: async (event: CompanionActionEvent) => {
 				instance.sendCommand(CameraPower, event.options)
-			},
-		},
-		[PtzOpticsActionId.SelectWhiteBalance]: {
-			name: 'White balance',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Mode',
-					id: WhiteBalanceOption.id,
-					choices: WhiteBalanceOption.choices,
-					default: WhiteBalanceOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(WhiteBalance, event.options)
-			},
-		},
-		[PtzOpticsActionId.WhiteBalanceOnePushTrigger]: {
-			name: 'White balance one push trigger',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(WhiteBalanceOnePushTrigger)
-			},
-		},
-		[PtzOpticsActionId.SelectAutoWhiteBalanceSensitivity]: {
-			name: 'Auto white balance sensitivity',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Sensitivity',
-					id: AutoWhiteBalanceSensitivityOption.id,
-					choices: AutoWhiteBalanceSensitivityOption.choices,
-					default: AutoWhiteBalanceSensitivityOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
 			},
 		},
 		[PtzOpticsActionId.AutoTracking]: {

@@ -5,6 +5,7 @@ import { osdActions } from './osd.js'
 import { otherActions } from './other-actions.js'
 import { panTiltActions } from './pan-tilt.js'
 import { presetActions } from './presets.js'
+import { whiteBalanceActions } from './white-balance.js'
 import { zoomActions } from './zoom.js'
 
 export function getActions(instance: PtzOpticsInstance): ActionDefinitions<PtzOpticsActionId> {
@@ -13,6 +14,7 @@ export function getActions(instance: PtzOpticsInstance): ActionDefinitions<PtzOp
 		...osdActions(instance),
 		...panTiltActions(instance),
 		...presetActions(instance),
+		...whiteBalanceActions(instance),
 		...zoomActions(instance),
 		...otherActions(instance),
 	}

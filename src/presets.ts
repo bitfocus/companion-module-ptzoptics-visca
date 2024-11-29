@@ -4,6 +4,7 @@ import { FocusActionId } from './actions/focus.js'
 import { OSDActionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import { PresetActionId } from './actions/presets.js'
+import { WhiteBalanceActionId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
 import {
 	IMAGE_UP,
@@ -684,7 +685,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectWhiteBalance,
+						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
 							val: 'automatic',
 						},
@@ -710,7 +711,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectWhiteBalance,
+						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
 							val: 'indoor',
 						},
@@ -736,7 +737,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectWhiteBalance,
+						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
 							val: 'outdoor',
 						},
@@ -762,7 +763,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.SelectWhiteBalance,
+						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
 							val: 'onepush',
 						},
@@ -788,7 +789,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.WhiteBalanceOnePushTrigger,
+						actionId: WhiteBalanceActionId.WhiteBalanceOnePushTrigger,
 						options: {},
 					},
 				],

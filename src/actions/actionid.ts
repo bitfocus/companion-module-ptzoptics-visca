@@ -3,6 +3,7 @@ import type { FocusActionId } from './focus.js'
 import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
 import type { PresetActionId } from './presets.js'
+import type { WhiteBalanceActionId } from './white-balance.js'
 import type { ZoomActionId } from './zoom.js'
 
 /**
@@ -22,9 +23,6 @@ export enum OtherActionId {
 	ShutterDown = 'shutD',
 	SetShutter = 'shutS',
 	CameraPowerState = 'power',
-	SelectWhiteBalance = 'wb',
-	WhiteBalanceOnePushTrigger = 'wbOPT',
-	SelectAutoWhiteBalanceSensitivity = 'awbS',
 	AutoTracking = 'autoTracking',
 	SendCustomCommand = 'custom',
 }
@@ -37,4 +35,5 @@ export type PtzOpticsActionId =
 	| OSDActionId
 	| PanTiltActionId
 	| PresetActionId
+	| WhiteBalanceActionId
 	| ZoomActionId
