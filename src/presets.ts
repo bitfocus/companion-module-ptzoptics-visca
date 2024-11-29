@@ -1,5 +1,7 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
+import { PanTiltActionId } from './actions/pan-tilt.js'
+import { PresetActionId } from './actions/presets.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
@@ -11,7 +13,6 @@ import {
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
 import { isValidPreset, OnScreenDisplayNavigateOption, OnScreenDisplayOption, twoDigitHex } from './camera/options.js'
-import { PresetActionId } from './actions/presets.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
@@ -32,13 +33,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltUp,
+						actionId: PanTiltActionId.PanTiltUp,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -63,13 +64,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltDown,
+						actionId: PanTiltActionId.PanTiltDown,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -94,13 +95,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltLeft,
+						actionId: PanTiltActionId.PanTiltLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -125,13 +126,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltRight,
+						actionId: PanTiltActionId.PanTiltRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -156,13 +157,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltUpRight,
+						actionId: PanTiltActionId.PanTiltUpRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -187,13 +188,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltUpLeft,
+						actionId: PanTiltActionId.PanTiltUpLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -218,13 +219,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltDownLeft,
+						actionId: PanTiltActionId.PanTiltDownLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -249,13 +250,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltDownRight,
+						actionId: PanTiltActionId.PanTiltDownRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PtzOpticsActionId.PanTiltStop,
+						actionId: PanTiltActionId.PanTiltStop,
 						options: {},
 					},
 				],
@@ -278,7 +279,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltHome,
+						actionId: PanTiltActionId.PanTiltHome,
 						options: {},
 					},
 				],
@@ -302,7 +303,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltSpeedUp,
+						actionId: PanTiltActionId.PanTiltSpeedUp,
 						options: {},
 					},
 				],
@@ -326,7 +327,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.PanTiltSpeedDown,
+						actionId: PanTiltActionId.PanTiltSpeedDown,
 						options: {},
 					},
 				],

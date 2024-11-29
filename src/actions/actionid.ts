@@ -1,4 +1,5 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
+import type { PanTiltActionId } from './pan-tilt.js'
 import type { PresetActionId } from './presets.js'
 
 /**
@@ -10,19 +11,6 @@ export type ActionDefinitions<ActionSet extends string> = {
 }
 
 export enum OtherActionId {
-	PanTiltLeft = 'left',
-	PanTiltRight = 'right',
-	PanTiltUp = 'up',
-	PanTiltDown = 'down',
-	PanTiltUpLeft = 'upLeft',
-	PanTiltUpRight = 'upRight',
-	PanTiltDownLeft = 'downLeft',
-	PanTiltDownRight = 'downRight',
-	PanTiltStop = 'stop',
-	PanTiltHome = 'home',
-	PanTiltSetSpeed = 'ptSpeedS',
-	PanTiltSpeedUp = 'ptSpeedU',
-	PanTiltSpeedDown = 'ptSpeedD',
 	StartZoomIn = 'zoomI',
 	StartZoomOut = 'zoomO',
 	StopZoom = 'zoomS',
@@ -55,4 +43,5 @@ export type PtzOpticsActionId =
 	// Force to separate lines
 	| OtherActionId
 	// Force to separate lines
+	| PanTiltActionId
 	| PresetActionId

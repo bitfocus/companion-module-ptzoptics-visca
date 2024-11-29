@@ -19,9 +19,6 @@ import {
 	OnScreenDisplayEnter,
 	OnScreenDisplayNavigate,
 	OnScreenDisplayToggle,
-	PanTiltAction,
-	PanTiltDirection,
-	PanTiltHome,
 	ShutterDown,
 	ShutterSet,
 	ShutterUp,
@@ -30,7 +27,6 @@ import {
 	ZoomIn,
 	ZoomOut,
 	ZoomStop,
-	sendPanTiltCommand,
 } from '../camera/commands.js'
 import { ExposureModeInquiry, FocusModeInquiry, OnScreenDisplayInquiry } from '../camera/inquiries.js'
 import {
@@ -42,7 +38,6 @@ import {
 	IrisSetOption,
 	OnScreenDisplayNavigateOption,
 	OnScreenDisplayOption,
-	PanTiltSetSpeedOption,
 	ShutterSetOption,
 	WhiteBalanceOption,
 } from '../camera/options.js'
@@ -50,96 +45,7 @@ import { generateCustomCommandAction } from '../custom-command-action.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
 export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<OtherActionId> {
-	function createPanTiltCallback(direction: readonly [number, number]) {
-		return async (_event: CompanionActionEvent) => {
-			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()
-			sendPanTiltCommand(instance, direction, panSpeed, tiltSpeed)
-		}
-	}
-
 	return {
-		[PtzOpticsActionId.PanTiltLeft]: {
-			name: 'Pan Left',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Left]),
-		},
-		[PtzOpticsActionId.PanTiltRight]: {
-			name: 'Pan Right',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Right]),
-		},
-		[PtzOpticsActionId.PanTiltUp]: {
-			name: 'Tilt Up',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Up]),
-		},
-		[PtzOpticsActionId.PanTiltDown]: {
-			name: 'Tilt Down',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Down]),
-		},
-		[PtzOpticsActionId.PanTiltUpLeft]: {
-			name: 'Up Left',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.UpLeft]),
-		},
-		[PtzOpticsActionId.PanTiltUpRight]: {
-			name: 'Up Right',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.UpRight]),
-		},
-		[PtzOpticsActionId.PanTiltDownLeft]: {
-			name: 'Down Left',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.DownLeft]),
-		},
-		[PtzOpticsActionId.PanTiltDownRight]: {
-			name: 'Down Right',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.DownRight]),
-		},
-		[PtzOpticsActionId.PanTiltStop]: {
-			name: 'P/T Stop',
-			options: [],
-			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Stop]),
-		},
-		[PtzOpticsActionId.PanTiltHome]: {
-			name: 'P/T Home',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.sendCommand(PanTiltHome)
-			},
-		},
-		[PtzOpticsActionId.PanTiltSetSpeed]: {
-			name: 'P/T Speed',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Speed setting',
-					id: PanTiltSetSpeedOption.id,
-					choices: PanTiltSetSpeedOption.choices,
-					default: PanTiltSetSpeedOption.default,
-				},
-			],
-			callback: async (event: CompanionActionEvent) => {
-				const speed = parseInt(String(event.options['speed']), 16)
-				instance.setPanTiltSpeed(speed)
-			},
-		},
-		[PtzOpticsActionId.PanTiltSpeedUp]: {
-			name: 'P/T Speed Up',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.increasePanTiltSpeed()
-			},
-		},
-		[PtzOpticsActionId.PanTiltSpeedDown]: {
-			name: 'P/T Speed Down',
-			options: [],
-			callback: async (_event: CompanionActionEvent) => {
-				instance.decreasePanTiltSpeed()
-			},
-		},
 		[PtzOpticsActionId.StartZoomIn]: {
 			name: 'Zoom In',
 			options: [],
