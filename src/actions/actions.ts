@@ -1,4 +1,5 @@
 import type { ActionDefinitions, PtzOpticsActionId } from './actionid.js'
+import { customCommandActions } from './custom-command.js'
 import { focusActions } from './focus.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { osdActions } from './osd.js'
@@ -10,6 +11,7 @@ import { zoomActions } from './zoom.js'
 
 export function getActions(instance: PtzOpticsInstance): ActionDefinitions<PtzOpticsActionId> {
 	return {
+		...customCommandActions(instance),
 		...focusActions(instance),
 		...osdActions(instance),
 		...panTiltActions(instance),

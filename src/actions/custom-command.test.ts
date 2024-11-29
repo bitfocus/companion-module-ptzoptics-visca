@@ -4,8 +4,8 @@ import {
 	addCommandParameterOptionsToCustomCommandOptions,
 	computeCustomCommandAndOptions,
 	isCustomCommandMissingCommandParameterOptions,
-} from './custom-command-action.js'
-import { MockContext } from './__tests__/mock-context.js'
+} from './custom-command.js'
+import { MockContext } from '../__tests__/mock-context.js'
 
 function makeCustomActionInfo(includeParameters: boolean): CompanionActionInfo {
 	const cai: CompanionActionInfo = {

@@ -3,11 +3,11 @@ import type {
 	CompanionStaticUpgradeResult,
 	CompanionUpgradeContext,
 } from '@companion-module/base'
-import { addDebugLoggingOptionToConfig, configIsMissingDebugLogging, type PtzOpticsConfig } from './config.js'
 import {
 	addCommandParameterOptionsToCustomCommandOptions,
 	isCustomCommandMissingCommandParameterOptions,
-} from './custom-command-action.js'
+} from './actions/custom-command.js'
+import { addDebugLoggingOptionToConfig, configIsMissingDebugLogging, type PtzOpticsConfig } from './config.js'
 
 /**
  * At one time, the "Custom command" action took only a single option with id

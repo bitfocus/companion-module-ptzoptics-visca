@@ -19,7 +19,6 @@ import {
 	IrisSetOption,
 	ShutterSetOption,
 } from '../camera/options.js'
-import { generateCustomCommandAction } from '../custom-command-action.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
 export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<OtherActionId> {
@@ -132,6 +131,5 @@ export function otherActions(instance: PtzOpticsInstance): ActionDefinitions<Oth
 				instance.sendCommand(AutoTracking, event.options)
 			},
 		},
-		[PtzOpticsActionId.SendCustomCommand]: generateCustomCommandAction(instance),
 	}
 }

@@ -1,4 +1,5 @@
 import type { CompanionActionDefinition } from '@companion-module/base'
+import type { CustomCommandActionId } from './custom-command.js'
 import type { FocusActionId } from './focus.js'
 import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
@@ -24,13 +25,13 @@ export enum OtherActionId {
 	SetShutter = 'shutS',
 	CameraPowerState = 'power',
 	AutoTracking = 'autoTracking',
-	SendCustomCommand = 'custom',
 }
 
 export type PtzOpticsActionId =
 	// Force to separate lines
 	| OtherActionId
 	// Force to separate lines
+	| CustomCommandActionId
 	| FocusActionId
 	| OSDActionId
 	| PanTiltActionId

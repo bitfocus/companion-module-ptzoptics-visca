@@ -5,9 +5,13 @@ import type {
 	CompanionInputFieldTextInput,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
-import type { PtzOpticsInstance } from './instance.js'
-import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from './visca/command.js'
+import type { ActionDefinitions } from './actionid.js'
+import type { PtzOpticsInstance } from '../instance.js'
+import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from '../visca/command.js'
+
+export enum CustomCommandActionId {
+	SendCustomCommand = 'custom',
+}
 
 /** Parse a VISCA message string into an array of byte values. */
 function parseMessage(msg: string): readonly number[] {
@@ -132,7 +136,8 @@ const CommandParametersDefault = ''
  */
 export function isCustomCommandMissingCommandParameterOptions(action: CompanionActionInfo): boolean {
 	return (
-		action.actionId === (PtzOpticsActionId.SendCustomCommand as any) && !(CommandParametersOptionId in action.options)
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+		action.actionId === CustomCommandActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
 	)
 }
 
@@ -231,5 +236,11 @@ export function generateCustomCommandAction(instance: PtzOpticsInstance): Compan
 			const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
 			instance.sendCommand(command, commandOpts)
 		},
+	}
+}
+
+export function customCommandActions(instance: PtzOpticsInstance): ActionDefinitions<CustomCommandActionId> {
+	return {
+		[CustomCommandActionId.SendCustomCommand]: generateCustomCommandAction(instance),
 	}
 }
