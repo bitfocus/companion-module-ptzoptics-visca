@@ -1,5 +1,4 @@
-import type { CompanionActionEvent } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
+import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
 import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from '../camera/commands.js'
 import { PanTiltSetSpeedOption } from '../camera/options.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -20,7 +19,7 @@ export enum PanTiltActionId {
 	PanTiltSpeedDown = 'ptSpeedD',
 }
 
-export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<PanTiltActionId> {
+export function panTiltActions(instance: PtzOpticsInstance): Record<PanTiltActionId, CompanionActionDefinition> {
 	function createPanTiltCallback(direction: readonly [number, number]) {
 		return async (_event: CompanionActionEvent) => {
 			const { panSpeed, tiltSpeed } = instance.panTiltSpeed()

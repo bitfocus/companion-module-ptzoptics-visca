@@ -1,5 +1,4 @@
-import type { CompanionActionEvent } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
+import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
 import { ExposureMode, IrisDown, IrisSet, IrisUp, ShutterDown, ShutterSet, ShutterUp } from '../camera/commands.js'
 import { ExposureModeInquiry } from '../camera/inquiries.js'
 import { ExposureModeOption, IrisSetOption, ShutterSetOption } from '../camera/options.js'
@@ -15,7 +14,7 @@ export enum ExposureActionId {
 	SetShutter = 'shutS',
 }
 
-export function exposureActions(instance: PtzOpticsInstance): ActionDefinitions<ExposureActionId> {
+export function exposureActions(instance: PtzOpticsInstance): Record<ExposureActionId, CompanionActionDefinition> {
 	return {
 		[ExposureActionId.SelectExposureMode]: {
 			name: 'Exposure Mode',

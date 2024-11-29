@@ -1,5 +1,4 @@
-import type { CompanionActionEvent } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
+import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
 import {
 	FocusFarStandard,
 	FocusLock,
@@ -21,7 +20,7 @@ export enum FocusActionId {
 	UnlockFocus = 'focusU',
 }
 
-export function focusActions(instance: PtzOpticsInstance): ActionDefinitions<FocusActionId> {
+export function focusActions(instance: PtzOpticsInstance): Record<FocusActionId, CompanionActionDefinition> {
 	return {
 		[FocusActionId.SelectFocusMode]: {
 			name: 'Focus Mode',

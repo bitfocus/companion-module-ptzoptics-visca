@@ -1,5 +1,4 @@
-import type { CompanionActionEvent } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
+import type { CompanionActionDefinition, CompanionActionEvent } from '@companion-module/base'
 import { AutoWhiteBalanceSensitivity, WhiteBalance, WhiteBalanceOnePushTrigger } from '../camera/commands.js'
 import { AutoWhiteBalanceSensitivityOption, WhiteBalanceOption } from '../camera/options.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -10,7 +9,9 @@ export enum WhiteBalanceActionId {
 	SelectAutoWhiteBalanceSensitivity = 'awbS',
 }
 
-export function whiteBalanceActions(instance: PtzOpticsInstance): ActionDefinitions<WhiteBalanceActionId> {
+export function whiteBalanceActions(
+	instance: PtzOpticsInstance,
+): Record<WhiteBalanceActionId, CompanionActionDefinition> {
 	return {
 		[WhiteBalanceActionId.SelectWhiteBalance]: {
 			name: 'White balance',

@@ -1,10 +1,10 @@
 import type {
 	CompanionActionContext,
+	CompanionActionDefinition,
 	CompanionActionInfo,
 	CompanionInputFieldTextInput,
 	CompanionOptionValues,
 } from '@companion-module/base'
-import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from '../visca/command.js'
 
@@ -196,7 +196,9 @@ export async function computeCustomCommandAndOptions(
 	return { command, options: commandOpts }
 }
 
-export function customCommandActions(instance: PtzOpticsInstance): ActionDefinitions<CustomCommandActionId> {
+export function customCommandActions(
+	instance: PtzOpticsInstance,
+): Record<CustomCommandActionId, CompanionActionDefinition> {
 	const PARAMETER_LIST_REGEX = '/^(?:[0-9]+(?:, ?[0-9]+)*(?:; ?[0-9]+(?:, ?[0-9]+)*)*|)$/'
 
 	return {
