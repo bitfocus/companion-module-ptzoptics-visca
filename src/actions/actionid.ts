@@ -2,6 +2,7 @@ import type { CompanionActionDefinition } from '@companion-module/base'
 import type { CustomCommandActionId } from './custom-command.js'
 import type { ExposureActionId } from './exposure.js'
 import type { FocusActionId } from './focus.js'
+import type { MiscellaneousActionId } from './miscellaneous.js'
 import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
 import type { PresetActionId } from './presets.js'
@@ -16,18 +17,11 @@ export type ActionDefinitions<ActionSet extends string> = {
 	[actionId in ActionSet]: CompanionActionDefinition
 }
 
-export enum OtherActionId {
-	CameraPowerState = 'power',
-	AutoTracking = 'autoTracking',
-}
-
 export type PtzOpticsActionId =
-	// Force to separate lines
-	| OtherActionId
-	// Force to separate lines
 	| CustomCommandActionId
 	| ExposureActionId
 	| FocusActionId
+	| MiscellaneousActionId
 	| OSDActionId
 	| PanTiltActionId
 	| PresetActionId

@@ -1,5 +1,5 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { OtherActionId as PtzOpticsActionId } from './actions/actionid.js'
+import { MiscellaneousActionId } from './actions/miscellaneous.js'
 import { ExposureActionId } from './actions/exposure.js'
 import { FocusActionId } from './actions/focus.js'
 import { OSDActionId } from './actions/osd.js'
@@ -814,7 +814,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.AutoTracking,
+						actionId: MiscellaneousActionId.AutoTracking,
 						options: {
 							tracking: 'on',
 						},
@@ -840,7 +840,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PtzOpticsActionId.AutoTracking,
+						actionId: MiscellaneousActionId.AutoTracking,
 						options: {
 							tracking: 'off',
 						},
