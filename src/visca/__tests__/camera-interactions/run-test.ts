@@ -3,6 +3,7 @@ import { type Interaction, type Match } from './interactions.js'
 import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
 import { prettyBytes } from '../../../utils/pretty.js'
+import { repr } from '../../../utils/repr.js'
 
 /** Turn on extra logging in performing test interactions to debug tests. */
 const DEBUG_LOGGING = true
@@ -12,14 +13,6 @@ function LOG(msg: string): void {
 	if (DEBUG_LOGGING) {
 		console.log(msg)
 	}
-}
-
-/** Generate a debug representation of a value. */
-function repr(val: undefined | number | string | boolean | readonly (string | number)[]): string {
-	if (val === undefined) {
-		return 'undefined'
-	}
-	return JSON.stringify(val)
 }
 
 /**

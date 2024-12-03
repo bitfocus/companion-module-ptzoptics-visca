@@ -1,4 +1,5 @@
 import type { CompanionActionContext } from '@companion-module/base'
+import { repr } from '../utils/repr.js'
 
 export class MockContext implements CompanionActionContext {
 	#variables = new Map<string, string>()
@@ -23,7 +24,7 @@ export class MockContext implements CompanionActionContext {
 		let matches
 		while ((matches = reg.exec(result)) !== null) {
 			if (matchCount++ > 10) {
-				throw new Error(`Excessive variable replacements in ${JSON.stringify(text)}`)
+				throw new Error(`Excessive variable replacements in ${repr(text)}`)
 			}
 
 			const [fullId, variable] = matches

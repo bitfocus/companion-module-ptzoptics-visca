@@ -6,15 +6,16 @@ import {
 } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
-import { getPresets } from './presets.js'
-import type { Command, Inquiry } from './visca/command.js'
-import { VISCAPort } from './visca/port.js'
 import {
 	canUpdateOptionsWithoutRestarting,
 	noCameraOptions,
 	optionsFromConfig,
 	type PtzOpticsOptions,
 } from './options.js'
+import { getPresets } from './presets.js'
+import { repr } from './utils/repr.js'
+import type { Command, Inquiry } from './visca/command.js'
+import { VISCAPort } from './visca/port.js'
 
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/** Options dictating the behavior of this instance. */
@@ -181,12 +182,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *   A description of the event occasioning the logging.
 	 */
 	#logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
-		this.log(
-			'info',
-			`PTZOptics module configuration on ${desc}: ${JSON.stringify(config, (_k, v) => {
-				if (v === undefined) return { undefined: true }
-				return v
-			})}`,
-		)
+		this.log('info', `PTZOptics module configuration on ${desc}: ${repr(config)}`)
 	}
 }
