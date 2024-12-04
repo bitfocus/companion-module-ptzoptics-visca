@@ -1,19 +1,19 @@
 import { describe, expect, test } from '@jest/globals'
-import { addDebugLoggingOptionToConfig, configIsMissingDebugLogging, type PtzOpticsConfig } from './config.js'
+import { DebugLoggingOptionId, type PtzOpticsConfig, tryUpdateConfigWithDebugLogging } from './config.js'
 
 describe('config upgrade to specify debug logging', () => {
 	test('config without debug logging', () => {
-		const configMissingDebugLogging = {
+		const configMissingDebugLogging: PtzOpticsConfig = {
 			host: '127.0.0.1',
 			port: '5678',
-		} as PtzOpticsConfig
+		}
+		expect(DebugLoggingOptionId in configMissingDebugLogging).toBe(false)
 
-		expect(configIsMissingDebugLogging(configMissingDebugLogging)).toBe(true)
+		expect(tryUpdateConfigWithDebugLogging(configMissingDebugLogging)).toBe(true)
+		expect(DebugLoggingOptionId in configMissingDebugLogging).toBe(true)
+		expect(configMissingDebugLogging[DebugLoggingOptionId]).toBe(false)
 
-		addDebugLoggingOptionToConfig(configMissingDebugLogging)
-
-		expect(configIsMissingDebugLogging(configMissingDebugLogging)).toBe(false)
-		expect(configMissingDebugLogging.debugLogging).toBe(false)
+		expect(tryUpdateConfigWithDebugLogging(configMissingDebugLogging)).toBe(false)
 	})
 
 	test('config with debug logging=false', () => {
@@ -23,8 +23,8 @@ describe('config upgrade to specify debug logging', () => {
 			debugLogging: false,
 		}
 
-		expect(configIsMissingDebugLogging(configWithDebugLoggingFalse)).toBe(false)
-		expect(configWithDebugLoggingFalse.debugLogging).toBe(false)
+		expect(tryUpdateConfigWithDebugLogging(configWithDebugLoggingFalse)).toBe(false)
+		expect(configWithDebugLoggingFalse[DebugLoggingOptionId]).toBe(false)
 	})
 
 	test('config with debug logging=true', () => {
@@ -34,7 +34,7 @@ describe('config upgrade to specify debug logging', () => {
 			debugLogging: true,
 		}
 
-		expect(configIsMissingDebugLogging(configWithDebugLoggingTrue)).toBe(false)
-		expect(configWithDebugLoggingTrue.debugLogging).toBe(true)
+		expect(tryUpdateConfigWithDebugLogging(configWithDebugLoggingTrue)).toBe(false)
+		expect(configWithDebugLoggingTrue[DebugLoggingOptionId]).toBe(true)
 	})
 })

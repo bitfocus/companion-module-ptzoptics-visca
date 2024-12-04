@@ -14,20 +14,21 @@ export interface PtzOpticsConfig {
 	[key: string]: InputValue | undefined
 }
 
-/**
- * Test whether a config is missing the 'debugLogging' option that was added in
- * 3.0.0.
- */
-export function configIsMissingDebugLogging(config: PtzOpticsConfig | null): config is PtzOpticsConfig {
-	return config !== null && !('debugLogging' in config)
-}
+/** The id of the debug-logging config option. */
+export const DebugLoggingOptionId = 'debugLogging'
 
 /**
- * Add the 'debugLogging' option (defaulting to false) to a pre-3.0.0 config
- * that's missing it.
+ * A config option was added in 3.0.0 to turn on extra logging to Companion's
+ * logs, to make it easier to debug the module in case of error.  Add a default
+ * value for that option to older configs.
  */
-export function addDebugLoggingOptionToConfig(config: PtzOpticsConfig): void {
-	config.debugLogging = false
+export function tryUpdateConfigWithDebugLogging(config: PtzOpticsConfig | null): boolean {
+	if (config !== null && !(DebugLoggingOptionId in config)) {
+		config[DebugLoggingOptionId] = false
+		return true
+	}
+
+	return false
 }
 
 export function getConfigFields(): SomeCompanionConfigField[] {
@@ -59,7 +60,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'checkbox',
-			id: 'debugLogging',
+			id: DebugLoggingOptionId,
 			label: 'Log extra info during connection operations, for debugging purposes',
 			default: false,
 			width: 6,
