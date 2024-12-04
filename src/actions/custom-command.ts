@@ -1,7 +1,7 @@
 import type {
 	CompanionActionContext,
-	CompanionActionInfo,
 	CompanionInputFieldTextInput,
+	CompanionMigrationAction,
 	CompanionOptionValues,
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
@@ -129,30 +129,28 @@ const CommandParametersOptionId = 'command_parameters'
 const CommandParametersDefault = ''
 
 /**
- * Determine whether the given action information corresponds to a "Custom
- * command" action consisting only of a byte sequence, missing options that
- * specify no parameters are present in it.
- */
-export function isCustomCommandMissingCommandParameterOptions(action: CompanionActionInfo): boolean {
-	return (
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-		action.actionId === CustomCommandActionId.SendCustomCommand && !(CommandParametersOptionId in action.options)
-	)
-}
-
-/**
  * At one time, the "Custom command" action took only a single option with id
- * "custom" specifying the bytes to send.
+ * "custom" specifying the bytes to send -- and no user-defined parameters.
  *
  * Now, the "Custom command" action supports user-defined parameters in the
  * command being sent.
  *
- * Add option values that specify "no parameters" to old-school `options` that
- * lack them.
+ * Add the missing options that would specify that this command has no
+ * user-defined parameters.
  */
-export function addCommandParameterOptionsToCustomCommandOptions(options: CompanionOptionValues): void {
-	options[CommandParametersOptionId] = CommandParametersDefault
-	addCommandParameterDefaults(options)
+export function tryUpdateCustomCommandsWithCommandParamOptions(action: CompanionMigrationAction): boolean {
+	const { actionId, options } = action
+	if (
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+		actionId === CustomCommandActionId.SendCustomCommand &&
+		!(CommandParametersOptionId in options)
+	) {
+		options[CommandParametersOptionId] = CommandParametersDefault
+		addCommandParameterDefaults(options)
+		return true
+	}
+
+	return false
 }
 
 const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'

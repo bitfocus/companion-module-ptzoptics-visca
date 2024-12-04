@@ -1,43 +1,23 @@
 import type {
+	CompanionMigrationAction,
 	CompanionStaticUpgradeProps,
 	CompanionStaticUpgradeResult,
+	CompanionStaticUpgradeScript,
 	CompanionUpgradeContext,
 } from '@companion-module/base'
-import {
-	addCommandParameterOptionsToCustomCommandOptions,
-	isCustomCommandMissingCommandParameterOptions,
-} from './actions/custom-command.js'
+import { tryUpdateCustomCommandsWithCommandParamOptions } from './actions/custom-command.js'
 import { addDebugLoggingOptionToConfig, configIsMissingDebugLogging, type PtzOpticsConfig } from './config.js'
 
-/**
- * At one time, the "Custom command" action took only a single option with id
- * "custom" specifying the bytes to send -- and no user-defined parameters.
- *
- * Now, the "Custom command" action supports user-defined parameters in the
- * command being sent.
- *
- * Add the missing options that would specify that this command has no
- * user-defined parameters.
- */
-function updateCustomCommandsWithCommandParamOptions(
-	_context: CompanionUpgradeContext<PtzOpticsConfig>,
-	props: CompanionStaticUpgradeProps<PtzOpticsConfig>,
-): CompanionStaticUpgradeResult<PtzOpticsConfig> {
-	const result: CompanionStaticUpgradeResult<PtzOpticsConfig> = {
-		updatedActions: [],
-		updatedConfig: null,
-		updatedFeedbacks: [],
-	}
-
-	for (const action of props.actions) {
-		if (isCustomCommandMissingCommandParameterOptions(action)) {
-			addCommandParameterOptionsToCustomCommandOptions(action.options)
-
-			result.updatedActions.push(action)
+function ActionUpdater(
+	tryUpdate: (action: CompanionMigrationAction) => boolean,
+): CompanionStaticUpgradeScript<PtzOpticsConfig> {
+	return (_context: CompanionUpgradeContext<PtzOpticsConfig>, props: CompanionStaticUpgradeProps<PtzOpticsConfig>) => {
+		return {
+			updatedActions: props.actions.filter(tryUpdate),
+			updatedConfig: null,
+			updatedFeedbacks: [],
 		}
 	}
-
-	return result
 }
 
 /**
@@ -64,4 +44,7 @@ function addDebugLoggingConfigIfMissing(
 	return result
 }
 
-export const UpgradeScripts = [updateCustomCommandsWithCommandParamOptions, addDebugLoggingConfigIfMissing]
+export const UpgradeScripts = [
+	ActionUpdater(tryUpdateCustomCommandsWithCommandParamOptions),
+	addDebugLoggingConfigIfMissing,
+]
