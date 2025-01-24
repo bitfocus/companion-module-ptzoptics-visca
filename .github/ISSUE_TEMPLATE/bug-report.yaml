@@ -1,0 +1,17 @@
+name: Bug report
+description: Create a bug report explaining the bug encountered or feature requested.
+body:
+  - type: input
+    attributes:
+      label: Camera model
+      description: "**NOTE**: Non-PTZOptics cameras are supported only if doing so won't break PTZOptics camera support."
+      placeholder: Move SE, Move 4K, Link 4K, other PTZOptics camera, or a non-PTZOptics camera
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: |
+        A description of the bug encountered or feature requested.
+    validations:
+      required: true
