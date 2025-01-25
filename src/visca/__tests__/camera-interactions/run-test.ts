@@ -1,5 +1,6 @@
-import { assertNever, type CompanionOptionValues, InstanceStatus, type LogLevel } from '@companion-module/base'
-import { type Interaction, type Match } from './interactions.js'
+import { assertNever, InstanceStatus, type LogLevel } from '@companion-module/base'
+import type { Answer, AnswerParameters } from '../../inquiry.js'
+import { type ExpectedAnswer, type Interaction, type Match } from './interactions.js'
 import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
 import type { Bytes } from '../../../utils/byte.js'
@@ -17,12 +18,12 @@ function LOG(msg: string): void {
 }
 
 /**
- * Compare the expected response to an inquiry against the actual response, and
- * throw if there's any mismatch.
+ * Compare the expected answer to an inquiry against the actual answer and throw
+ * if there's any mismatch.
  */
-function checkInquirySucceeded(expectedResponse: CompanionOptionValues, actualResponse: CompanionOptionValues) {
-	function sortedOptionsEntries(options: CompanionOptionValues) {
-		return Object.entries(options).sort((e1, e2) => {
+function checkInquirySucceeded(expectedAnswer: ExpectedAnswer, actualAnswer: Answer<AnswerParameters>) {
+	function sortedAnswerEntries(answer: ExpectedAnswer) {
+		return Object.entries(answer).sort((e1, e2) => {
 			if (e1[0] < e2[0]) {
 				return -1
 			}
@@ -33,10 +34,10 @@ function checkInquirySucceeded(expectedResponse: CompanionOptionValues, actualRe
 		})
 	}
 
-	const expectedEntries = sortedOptionsEntries(expectedResponse)
-	const actualEntries = sortedOptionsEntries(actualResponse)
+	const expectedEntries = sortedAnswerEntries(expectedAnswer)
+	const actualEntries = sortedAnswerEntries(actualAnswer)
 	if (expectedEntries.length !== actualEntries.length) {
-		throw new Error('Expected/actual response have different numbers of parameters')
+		throw new Error('Expected/actual answer have different numbers of parameters')
 	}
 	for (let i = 0; i < expectedEntries.length; i++) {
 		const [[expectedName, expectedValue], [actualName, actualValue]] = [expectedEntries[i], actualEntries[i]]
@@ -291,7 +292,7 @@ async function verifyInteractions(
 
 	try {
 		const sentCommands: Map<string, Promise<void | Error>> = new Map()
-		const sentInquiries: { inquiry: Promise<CompanionOptionValues | Error>; id: string }[] = []
+		const sentInquiries: { inquiry: Promise<Answer<AnswerParameters> | Error>; id: string }[] = []
 
 		for (const interaction of interactions) {
 			LOG(`Processing ${interaction.type} interaction`)
@@ -400,7 +401,7 @@ async function verifyInteractions(
 					break
 				}
 				case 'inquiry-succeeded': {
-					const { response: expectedResponse, id } = interaction
+					const { answer: expectedAnswer, id } = interaction
 					const inquiryInfo = sentInquiries.shift()
 					if (inquiryInfo === undefined) {
 						throw new Error('No unexamined sent inquiries to examine')
@@ -410,11 +411,11 @@ async function verifyInteractions(
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
 					await inquiry.then(
-						(res: CompanionOptionValues | Error) => {
+						(res: Answer<AnswerParameters> | Error) => {
 							if (res instanceof Error) {
 								throw new Error(`Expected inquiry to succeed, instead failed: ${repr(res.message)}`)
 							} else {
-								checkInquirySucceeded(expectedResponse, res)
+								checkInquirySucceeded(expectedAnswer, res)
 							}
 						},
 						(reason: Error) => {
@@ -434,7 +435,7 @@ async function verifyInteractions(
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
 					await inquiry.then(
-						(res: CompanionOptionValues | Error) => {
+						(res: Answer<AnswerParameters> | Error) => {
 							if (res instanceof Error) {
 								checkMatch('inquiry', match, res.message)
 							} else {
@@ -458,7 +459,7 @@ async function verifyInteractions(
 						throw new Error(`Expectation mismatch: expecting ${id} but got ${actualId}`)
 					}
 					await inquiry.then(
-						(res: CompanionOptionValues | Error) => {
+						(res: Answer<AnswerParameters> | Error) => {
 							if (res instanceof Error) {
 								requireFatalFailureWhenFailed('inquiry', match, res.message)
 							} else {

@@ -1,7 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { FocusLock } from '../../camera/commands.js'
-import { FocusModeInquiry } from '../../camera/inquiries.js'
+import { FocusLock, FocusModeInquiry } from '../../camera/focus.js'
 import { ACK, FocusLockBytes, FocusModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -38,7 +37,7 @@ describe('no pending inquiry', () => {
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
 				CameraExpectIncomingBytes(FocusModeInquiryBytes), // focus-mode
 				CameraReplyBytes([0x90, 0x50, 0x02, 0xff]), // focus-mode
-				InquirySucceeded({ bol: '0' }, 'focus-mode'),
+				InquirySucceeded({ mode: 'auto' }, 'focus-mode'),
 				CameraReplyBytes(InquiryResponse),
 				CommandFailedFatally([InquiryResponseWithoutInquiryMatcher, MatchVISCABytes(InquiryResponse)], 'focus-lock'),
 			],

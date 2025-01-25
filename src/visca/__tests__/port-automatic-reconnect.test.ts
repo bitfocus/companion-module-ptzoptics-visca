@@ -14,16 +14,16 @@ import {
 } from './camera-interactions/interactions.js'
 import { CameraClosedConnectionMatcher } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
-import { ModuleDefinedCommand, ModuleDefinedInquiry } from '../command.js'
+import { ModuleDefinedCommand } from '../newcommand.js'
+import { ModuleDefinedInquiry } from '../inquiry.js'
 
 describe('When the camera closes the connection, the VISCA port should attempt to reconnect', () => {
-	const TestCommandBytes = [0x81, 0x17, 0x42, 0xff]
+	const TestCommandBytes = [0x81, 0x17, 0x42, 0xff] as const
 	const TestCommand = new ModuleDefinedCommand(TestCommandBytes)
 
-	const TestInquiryBytes = [0x81, 0x31, 0x41, 0x59, 0xff]
+	const TestInquiryBytes = [0x81, 0x31, 0x41, 0x59, 0xff] as const
 	const TestInquiry = new ModuleDefinedInquiry(TestInquiryBytes, {
-		value: [0x90, 0x50, 0x07, 0xff],
-		mask: [0xff, 0xff, 0xff, 0xff],
+		bytes: [0x90, 0x50, 0x07, 0xff],
 		params: {},
 	})
 

@@ -1,7 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { FocusNearStandard } from '../../camera/commands.js'
-import { ExposureModeInquiry } from '../../camera/inquiries.js'
+import { ExposureModeInquiry } from '../../camera/exposure.js'
+import { FocusNearStandard } from '../../camera/focus.js'
 import { CommandNotExecutable, ExposureModeInquiryBytes, FocusNearStandardBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -60,7 +60,7 @@ describe('command not executable error', () => {
 				CommandFailed([CantBeExecutedNowMatcher, MatchVISCABytes(FocusNearStandardBytes)], 'focus-near'),
 				InstanceStatusIs(InstanceStatus.Ok),
 				CameraReplyBytes([0x90, 0x50, 0x0a, 0xff]), // exposure-mode
-				InquirySucceeded({ val: '2' }, 'exposure-mode'),
+				InquirySucceeded({ mode: 'shutter-priority' }, 'exposure-mode'),
 			],
 			InstanceStatus.Ok,
 		)

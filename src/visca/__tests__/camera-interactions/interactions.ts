@@ -1,5 +1,6 @@
-import type { CompanionOptionValues, InstanceStatus } from '@companion-module/base'
-import type { Command, Inquiry } from '../../command.js'
+import type { InstanceStatus } from '@companion-module/base'
+import type { AnswerParameters, Inquiry } from '../../inquiry.js'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from '../../newcommand.js'
 import type { Bytes } from '../../../utils/byte.js'
 
 /**
@@ -15,14 +16,14 @@ export type Match = string | RegExp | readonly RegExp[]
 
 type SendCameraCommand = {
 	readonly type: 'send-camera-command'
-	readonly command: Command
-	readonly options: CompanionOptionValues | null
+	readonly command: Command<CommandParameters>
+	readonly options: CommandParamValues<CommandParameters>
 	readonly id: string
 }
 
 type SendCameraInquiry = {
 	readonly type: 'send-camera-inquiry'
-	readonly inquiry: Inquiry
+	readonly inquiry: Inquiry<AnswerParameters>
 	readonly id: string
 }
 
@@ -53,9 +54,11 @@ type CommandFatalFailure = {
 	readonly id: string
 }
 
+export type ExpectedAnswer = { readonly [key: string]: any }
+
 type InquirySuccess = {
 	readonly type: 'inquiry-succeeded'
-	readonly response: CompanionOptionValues
+	readonly answer: ExpectedAnswer
 	readonly id: string
 }
 
@@ -121,43 +124,44 @@ export type Interaction =
 	| WaitLogMessage
 
 /**
- * Send a command that has options through the VISCA port.
+ * Send a command through the VISCA port.
  *
  * @param command
- *    The command to send.
- * @param options
- *    Compatible options to use to generate the bytes sent to the "camera".
+ *    A command to send that doesn't contain any parameters.
  * @param id
  *    An identifier to associate with this command.  The same identifier must be
  *    specified when the command is eventually expected .
  */
-export function SendCommand(command: Command, options: CompanionOptionValues, id: string): SendCameraCommand
+export function SendCommand<CmdParameters extends NoCommandParameters>(
+	command: Command<CmdParameters>,
+	id: string,
+): SendCameraCommand
 /**
- * Send a command with no options through the VISCA port.
+ * Send a command through the VISCA port.
  *
  * @param command
  *    The command to send.
+ * @param paramValues
+ *    Parameter values to interpolate into the command.
  * @param id
  *    An identifier to associate with this command.  The same identifier must be
  *    specified when the command is eventually expected .
  */
-export function SendCommand(command: Command, id: string): SendCameraCommand
-export function SendCommand(
-	command: Command,
-	optsOrId: CompanionOptionValues | string,
-	optionalId?: string,
+export function SendCommand<CmdParameters extends CommandParameters>(
+	command: Command<CmdParameters>,
+	options: CommandParamValues<CmdParameters>,
+	id: string,
+): SendCameraCommand
+export function SendCommand<CmdParameters extends CommandParameters>(
+	command: Command<CmdParameters>,
+	optionsOrId: CommandParamValues<CmdParameters> | string,
+	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+	id?: any,
 ): SendCameraCommand {
-	let options, id
-	if (typeof optsOrId === 'string') {
-		options = {}
-		id = optsOrId
-	} else if (typeof optionalId === 'string') {
-		options = optsOrId
-		id = optionalId
-	} else {
-		throw new Error('bad SendCommand arguments')
+	if (typeof optionsOrId === 'string') {
+		return { type: 'send-camera-command', command, options: {}, id: optionsOrId }
 	}
-	return { type: 'send-camera-command', command, options, id }
+	return { type: 'send-camera-command', command, options: optionsOrId, id }
 }
 
 /**
@@ -169,7 +173,10 @@ export function SendCommand(
  *    An identifier to associate with this inquiry.  The same identifier must be
  *    specified when the inquiry is eventually expected .
  */
-export function SendInquiry(inquiry: Inquiry, id: string): SendCameraInquiry {
+export function SendInquiry<Parameters extends AnswerParameters>(
+	inquiry: Inquiry<Parameters>,
+	id: string,
+): SendCameraInquiry {
 	return { type: 'send-camera-inquiry', inquiry, id }
 }
 
@@ -252,16 +259,16 @@ export function CommandFailedFatally(match: Match, id: string): CommandFatalFail
  * Expect the oldest not-yet-expected inquiry to succeed, resolving the given
  * option values.
  *
- * @param response
- *    An expected options object.  It must have the same properties as the
- *    actual options, and each of those properties must have the
+ * @param answer
+ *    An expected answer.  It must have the same properties as the actual
+ *    answer, and each of those properties must have the
  *    {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is|same value}.
  * @param id
  *    The `id` that was supplied to `SendInquiry` when the corresponding inquiry
  *    was sent.
  */
-export function InquirySucceeded(response: CompanionOptionValues, id: string): InquirySuccess {
-	return { type: 'inquiry-succeeded', response, id }
+export function InquirySucceeded(answer: ExpectedAnswer, id: string): InquirySuccess {
+	return { type: 'inquiry-succeeded', answer, id }
 }
 
 /**

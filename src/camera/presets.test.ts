@@ -1,5 +1,5 @@
 import { describe, expect, test } from '@jest/globals'
-import { isValidPreset } from './options'
+import { isValidPreset } from './presets.js'
 
 describe('isValidPreset', () => {
 	test('too low', () => {

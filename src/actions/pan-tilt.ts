@@ -1,7 +1,7 @@
 import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
-import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from '../camera/commands.js'
-import { PanTiltSetSpeedOption } from '../camera/options.js'
+import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from '../camera/pan-tilt.js'
+import { SPEED_CHOICES } from './speeds.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
 export enum PanTiltActionId {
@@ -19,6 +19,8 @@ export enum PanTiltActionId {
 	PanTiltSpeedUp = 'ptSpeedU',
 	PanTiltSpeedDown = 'ptSpeedD',
 }
+
+const PanTiltSpeedOptionId = 'speed'
 
 export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<PanTiltActionId> {
 	function createPanTiltCallback(direction: readonly [number, number]) {
@@ -87,13 +89,13 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 				{
 					type: 'dropdown',
 					label: 'Speed setting',
-					id: PanTiltSetSpeedOption.id,
-					choices: PanTiltSetSpeedOption.choices,
-					default: PanTiltSetSpeedOption.default,
+					id: PanTiltSpeedOptionId,
+					choices: SPEED_CHOICES,
+					default: '0C',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				const speed = parseInt(String(event.options['speed']), 16)
+			callback: async ({ options }) => {
+				const speed = parseInt(String(options[PanTiltSpeedOptionId]), 16)
 				instance.setPanTiltSpeed(speed)
 			},
 		},

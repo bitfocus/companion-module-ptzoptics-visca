@@ -1,10 +1,15 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
 import { ExposureActionId } from './actions/exposure.js'
 import { FocusActionId } from './actions/focus.js'
-import { MiscellaneousActionId } from './actions/miscellaneous.js'
-import { OSDActionId } from './actions/osd.js'
+import { AutoTrackingActionId } from './actions/auto-tracking.js'
+import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
-import { PresetActionId, PresetUseVariablesOptionId, PresetVariableOptionId } from './actions/presets.js'
+import {
+	PresetActionId,
+	PresetUseVariablesOptionId,
+	PresetValueOptionId,
+	PresetVariableOptionId,
+} from './actions/presets.js'
 import { WhiteBalanceActionId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
 import {
@@ -17,12 +22,7 @@ import {
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
-import {
-	isValidPreset,
-	OnScreenDisplayNavigateOption,
-	OnScreenDisplayOption,
-	PresetValueOptionId,
-} from './camera/options.js'
+import { isValidPreset } from './camera/presets.js'
 import { twoDigitHex } from './utils/two-digit-hex.js'
 
 export function getPresets(): CompanionPresetDefinitions {
@@ -820,7 +820,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: MiscellaneousActionId.AutoTracking,
+						actionId: AutoTrackingActionId.AutoTracking,
 						options: {
 							tracking: 'on',
 						},
@@ -846,7 +846,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: MiscellaneousActionId.AutoTracking,
+						actionId: AutoTrackingActionId.AutoTracking,
 						options: {
 							tracking: 'off',
 						},
@@ -874,7 +874,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: OSDActionId.OSD,
 						options: {
-							[OnScreenDisplayOption.id]: 'toggle',
+							[OnScreenDisplayMenuStateId]: 'toggle',
 						},
 					},
 				],
@@ -908,7 +908,7 @@ export function getPresets(): CompanionPresetDefinitions {
 						{
 							actionId: OSDActionId.OSDNavigate,
 							options: {
-								[OnScreenDisplayNavigateOption.id]: DIRECTION,
+								[OSDNavigateDirectionId]: DIRECTION,
 							},
 						},
 					],

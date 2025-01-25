@@ -1,16 +1,9 @@
 import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
-import {
-	FocusFarStandard,
-	FocusLock,
-	FocusMode,
-	FocusNearStandard,
-	FocusStop,
-	FocusUnlock,
-} from '../camera/commands.js'
-import { FocusModeInquiry } from '../camera/inquiries.js'
-import { FocusModeOption } from '../camera/options.js'
+import { FocusFarStandard, FocusLock, FocusMode, FocusNearStandard, FocusStop, FocusUnlock } from '../camera/focus.js'
+import { FocusModeInquiry } from '../camera/focus.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { optionConversions } from './option-conversion.js'
 
 export enum FocusActionId {
 	SelectFocusMode = 'focusM',
@@ -21,6 +14,19 @@ export enum FocusActionId {
 	UnlockFocus = 'focusU',
 }
 
+const FocusModeId = 'bol'
+
+const [getFocusMode, focusModeToOption] = optionConversions<FocusMode, typeof FocusModeId>(
+	FocusModeId,
+	[
+		['0', 'auto'],
+		['1', 'manual'],
+	],
+	'auto',
+	'0',
+	String,
+)
+
 export function focusActions(instance: PtzOpticsInstance): ActionDefinitions<FocusActionId> {
 	return {
 		[FocusActionId.SelectFocusMode]: {
@@ -29,18 +35,24 @@ export function focusActions(instance: PtzOpticsInstance): ActionDefinitions<Foc
 				{
 					type: 'dropdown',
 					label: 'Auto/manual focus',
-					id: FocusModeOption.id,
-					choices: FocusModeOption.choices,
-					default: FocusModeOption.default,
+					id: FocusModeId,
+					choices: [
+						{ id: '0', label: 'Auto focus' },
+						{ id: '1', label: 'Manual focus' },
+					],
+					default: '0',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(FocusMode, event.options)
+			callback: async ({ options }) => {
+				const mode = getFocusMode(options)
+				instance.sendCommand(FocusMode, { mode })
 			},
 			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendInquiry(FocusModeInquiry)
-				if (opts === null) return undefined
-				return { ...opts }
+				const answer = await instance.sendInquiry(FocusModeInquiry)
+				if (answer === null) {
+					return undefined
+				}
+				return { [FocusModeId]: focusModeToOption(answer.mode) }
 			},
 		},
 		[FocusActionId.StartFocusNearer]: {

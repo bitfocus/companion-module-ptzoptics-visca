@@ -7,7 +7,7 @@ import type {
 import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import type { Bytes } from '../utils/byte.js'
-import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from '../visca/command.js'
+import { type CommandParameters, type CommandParamValues, UserDefinedCommand } from '../visca/newcommand.js'
 
 export enum CustomCommandActionId {
 	SendCustomCommand = 'custom',
@@ -67,16 +67,6 @@ function generateInputsForCommandParameters(): CompanionInputFieldTextInput[] {
 	return inputs
 }
 
-/**
- * Add option values for command parameters to "Custom command" action options
- * that lack them.
- */
-function addCommandParameterDefaults(options: CompanionOptionValues): void {
-	for (let i = 0; i < MAX_PARAMETERS_IN_COMMAND; i++) {
-		options[`parameter${i}`] = CommandParameterDefault
-	}
-}
-
 const PARAMETERS_SPLITTER = /; ?/g
 const NIBBLES_SPLITTER = /, ?/g
 
@@ -92,13 +82,13 @@ const NIBBLES_SPLITTER = /, ?/g
  *    of nibble offsets, all nibble offsets being unique and referring to
  *    nibbles in `command` that are zero.
  */
-function parseParameters(command: readonly number[], parametersString: string): readonly number[][] {
+function parseParameters(command: readonly number[], parametersString: string): (readonly number[])[] {
 	if (parametersString === '') return []
 
 	const params = parametersString.split(PARAMETERS_SPLITTER)
 
 	// Parse.
-	const parameters = params.map((parameterString) => {
+	const parameters: (readonly number[])[] = params.map((parameterString) => {
 		return parameterString.split(NIBBLES_SPLITTER).map((ds) => parseInt(ds, 10))
 	})
 
@@ -126,6 +116,8 @@ function parseParameters(command: readonly number[], parametersString: string): 
 	return parameters
 }
 
+const CustomCommandOptionId = 'custom'
+
 const CommandParametersOptionId = 'command_parameters'
 const CommandParametersDefault = ''
 
@@ -147,7 +139,9 @@ export function tryUpdateCustomCommandsWithCommandParamOptions(action: Companion
 		!(CommandParametersOptionId in options)
 	) {
 		options[CommandParametersOptionId] = CommandParametersDefault
-		addCommandParameterDefaults(options)
+		for (let i = 0; i < MAX_PARAMETERS_IN_COMMAND; i++) {
+			options[`parameter${i}`] = CommandParameterDefault
+		}
 		return true
 	}
 
@@ -157,8 +151,8 @@ export function tryUpdateCustomCommandsWithCommandParamOptions(action: Companion
 const COMMAND_REGEX = '/^81 ?(?:[0-9a-fA-F]{2} ?){3,13}[fF][fF]$/'
 
 type CommandAndOptions = {
-	command: UserDefinedCommand
-	options: CompanionOptionValues
+	command: UserDefinedCommand<CommandParameters>
+	paramValues: CommandParamValues<CommandParameters>
 }
 
 /**
@@ -170,29 +164,28 @@ export async function computeCustomCommandAndOptions(
 	options: CompanionOptionValues,
 	context: CompanionActionContext,
 ): Promise<CommandAndOptions> {
-	const commandBytes = parseMessage(String(options['custom']))
+	const commandBytes = parseMessage(String(options[CustomCommandOptionId]))
 
-	const commandParams: CommandParams = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
+	const commandParams: CommandParameters = parseParameters(commandBytes, String(options['command_parameters'])).reduce(
 		(acc, nibbles, i) => {
 			acc[`${i}`] = {
 				nibbles,
-				choiceToParam: Number,
 			}
 
 			return acc
 		},
-		{} as PartialCommandParams,
+		{} as CommandParameters,
 	)
 
 	const command = new UserDefinedCommand(commandBytes, commandParams)
 
-	const commandOpts: CompanionOptionValues = {}
+	const paramValues: CommandParamValues<CommandParameters> = {}
 	for (const i of Object.keys(commandParams)) {
 		const val = await context.parseVariablesInString(String(options[`parameter${i}`]))
-		commandOpts[i] = val
+		paramValues[i] = Number(val)
 	}
 
-	return { command, options: commandOpts }
+	return { command, paramValues }
 }
 
 export function customCommandActions(instance: PtzOpticsInstance): ActionDefinitions<CustomCommandActionId> {
@@ -211,7 +204,7 @@ export function customCommandActions(instance: PtzOpticsInstance): ActionDefinit
 				{
 					type: 'textinput',
 					label: 'Bytes of the command (set all parameter half-bytes to zeroes)',
-					id: 'custom',
+					id: CustomCommandOptionId,
 					regex: COMMAND_REGEX,
 				},
 				{
@@ -229,8 +222,8 @@ export function customCommandActions(instance: PtzOpticsInstance): ActionDefinit
 				...generateInputsForCommandParameters(),
 			],
 			callback: async ({ options }, context) => {
-				const { command, options: commandOpts } = await computeCustomCommandAndOptions(options, context)
-				instance.sendCommand(command, commandOpts)
+				const { command, paramValues } = await computeCustomCommandAndOptions(options, context)
+				instance.sendCommand(command, paramValues)
 			},
 		},
 	}

@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { FocusModeInquiry } from '../../camera/inquiries.js'
+import { FocusModeInquiry } from '../../camera/focus.js'
 import { ACK, FocusModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,

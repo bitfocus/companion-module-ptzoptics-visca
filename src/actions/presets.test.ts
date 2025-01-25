@@ -1,19 +1,18 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
-import { PresetRecall, PresetSave } from '../camera/commands.js'
-import { PresetRecallDefault, PresetSetDefault, PresetValueOptionId } from '../camera/options.js'
+import { PresetValueOptionId } from './presets.js'
 import {
-	parsePresetVariableOption,
+	getPresetNumber,
 	PresetActionId,
+	PresetRecallDefault,
+	PresetSetDefault,
 	PresetUseVariablesOptionId,
 	PresetVariableOptionId,
 	tryUpdateRecallSetPresetActions,
 } from './presets.js'
 import { MockContext } from '../__tests__/mock-context.js'
-import type { Bytes } from '../utils/byte.js'
 import { repr } from '../utils/repr.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
-import type { Command } from '../visca/command.js'
 
 function optionsWithPresetOption(textinput: string, preset: number): CompanionOptionValues {
 	return {
@@ -23,23 +22,7 @@ function optionsWithPresetOption(textinput: string, preset: number): CompanionOp
 	}
 }
 
-function expectResolvesToCommandBytes(
-	result: string | CompanionOptionValues,
-	command: Command,
-	expectedBytes: Bytes,
-): void {
-	if (typeof result === 'string') {
-		throw new TypeError('Result should not have been an error, instead got: ' + result)
-	}
-
-	const commandBytes = command.toBytes(result)
-	expect(commandBytes.length).toBe(expectedBytes.length)
-	for (let i = 0; i < commandBytes.length; i++) {
-		expect(commandBytes[i]).toBe(expectedBytes[i])
-	}
-}
-
-function expectIsErrorString(result: string | CompanionOptionValues): void {
+function expectIsErrorString(result: number | string): void {
 	if (typeof result !== 'string') {
 		throw new TypeError(`Result should have been an error: ${repr(result)}`)
 	}
@@ -49,14 +32,14 @@ describe('test invalid preset input', () => {
 	test('User enters "foo" (not a number at all) as the preset', async () => {
 		const context = new MockContext()
 		const options = optionsWithPresetOption('foo', PresetSetDefault)
-		const result = await parsePresetVariableOption(options, context)
-		expectIsErrorString(result)
+		const preset = await getPresetNumber(options, context)
+		expectIsErrorString(preset)
 	})
 
 	test('User enters an invalid preset', async () => {
 		const context = new MockContext()
 		const options = optionsWithPresetOption('99', PresetRecallDefault)
-		const result = await parsePresetVariableOption(options, context)
+		const result = await getPresetNumber(options, context)
 		expectIsErrorString(result)
 	})
 
@@ -64,7 +47,7 @@ describe('test invalid preset input', () => {
 		const context = new MockContext()
 		context.setVariable('internal:foo', '255')
 		const options = optionsWithPresetOption('$(internal:foo)', 250)
-		const result = await parsePresetVariableOption(options, context)
+		const result = await getPresetNumber(options, context)
 		expectIsErrorString(result)
 	})
 })
@@ -73,16 +56,16 @@ describe('test recall preset values', () => {
 	test('User enters "37" as the preset', async () => {
 		const context = new MockContext()
 		const options = optionsWithPresetOption('37', 25)
-		const result = await parsePresetVariableOption(options, context)
-		expectResolvesToCommandBytes(result, PresetRecall, [0x81, 0x01, 0x04, 0x3f, 0x02, 0x25, 0xff])
+		const result = await getPresetNumber(options, context)
+		expect(result).toBe(37)
 	})
 
 	test('User enters a variable that resolves to dec 254', async () => {
 		const context = new MockContext()
 		context.setVariable('internal:foo', '254')
 		const options = optionsWithPresetOption('$(internal:foo)', 16)
-		const result = await parsePresetVariableOption(options, context)
-		expectResolvesToCommandBytes(result, PresetRecall, [0x81, 0x01, 0x04, 0x3f, 0x02, 0xfe, 0xff])
+		const result = await getPresetNumber(options, context)
+		expect(result).toBe(254)
 	})
 })
 
@@ -90,16 +73,16 @@ describe('test set preset values', () => {
 	test('User enters "37" as the preset', async () => {
 		const context = new MockContext()
 		const options = optionsWithPresetOption('37', 82)
-		const result = await parsePresetVariableOption(options, context)
-		expectResolvesToCommandBytes(result, PresetSave, [0x81, 0x01, 0x04, 0x3f, 0x01, 0x25, 0xff])
+		const result = await getPresetNumber(options, context)
+		expect(result).toBe(37)
 	})
 
 	test('User enters a variable that resolves to dec 254', async () => {
 		const context = new MockContext()
 		context.setVariable('internal:foo', '254')
 		const options = optionsWithPresetOption('$(internal:foo)', 77)
-		const result = await parsePresetVariableOption(options, context)
-		expectResolvesToCommandBytes(result, PresetSave, [0x81, 0x01, 0x04, 0x3f, 0x01, 0xfe, 0xff])
+		const result = await getPresetNumber(options, context)
+		expect(result).toBe(254)
 	})
 })
 

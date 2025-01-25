@@ -1,5 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
+import { OnScreenDisplayClose, OnScreenDisplayInquiry } from '../../camera/osd.js'
+import { ACKCompletion, OnScreenDisplayCloseBytes, OnScreenDisplayInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
@@ -10,10 +12,7 @@ import {
 	SendCommand,
 	SendInquiry,
 } from './camera-interactions/interactions.js'
-import { ACKCompletion, OnScreenDisplayCloseBytes, OnScreenDisplayInquiryBytes } from './camera-interactions/bytes.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
-import { OnScreenDisplayClose } from '../../camera/commands.js'
-import { OnScreenDisplayInquiry } from '../../camera/inquiries.js'
 
 describe('network change reply', () => {
 	test('network change reply followed by command', async () => {

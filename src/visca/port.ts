@@ -1,12 +1,8 @@
-import {
-	assertNever,
-	type CompanionOptionValues,
-	InstanceStatus,
-	TCPHelper,
-	type TCPHelperEvents,
-} from '@companion-module/base'
-import { checkCommandBytes, type Command, type Inquiry, type Response, responseMatches } from './command.js'
+import { assertNever, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './newcommand.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { checkMessageBytes } from './message.js'
+import type { Answer, AnswerMessage, AnswerParameters, Inquiry } from './inquiry.js'
 import type { Bytes } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
 import { promiseWithResolvers } from '../utils/promise-with-resolvers.js'
@@ -37,7 +33,7 @@ type MessageRejectFatally = (reason: Error) => void
  * Information about a VISCA message sent to the camera, for which a full
  * response has not yet been received.
  */
-abstract class PendingBase {
+abstract class PendingMessage {
 	/** The type of the pending message. */
 	abstract readonly type: MessageType
 
@@ -151,7 +147,7 @@ type CommandResolve = (result: void | Error) => unknown
  * Information about a VISCA command sent to the camera, for which a full
  * response has not yet been received.
  */
-class PendingCommand extends PendingBase {
+class PendingCommand extends PendingMessage {
 	readonly type = 'command'
 	protected readonly resolve: CommandResolve
 
@@ -187,24 +183,24 @@ class PendingCommand extends PendingBase {
  * The type of the resolve handler for a pending VISCA inquiry.
  *
  * If the inquiry executes successfully and receives a response that is valid
- * per the `Inquiry` that was sent, it resolves options computed per the
- * parameters specified in that `Inquiry`.
+ * per the `Inquiry` that was sent, it resolves an answer containing the numeric
+ * values of the parameters specified in that `Inquiry`.
  *
  * But if the inquiry instead receives a camera response indicating an error
  * that doesn't suggest any sort of connection instability or decoherence, the
  * handler resolves an `Error` indicating details of the error encountered, and
  * the connection will remain active.
  */
-type InquiryResolve = (val: CompanionOptionValues | Error) => void
+type InquiryResolve<Parameters extends AnswerParameters> = (answer: Answer<Parameters> | Error) => void
 
 /**
  * Information about a VISCA inquiry sent to the camera, for which a full
  * response has not yet been received.
  */
-class PendingInquiry extends PendingBase {
+class PendingInquiry<Parameters extends AnswerParameters> extends PendingMessage {
 	readonly type = 'inquiry'
-	protected readonly resolve: InquiryResolve
-	readonly expectedResponse: Response
+	protected readonly resolve: InquiryResolve<Parameters>
+	readonly expectedReturn: AnswerMessage<AnswerParameters>
 
 	/**
 	 * Record information for a VISCA inquiry sent to the camera that hasn't
@@ -226,31 +222,24 @@ class PendingInquiry extends PendingBase {
 	constructor(
 		bytes: Bytes,
 		userDefined: boolean,
-		resolve: InquiryResolve,
+		resolve: InquiryResolve<Parameters>,
 		reject: MessageRejectFatally,
-		expectedResponse: Response,
+		expectedReturn: AnswerMessage<Parameters>,
 	) {
 		super(bytes, userDefined, reject)
 
 		this.resolve = resolve
-		this.expectedResponse = expectedResponse
+		this.expectedReturn = expectedReturn
 	}
 
 	/**
-	 * Resolve this inquiry with options corresponding to parameters in the
-	 * inquiry response.
+	 * Resolve this inquiry with an answer containing the parameter values in
+	 * the inquiry return message.
 	 */
-	succeeded(options: CompanionOptionValues) {
-		this.resolve(options)
+	succeeded(answer: Answer<Parameters>) {
+		this.resolve(answer)
 	}
 }
-
-/**
- * The type of a VISCA message sent to a camera: either a command (potentially
- * containing fillable numeric parameters) or an inquiry (a fixed byte sequence
- * whose response matches a specific format that contains numeric parameters).
- */
-type PendingMessage = PendingCommand | PendingInquiry
 
 /**
  * The subset of the `PtzOpticsInstance` interface used by `VISCAPort` to log
@@ -265,6 +254,26 @@ export interface PartialInstance {
 
 	/** See {@link PtzOpticsInstance.debugLogging}. */
 	readonly debugLogging: boolean
+}
+
+/**
+ * Check whether the bytes of VISCA return message `returnMessage`, when masked,
+ * equal those of `bytes`.
+ */
+export function returnMatches<Parameters extends AnswerParameters>(
+	returnMessage: Bytes,
+	{ mask, bytes }: PendingInquiry<Parameters>['expectedReturn'],
+): boolean {
+	if (returnMessage.length !== bytes.length) {
+		return false
+	}
+
+	for (let i = 0; i < returnMessage.length; i++) {
+		if ((returnMessage[i] & mask[i]) !== bytes[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 /**
@@ -772,11 +781,11 @@ export class VISCAPort {
 				if (result === undefined) {
 					throw this.#errorWhileProcessingMessage(`Received ACK without a pending command`, returnMessage)
 				}
-				const { i, command } = result
+				const { i, pendingCommand } = result
 
 				const socket = secondByte & 0xf
 				if (this.#instance.debugLogging) {
-					this.#instance.log('info', `Processing ${prettyBytes(command.bytes)} ACK in socket ${socket}`)
+					this.#instance.log('info', `Processing ${prettyBytes(pendingCommand.bytes)} ACK in socket ${socket}`)
 				}
 
 				this.#waitingForInitialResponse.splice(i, 1)
@@ -785,9 +794,12 @@ export class VISCAPort {
 					socketQueue = []
 					this.#waitingForCompletion.set(socket, socketQueue)
 				} else if (socketQueue.length > 0) {
-					this.#instance.log('info', `Processing ${prettyBytes(command.bytes)} in already-filled socket ${socket}`)
+					this.#instance.log(
+						'info',
+						`Processing ${prettyBytes(pendingCommand.bytes)} in already-filled socket ${socket}`,
+					)
 				}
-				socketQueue.push(command)
+				socketQueue.push(pendingCommand)
 				continue
 			} // (secondByte & 0xf0) === 0x40
 
@@ -827,14 +839,14 @@ export class VISCAPort {
 				if (result === undefined) {
 					throw this.#errorWhileProcessingMessage('Received inquiry response without a pending inquiry', returnMessage)
 				}
-				const { i, inquiry } = result
+				const { i, pendingInquiry } = result
 
-				const { value, mask, params } = inquiry.expectedResponse
-				if (responseMatches(returnMessage, mask, value)) {
+				const expectedReturn = pendingInquiry.expectedReturn
+				if (returnMatches(returnMessage, expectedReturn)) {
 					// Resolve the inquiry's promise with options corresponding
 					// to the response's parameters.
-					const options: CompanionOptionValues = {}
-					for (const [id, { nibbles, paramToChoice }] of Object.entries(params)) {
+					const answer: Answer<AnswerParameters> = {}
+					for (const [id, { nibbles, convert }] of Object.entries(expectedReturn.params)) {
 						let paramval = 0
 						for (const nibble of nibbles) {
 							const byteOffset = nibble >> 1
@@ -845,17 +857,17 @@ export class VISCAPort {
 							paramval = (paramval << 4) | contrib
 						}
 
-						options[id] = paramToChoice(paramval)
+						answer[id] = convert ? convert(paramval) : paramval
 					}
 
-					inquiry.succeeded(options)
+					pendingInquiry.succeeded(answer)
 				} else {
-					const blame = inquiry.userDefined ? 'Double-check the syntax of your inquiry.' : BLAME_MODULE
+					const blame = pendingInquiry.userDefined ? 'Double-check the syntax of your inquiry.' : BLAME_MODULE
 					const reason =
-						`Inquiry ${prettyBytes(inquiry.bytes)} received the ` +
+						`Inquiry ${prettyBytes(pendingInquiry.bytes)} received the ` +
 						`response ${prettyBytes(returnMessage)} which isn't ` +
 						`compatible with the expected format.  (${blame})`
-					inquiry.nonfatalError(reason)
+					pendingInquiry.nonfatalError(reason)
 				}
 
 				this.#waitingForInitialResponse.splice(i, 1)
@@ -886,8 +898,8 @@ export class VISCAPort {
 					// There's no way to safely handle both possibilities,
 					// because mis-resolving a command in a socket will result
 					// in an error when the command's Completion comes through
-					// later.  So we implement for the only behavior observed
-					// and hopefully wash our hands of the matter.
+					// later.  So we implement for now the only behavior
+					// observed and hopefully wash our hands of the matter.
 
 					const commandAwaitingInitialResponse = this.#findFirstCommandWaitingForInitialResponse()
 					if (commandAwaitingInitialResponse === undefined) {
@@ -896,18 +908,18 @@ export class VISCAPort {
 							returnMessage,
 						)
 					}
-					const { i, command } = commandAwaitingInitialResponse
+					const { i, pendingCommand } = commandAwaitingInitialResponse
 
 					const reason =
 						'The command ' +
-						prettyBytes(command.bytes) +
+						prettyBytes(pendingCommand.bytes) +
 						" can't be executed now.  This is likely because the " +
 						"command alters a setting that doesn't pertain to a " +
 						'current camera mode.  (For example, the Focus Near ' +
 						'command may require Manual Focus mode is active ' +
 						'rather than Auto Focus mode.)  Activate the ' +
 						'relevant camera mode before executing this command.'
-					command.nonfatalError(reason)
+					pendingCommand.nonfatalError(reason)
 
 					if (this.#instance.debugLogging) {
 						this.#instance.log('info', 'Removing non-executable command from #waitingForInitialResponse')
@@ -998,11 +1010,11 @@ export class VISCAPort {
 	 * Find the first command awaiting an initial response, potentially among
 	 * pending inquiries.
 	 */
-	#findFirstCommandWaitingForInitialResponse(): { i: number; command: PendingCommand } | undefined {
+	#findFirstCommandWaitingForInitialResponse(): { i: number; pendingCommand: PendingCommand } | undefined {
 		for (let i = 0; i < this.#waitingForInitialResponse.length; i++) {
 			const message = this.#waitingForInitialResponse[i]
 			if (message.type === 'command') {
-				return { i, command: message }
+				return { i, pendingCommand: message as PendingCommand }
 			}
 		}
 
@@ -1013,11 +1025,13 @@ export class VISCAPort {
 	 * Find the first inquiry awaiting an initial response, potentially among
 	 * pending commands.
 	 */
-	#findFirstInquiryWaitingForInitialResponse(): { i: number; inquiry: PendingInquiry } | undefined {
+	#findFirstInquiryWaitingForInitialResponse():
+		| { i: number; pendingInquiry: PendingInquiry<AnswerParameters> }
+		| undefined {
 		for (let i = 0; i < this.#waitingForInitialResponse.length; i++) {
 			const message = this.#waitingForInitialResponse[i]
 			if (message.type === 'inquiry') {
-				return { i, inquiry: message }
+				return { i, pendingInquiry: message as PendingInquiry<AnswerParameters> }
 			}
 		}
 
@@ -1039,17 +1053,22 @@ export class VISCAPort {
 	 *
 	 * @param command
 	 *    The command to send.
-	 * @param options
-	 *    Compatible options to use to fill in any parameters in `command`; may
-	 *    be omitted or null if `command` has no parameters.
+	 * @param paramValues
+	 *    Parameter values consistent with `command`'s parameter definitions.
+	 *    This may be omitted if `command` has no parameters.
 	 * @returns
 	 *    A promise that resolves after the response (which may be an error
 	 *    response) to `command` with parameters filled according to `options`
 	 *    has been processed.  If the command failed, an `Error` is resolved; if
 	 *    the command succeeded, the promise resolves `undefined`.
 	 */
-	async sendCommand(command: Command, options: CompanionOptionValues | null = null): Promise<void | Error> {
-		const messageBytes = command.toBytes(options)
+	async sendCommand<CmdParameters extends CommandParameters>(
+		command: Command<CmdParameters>,
+		...paramValues: CmdParameters extends NoCommandParameters
+			? [Readonly<CommandParamValues<CmdParameters>>?]
+			: [Readonly<CommandParamValues<CmdParameters>>]
+	): Promise<void | Error> {
+		const messageBytes = command.toBytes(...paramValues)
 		const isUserDefined = command.isUserDefined()
 		return this.#sendMessage('command', isUserDefined, messageBytes).then(async (result: void | Error) => {
 			if (result !== undefined) {
@@ -1083,7 +1102,9 @@ export class VISCAPort {
 	 *    `Error` is resolved; if the inquiry succeeded, the promise resolves
 	 *    the corresponding options.
 	 */
-	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | Error> {
+	async sendInquiry<Parameters extends AnswerParameters>(
+		inquiry: Inquiry<Parameters>,
+	): Promise<Answer<Parameters> | Error> {
 		const messageBytes = inquiry.toBytes()
 		const isUserDefined = inquiry.isUserDefined()
 		return this.#sendMessage('inquiry', isUserDefined, messageBytes).then(async (result: void | Error) => {
@@ -1091,9 +1112,9 @@ export class VISCAPort {
 				return result
 			}
 
-			return new Promise((resolve: InquiryResolve, reject: MessageRejectFatally) => {
+			return new Promise((resolve: InquiryResolve<Parameters>, reject: MessageRejectFatally) => {
 				this.#waitingForInitialResponse.push(
-					new PendingInquiry(messageBytes, isUserDefined, resolve, reject, inquiry.response()),
+					new PendingInquiry(messageBytes, isUserDefined, resolve, reject, inquiry.answer()),
 				)
 			})
 		})
@@ -1101,7 +1122,7 @@ export class VISCAPort {
 
 	/** Send a message of the given type and bytes. */
 	async #sendMessage(type: MessageType, userDefined: boolean, messageBytes: Bytes): Promise<void | Error> {
-		const err = checkCommandBytes(messageBytes)
+		const err = checkMessageBytes(messageBytes)
 		if (err !== null) {
 			// The bytes should already have been validated, so if this is hit,
 			// it's always an error.

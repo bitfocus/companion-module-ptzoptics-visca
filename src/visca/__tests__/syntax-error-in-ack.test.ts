@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { FocusNearStandard } from '../../camera/commands.js'
+import { FocusNearStandard } from '../../camera/focus.js'
 import { FocusNearStandardBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,

@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { OnScreenDisplayClose, OnScreenDisplayToggle } from '../../camera/commands.js'
+import { OnScreenDisplayClose, OnScreenDisplayToggle } from '../../camera/osd.js'
 import {
 	ACKCompletion,
 	CommandBufferFullBytes,
