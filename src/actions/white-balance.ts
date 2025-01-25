@@ -1,14 +1,44 @@
 import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
-import { AutoWhiteBalanceSensitivity, WhiteBalance, WhiteBalanceOnePushTrigger } from '../camera/commands.js'
-import { AutoWhiteBalanceSensitivityOption, WhiteBalanceOption } from '../camera/options.js'
+import {
+	AutoWhiteBalanceSensitivity,
+	type AutoWhiteBalanceSensitivityLevel,
+	WhiteBalance,
+	type WhiteBalanceMode,
+	WhiteBalanceOnePushTrigger,
+} from '../camera/white-balance.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { optionConversions, optionNullConversions } from './option-conversion.js'
 
 export enum WhiteBalanceActionId {
 	SelectWhiteBalance = 'wb',
 	WhiteBalanceOnePushTrigger = 'wbOPT',
 	SelectAutoWhiteBalanceSensitivity = 'awbS',
 }
+
+const WhiteBalanceModeId = 'val'
+
+const [getWhiteBalanceMode] = optionNullConversions<WhiteBalanceMode, typeof WhiteBalanceModeId>(
+	WhiteBalanceModeId,
+	['automatic', 'indoor', 'outdoor', 'onepush', 'manual'],
+	'automatic',
+)
+
+const AutoWhiteBalanceSensitivityId = 'val'
+
+const [getAutoWhiteBalanceSensitivityLevel] = optionConversions<
+	AutoWhiteBalanceSensitivityLevel,
+	typeof AutoWhiteBalanceSensitivityId
+>(
+	AutoWhiteBalanceSensitivityId,
+	[
+		[0, 'high'],
+		[1, 'normal'],
+		[2, 'low'],
+	],
+	'normal',
+	1,
+)
 
 export function whiteBalanceActions(instance: PtzOpticsInstance): ActionDefinitions<WhiteBalanceActionId> {
 	return {
@@ -18,13 +48,20 @@ export function whiteBalanceActions(instance: PtzOpticsInstance): ActionDefiniti
 				{
 					type: 'dropdown',
 					label: 'Mode',
-					id: WhiteBalanceOption.id,
-					choices: WhiteBalanceOption.choices,
-					default: WhiteBalanceOption.default,
+					id: WhiteBalanceModeId,
+					choices: [
+						{ id: 'automatic', label: 'Automatic' },
+						{ id: 'indoor', label: 'Indoor' },
+						{ id: 'outdoor', label: 'Outdoor' },
+						{ id: 'onepush', label: 'One Push' },
+						{ id: 'manual', label: 'Manual' },
+					],
+					default: 'automatic',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(WhiteBalance, event.options)
+			callback: async ({ options }) => {
+				const mode = getWhiteBalanceMode(options)
+				instance.sendCommand(WhiteBalance, { mode })
 			},
 		},
 		[WhiteBalanceActionId.WhiteBalanceOnePushTrigger]: {
@@ -40,13 +77,18 @@ export function whiteBalanceActions(instance: PtzOpticsInstance): ActionDefiniti
 				{
 					type: 'dropdown',
 					label: 'Sensitivity',
-					id: AutoWhiteBalanceSensitivityOption.id,
-					choices: AutoWhiteBalanceSensitivityOption.choices,
-					default: AutoWhiteBalanceSensitivityOption.default,
+					id: AutoWhiteBalanceSensitivityId,
+					choices: [
+						{ id: 0, label: 'High' },
+						{ id: 1, label: 'Middle' },
+						{ id: 2, label: 'Low' },
+					],
+					default: 1,
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(AutoWhiteBalanceSensitivity, event.options)
+			callback: async ({ options }) => {
+				const level = getAutoWhiteBalanceSensitivityLevel(options)
+				instance.sendCommand(AutoWhiteBalanceSensitivity, { level })
 			},
 		},
 	}

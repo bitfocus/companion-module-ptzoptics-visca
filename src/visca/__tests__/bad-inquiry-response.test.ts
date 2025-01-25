@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { ExposureModeInquiry } from '../../camera/inquiries.js'
+import { ExposureModeInquiry } from '../../camera/exposure.js'
 import { ExposureModeInquiryBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -16,17 +16,15 @@ import {
 	UserDefinedInquiryMatcher,
 } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
-import { UserDefinedInquiry } from '../command.js'
+import { UserDefinedInquiry } from '../inquiry.js'
 
 describe('inquiry response mismatch', () => {
 	const ZoomPositionInquiryBytes = [0x81, 0x09, 0x04, 0x47, 0xff]
 	const ZoomPositionInquiry = new UserDefinedInquiry(ZoomPositionInquiryBytes, {
-		value: [0x90, 0x50, 0x00, 0x00, 0x00, 0x00, 0xff],
-		mask: [0xff, 0xff, 0xf0, 0xf0, 0xf0, 0xf0, 0xff],
+		bytes: [0x90, 0x50, 0x00, 0x00, 0x00, 0x00, 0xff],
 		params: {
 			position: {
 				nibbles: [5, 7, 9, 11],
-				paramToChoice: String,
 			},
 		},
 	})

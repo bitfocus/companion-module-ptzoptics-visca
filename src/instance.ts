@@ -1,9 +1,4 @@
-import {
-	type CompanionOptionValues,
-	InstanceBase,
-	InstanceStatus,
-	type SomeCompanionConfigField,
-} from '@companion-module/base'
+import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import {
@@ -14,7 +9,8 @@ import {
 } from './options.js'
 import { getPresets } from './presets.js'
 import { repr } from './utils/repr.js'
-import type { Command, Inquiry } from './visca/command.js'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './visca/newcommand.js'
+import type { Answer, AnswerParameters, Inquiry } from './visca/inquiry.js'
 import { VISCAPort } from './visca/port.js'
 
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
@@ -36,15 +32,21 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *
 	 * @param command
 	 *    The command to send.
-	 * @param options
-	 *    Compatible options to use to fill in any parameters in `command`; may
-	 *    be omitted if `command` has no parameters.
+	 * @param paramValues
+	 *    A parameter values object compatible with this command's parameters
+	 *    and their types.  (This can be omitted if the command lacks
+	 *    parameters.)
 	 */
-	sendCommand(command: Command, options: CompanionOptionValues = {}): void {
+	sendCommand<CmdParameters extends CommandParameters>(
+		command: Command<CmdParameters>,
+		...paramValues: CmdParameters extends NoCommandParameters
+			? [CommandParamValues<CmdParameters>?]
+			: [CommandParamValues<CmdParameters>]
+	): void {
 		// `sendCommand` implicitly waits for the connection to be fully
 		// established, so it's unnecessary to resolve `this.#visca.connect()`
 		// here.
-		this.#visca.sendCommand(command, options).then(
+		this.#visca.sendCommand(command, ...paramValues).then(
 			(result: void | Error) => {
 				if (typeof result === 'undefined') {
 					return
@@ -72,12 +74,14 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	 *    resolves null.  Otherwise it resolves an object whose properties are
 	 *    choices corresponding to the parameters in the response.
 	 */
-	async sendInquiry(inquiry: Inquiry): Promise<CompanionOptionValues | null> {
+	async sendInquiry<Parameters extends AnswerParameters>(
+		inquiry: Inquiry<Parameters>,
+	): Promise<Answer<Parameters> | null> {
 		// `sendInquiry` implicitly waits for the connection to be fully
 		// established, so it's unnecessary to resolve `this.#visca.connect()`
 		// here.
 		return this.#visca.sendInquiry(inquiry).then(
-			(result: CompanionOptionValues | Error) => {
+			(result: Answer<Parameters> | Error) => {
 				if (result instanceof Error) {
 					this.log('error', `Error processing inquiry: ${result.message}`)
 					return null

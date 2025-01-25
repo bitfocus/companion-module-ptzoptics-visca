@@ -1,15 +1,17 @@
-import type { CompanionActionEvent } from '@companion-module/base'
+import { type CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import {
 	OnScreenDisplayBack,
 	OnScreenDisplayClose,
 	OnScreenDisplayEnter,
+	type OnScreenDisplayMenuState,
 	OnScreenDisplayNavigate,
 	OnScreenDisplayToggle,
-} from '../camera/commands.js'
-import { OnScreenDisplayInquiry } from '../camera/inquiries.js'
-import { OnScreenDisplayNavigateOption, OnScreenDisplayOption } from '../camera/options.js'
+	type OSDNavigateDirection,
+} from '../camera/osd.js'
+import { OnScreenDisplayInquiry } from '../camera/osd.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { optionNullConversions } from './option-conversion.js'
 
 export enum OSDActionId {
 	OSD = 'onScreenDisplay',
@@ -17,6 +19,22 @@ export enum OSDActionId {
 	OSDEnter = 'onScreenDisplayEnter',
 	OSDBack = 'onScreenDisplayBack',
 }
+
+export const OnScreenDisplayMenuStateId = 'state'
+
+const osdMenuStateToOption = optionNullConversions<OnScreenDisplayMenuState, typeof OnScreenDisplayMenuStateId>(
+	OnScreenDisplayMenuStateId,
+	['open', 'close'],
+	'open',
+)[1]
+
+export const OSDNavigateDirectionId = 'direction'
+
+const [getOSDNavigateDirection] = optionNullConversions<OSDNavigateDirection, typeof OSDNavigateDirectionId>(
+	OSDNavigateDirectionId,
+	['up', 'down', 'left', 'right'],
+	'down',
+)
 
 export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDActionId> {
 	return {
@@ -26,14 +44,18 @@ export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDAc
 				{
 					type: 'dropdown',
 					label: 'Activate OSD menu',
-					id: OnScreenDisplayOption.id,
-					choices: [...OnScreenDisplayOption.choices, { id: 'toggle', label: 'Toggle' }],
+					id: OnScreenDisplayMenuStateId,
+					choices: [
+						{ id: 'open', label: 'Open' },
+						{ id: 'close', label: 'Close' },
+						{ id: 'toggle', label: 'Toggle' },
+					],
 					default: 'toggle',
 				},
 			],
 			callback: async ({ options }) => {
 				let shouldToggle = false
-				switch (options[OnScreenDisplayOption.id]) {
+				switch (options[OnScreenDisplayMenuStateId]) {
 					case 'close':
 						instance.sendCommand(OnScreenDisplayClose)
 						return
@@ -41,9 +63,12 @@ export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDAc
 						shouldToggle = true
 						break
 					case 'open': {
-						const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
-						if (opts === null) return
-						shouldToggle = opts[OnScreenDisplayOption.id] !== 'open'
+						const answer = await instance.sendInquiry(OnScreenDisplayInquiry)
+						if (answer === null) {
+							instance.log('error', 'OSD menu state inquiry failed')
+							return
+						}
+						shouldToggle = answer.state !== 'open'
 					}
 				}
 
@@ -52,9 +77,11 @@ export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDAc
 				}
 			},
 			learn: async (_event: CompanionActionEvent) => {
-				const opts = await instance.sendInquiry(OnScreenDisplayInquiry)
-				if (opts === null) return undefined
-				return { ...opts }
+				const answer = await instance.sendInquiry(OnScreenDisplayInquiry)
+				if (answer === null) {
+					return undefined
+				}
+				return { [OnScreenDisplayMenuStateId]: osdMenuStateToOption(answer.state) }
 			},
 		},
 		[OSDActionId.OSDNavigate]: {
@@ -63,13 +90,19 @@ export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDAc
 				{
 					type: 'dropdown',
 					label: 'Direction',
-					id: OnScreenDisplayNavigateOption.id,
-					choices: OnScreenDisplayNavigateOption.choices,
+					id: OSDNavigateDirectionId,
+					choices: [
+						{ id: 'up', label: 'Up' },
+						{ id: 'right', label: 'Right' },
+						{ id: 'down', label: 'Down' },
+						{ id: 'left', label: 'Left' },
+					],
 					default: 'down',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(OnScreenDisplayNavigate, event.options)
+			callback: async ({ options }) => {
+				const direction = getOSDNavigateDirection(options)
+				instance.sendCommand(OnScreenDisplayNavigate, { direction })
 			},
 		},
 		[OSDActionId.OSDEnter]: {

@@ -1,7 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { FocusLock, FocusNearStandard, FocusStop } from '../../camera/commands.js'
-import { ExposureModeInquiry, FocusModeInquiry } from '../../camera/inquiries.js'
+import { ExposureModeInquiry } from '../../camera/exposure.js'
+import { FocusLock, FocusModeInquiry, FocusNearStandard, FocusStop } from '../../camera/focus.js'
 import {
 	ACK,
 	ExposureModeInquiryBytes,

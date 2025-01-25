@@ -1,6 +1,6 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { UserDefinedCommand } from '../command.js'
+import { UserDefinedCommand } from '../newcommand.js'
 import { CommandFailed, SendCommand, WaitUntilConnectedToCamera } from './camera-interactions/interactions.js'
 import { AttemptSendInvalidMatcher, MatchVISCABytes } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
@@ -10,7 +10,7 @@ describe('terminator embedded in command via param', () => {
 		const MyCustomCommand = new UserDefinedCommand([0x81, 0xf0, 0xff], {
 			param: {
 				nibbles: [3],
-				choiceToParam: (choice: string): number => {
+				convert: (choice: string): number => {
 					return parseInt(choice, 16)
 				},
 			},

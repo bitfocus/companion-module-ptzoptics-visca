@@ -1,6 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { UserDefinedCommand, UserDefinedInquiry } from '../command.js'
+import { UserDefinedCommand } from '../newcommand.js'
+import { UserDefinedInquiry } from '../inquiry.js'
 import { SyntaxErrorBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -39,12 +40,11 @@ describe('syntax error in user-defined message', () => {
 	test('syntax error in user-defined inquiry', async () => {
 		const ABCDInquiryBytes = [0x81, 0x0a, 0x0b, 0x0c, 0x0d, 0xff]
 		const ABCDInquiry = new UserDefinedInquiry(ABCDInquiryBytes, {
-			value: [0x90, 0x50, 0x00, 0xff],
-			mask: [0xff, 0xff, 0xf0, 0xff],
+			bytes: [0x90, 0x50, 0x00, 0xff],
 			params: {
 				p: {
 					nibbles: [5],
-					paramToChoice: String,
+					convert: String,
 				},
 			},
 		})

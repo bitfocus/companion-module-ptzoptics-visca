@@ -1,6 +1,7 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { CameraPower, FocusLock } from '../../camera/commands.js'
+import { FocusLock } from '../../camera/focus.js'
+import { CameraPower } from '../../camera/power.js'
 import { ACKCompletion, CameraPowerBytes, Completion, FocusLockBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -17,7 +18,7 @@ describe('completion in empty socket', () => {
 	test('completion in never-used socket', async () => {
 		return RunCameraInteractionTest(
 			[
-				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
+				SendCommand(CameraPower, { state: 'on' }, 'camera-power'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
 				CameraReplyNetworkChange([0x90, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraReplyBytes(Completion(1)), // camera-power
@@ -30,7 +31,7 @@ describe('completion in empty socket', () => {
 	test('completion in never-used socket with prior command', async () => {
 		return RunCameraInteractionTest(
 			[
-				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
+				SendCommand(CameraPower, { state: 'on' }, 'camera-power'),
 				SendCommand(FocusLock, 'focus-lock'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
@@ -46,7 +47,7 @@ describe('completion in empty socket', () => {
 	test('completion in used-but-emptied socket', async () => {
 		return RunCameraInteractionTest(
 			[
-				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
+				SendCommand(CameraPower, { state: 'on' }, 'camera-power'),
 				SendCommand(FocusLock, 'focus-lock'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
 				CameraReplyBytes(ACKCompletion(1)), // camera-power

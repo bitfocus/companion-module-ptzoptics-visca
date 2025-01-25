@@ -1,24 +1,15 @@
 import type {
 	CompanionActionContext,
-	CompanionActionEvent,
 	CompanionInputFieldCheckbox,
 	CompanionInputFieldTextInput,
 	CompanionMigrationAction,
 	CompanionOptionValues,
+	DropdownChoice,
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
-import { PresetDriveSpeed, PresetRecall, PresetSave } from '../camera/commands.js'
-import {
-	isValidPreset,
-	PresetDriveNumberOption,
-	PresetDriveSpeedOption,
-	PresetRecallDefault,
-	PresetRecallOption,
-	PresetSaveOption,
-	PresetSetDefault,
-	PresetValueOptionId,
-} from '../camera/options.js'
+import { isValidPreset, PresetDriveSpeed, PresetRecall, PresetSave } from '../camera/presets.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { SPEED_CHOICES } from './speeds.js'
 import { repr } from '../utils/repr.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
 
@@ -45,6 +36,9 @@ export const ObsoleteRecallPsetFromVar = 'recallPsetFromVar'
 
 /**
  * The id of the use-variables option checkbox for preset recall/save actions.
+ *
+ * This value must be kept in sync with `OptionWithoutVariablesIsVisible` and
+ * `OptionWithVariablesIsVisible`.
  */
 export const PresetUseVariablesOptionId = 'useVariables'
 
@@ -54,6 +48,12 @@ export const PresetUseVariablesOptionId = 'useVariables'
  * checked.
  */
 export const PresetVariableOptionId = 'presetVariable'
+
+/**
+ * The id of the option that identifies the preset in preset recall/save actions
+ * when the use-variables checkbox is unchecked.
+ */
+export const PresetValueOptionId = 'val'
 
 /**
  * If the entirety of `s` is a decimal number, return it.  Otherwise return
@@ -171,33 +171,61 @@ function OptionWithoutVariablesIsVisible(options: CompanionOptionValues): boolea
 
 /**
  * Given options for an action with a preset option that supports variables,
- * compute command options that specify that preset numerically.
+ * compute the desired preset.
  *
  * @param options
  *   Options from the action.
  * @param context
  *   The context supplied to the action.
  * @returns
- *   An error string if the preset isn't validly identified, or else an options
- *   object that specifies the preset as a number.
+ *   An error string if the preset isn't validly identified, or else the preset.
  */
-export async function parsePresetVariableOption(
+export async function getPresetNumber(
 	options: CompanionOptionValues,
 	context: CompanionActionContext,
-): Promise<CompanionOptionValues | string> {
-	const presetStr = String(options[PresetVariableOptionId])
+): Promise<number | string> {
 	const useVariables = Boolean(options[PresetUseVariablesOptionId])
-	if (!useVariables) {
-		return `Improperly attempted to parse preset value when not using variables: ${presetStr}`
+	let preset
+	if (useVariables) {
+		const presetStr = String(options[PresetVariableOptionId])
+		preset = parseCompleteDecimal(await context.parseVariablesInString(presetStr))
+
+		if (!isValidPreset(preset)) {
+			return `Preset field ${repr(presetStr)} evaluated to an invalid preset`
+		}
+	} else {
+		const presetStr = String(options[PresetValueOptionId])
+		preset = parseInt(presetStr, 16)
+
+		if (!isValidPreset(preset)) {
+			return `Invalid preset selected: ${repr(presetStr)}`
+		}
 	}
 
-	const preset = parseCompleteDecimal(await context.parseVariablesInString(presetStr))
-	if (!isValidPreset(preset)) {
-		return `Invalid recall preset value of: ${repr(presetStr)}`
-	} else {
-		return { [PresetValueOptionId]: twoDigitHex(preset) }
+	return preset
+}
+
+/**
+ * The preset default for a preset-recall option.  (0 is used because it's the
+ * home setting and so can be expected to be reasonably defined.)
+ */
+export const PresetRecallDefault = 0
+
+/**
+ * The preset default for a preset-set option.  (253 is chosen because it's
+ * reasonably likely to be unused, so if the user accidentally forgets to change
+ * it he's unlikely to destroy an existing preset.)
+ */
+export const PresetSetDefault = 253
+
+const PRESET_CHOICES: DropdownChoice[] = []
+for (let i = 0; i < 255; ++i) {
+	if (isValidPreset(i)) {
+		PRESET_CHOICES.push({ id: twoDigitHex(i), label: String(i) })
 	}
 }
+
+const PresetDriveSpeedSpeedId = 'speed'
 
 export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<PresetActionId> {
 	const PresetUseVariablesOption: CompanionInputFieldCheckbox = {
@@ -227,8 +255,8 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				{
 					type: 'dropdown',
 					label: 'Preset number',
-					id: PresetSaveOption.id,
-					choices: PresetSaveOption.choices,
+					id: PresetValueOptionId,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
 					default: twoDigitHex(PresetSetDefault),
 					isVisible: OptionWithoutVariablesIsVisible,
@@ -236,18 +264,13 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				presetNumberTextInput(PresetSetDefault),
 			],
 			callback: async ({ options }, context) => {
-				const useVariableOption = Boolean(options[PresetUseVariablesOptionId])
-				let commandOpts
-				if (useVariableOption) {
-					commandOpts = await parsePresetVariableOption(options, context)
-					if (typeof commandOpts === 'string') {
-						instance.log('error', commandOpts)
-						return
-					}
-				} else {
-					commandOpts = options
+				const preset = await getPresetNumber(options, context)
+				if (typeof preset === 'string') {
+					instance.log('error', preset)
+					return
 				}
-				instance.sendCommand(PresetSave, commandOpts)
+
+				instance.sendCommand(PresetSave, { preset })
 			},
 		},
 		[PresetActionId.RecallPset]: {
@@ -257,8 +280,8 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				{
 					type: 'dropdown',
 					label: 'Preset number',
-					id: PresetRecallOption.id,
-					choices: PresetRecallOption.choices,
+					id: PresetValueOptionId,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
 					default: twoDigitHex(PresetRecallDefault),
 					isVisible: OptionWithoutVariablesIsVisible,
@@ -266,18 +289,13 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				presetNumberTextInput(PresetRecallDefault),
 			],
 			callback: async ({ options }, context) => {
-				const useVariableOption = Boolean(options[PresetUseVariablesOptionId])
-				let commandOpts
-				if (useVariableOption) {
-					commandOpts = await parsePresetVariableOption(options, context)
-					if (typeof commandOpts === 'string') {
-						instance.log('error', commandOpts)
-						return
-					}
-				} else {
-					commandOpts = options
+				const preset = await getPresetNumber(options, context)
+				if (typeof preset === 'string') {
+					instance.log('error', preset)
+					return
 				}
-				instance.sendCommand(PresetRecall, commandOpts)
+
+				instance.sendCommand(PresetRecall, { preset })
 			},
 		},
 		[PresetActionId.SetPresetDriveSpeed]: {
@@ -286,22 +304,24 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				{
 					type: 'dropdown',
 					label: 'Preset number',
-					id: PresetDriveNumberOption.id,
-					choices: PresetDriveNumberOption.choices,
+					id: PresetValueOptionId,
+					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
-					default: PresetDriveNumberOption.default,
+					default: '01',
 				},
 				{
 					type: 'dropdown',
 					label: 'Speed setting',
-					id: PresetDriveSpeedOption.id,
-					choices: PresetDriveSpeedOption.choices,
+					id: PresetDriveSpeedSpeedId,
+					choices: SPEED_CHOICES,
 					minChoicesForSearch: 1,
-					default: PresetDriveSpeedOption.default,
+					default: '0C',
 				},
 			],
-			callback: async (event: CompanionActionEvent) => {
-				instance.sendCommand(PresetDriveSpeed, event.options)
+			callback: async ({ options }) => {
+				const preset = parseInt(String(options[PresetValueOptionId]), 16)
+				const speed = parseInt(String(options[PresetDriveSpeedSpeedId]), 16)
+				instance.sendCommand(PresetDriveSpeed, { preset, speed })
 			},
 		},
 	}

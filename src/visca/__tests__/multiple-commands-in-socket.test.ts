@@ -1,6 +1,8 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { CameraPower, FocusLock, PanTiltHome } from '../../camera/commands.js'
+import { FocusLock } from '../../camera/focus.js'
+import { PanTiltHome } from '../../camera/pan-tilt.js'
+import { CameraPower } from '../../camera/power.js'
 import { ACK, CameraPowerBytes, Completion, FocusLockBytes, PanTiltHomeBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -14,7 +16,7 @@ describe('multiple ACKs in same socket', () => {
 	test('two in same socket', async () => {
 		return RunCameraInteractionTest(
 			[
-				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
+				SendCommand(CameraPower, { state: 'on' }, 'camera-power'),
 				SendCommand(FocusLock, 'focus-lock'),
 				SendCommand(PanTiltHome, 'ptz-home'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power
@@ -37,7 +39,7 @@ describe('multiple ACKs in same socket', () => {
 	test('two in same socket, out of order', async () => {
 		return RunCameraInteractionTest(
 			[
-				SendCommand(CameraPower, { bool: 'on' }, 'camera-power'),
+				SendCommand(CameraPower, { state: 'on' }, 'camera-power'),
 				SendCommand(FocusLock, 'focus-lock'),
 				SendCommand(PanTiltHome, 'ptz-home'),
 				CameraExpectIncomingBytes(CameraPowerBytes), // camera-power

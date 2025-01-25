@@ -1,12 +1,8 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import {
-	FocusFarStandard,
-	FocusNearStandard,
-	FocusStop,
-	OnScreenDisplayClose,
-	PresetRecall,
-} from '../../camera/commands.js'
+import { FocusFarStandard, FocusNearStandard, FocusStop } from '../../camera/focus.js'
+import { OnScreenDisplayClose } from '../../camera/osd.js'
+import { PresetRecall } from '../../camera/presets.js'
 import {
 	ACK,
 	ACKCompletion,
@@ -38,22 +34,22 @@ describe('completion in empty socket', () => {
 				CameraReplyNetworkChange([0x80, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				SendCommand(OnScreenDisplayClose, 'osd-close-1'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-1
-				SendCommand(PresetRecall, { val: '04' }, 'preset-recall-2'),
+				SendCommand(PresetRecall, { preset: 4 }, 'preset-recall-2'),
 				CameraExpectIncomingBytes(PresetRecallBytes(4)), // preset-recall-2
 				CameraReplyBytes(ACKCompletion(1)), // osd-close-1
 				CommandSucceeded('osd-close-1'),
 				SendCommand(OnScreenDisplayClose, 'osd-close-3'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-3
-				SendCommand(PresetRecall, { val: '01' }, 'preset-recall-4'),
+				SendCommand(PresetRecall, { preset: 1 }, 'preset-recall-4'),
 				CameraReplyNetworkChange([0xf0, 0x38, 0xff]), // not essential to this test: randomly added to tests
 				CameraExpectIncomingBytes(PresetRecallBytes(1)), // preset-recall-4
 				SendCommand(OnScreenDisplayClose, 'osd-close-5'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-5
-				SendCommand(PresetRecall, { val: '03' }, 'preset-recall-6'),
+				SendCommand(PresetRecall, { preset: 3 }, 'preset-recall-6'),
 				CameraExpectIncomingBytes(PresetRecallBytes(3)), // preset-recall-6
 				SendCommand(OnScreenDisplayClose, 'osd-close-7'),
 				CameraExpectIncomingBytes(OnScreenDisplayCloseBytes), // osd-close-7
-				SendCommand(PresetRecall, { val: '02' }, 'preset-recall-8'),
+				SendCommand(PresetRecall, { preset: 2 }, 'preset-recall-8'),
 				CameraExpectIncomingBytes(PresetRecallBytes(2)), // preset-recall-8
 				CameraReplyBytes(ACK(2)), // preset-recall-2
 				CameraReplyBytes(ACKCompletion(1)), // osd-close-3
