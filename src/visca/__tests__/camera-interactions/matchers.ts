@@ -1,6 +1,7 @@
+import type { Bytes } from '../../../utils/byte.js'
 import { prettyBytes } from '../../../utils/pretty.js'
 
-export function MatchVISCABytes(bytes: readonly number[]): RegExp {
+export function MatchVISCABytes(bytes: Bytes): RegExp {
 	return new RegExp(`\\[${prettyBytes(bytes).slice(1, -1)}\\]`)
 }
 

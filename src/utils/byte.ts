@@ -1,3 +1,6 @@
+/** A sequence of bytes. */
+export type Bytes = readonly number[]
+
 /** Determine if a number is a byte. */
 function isByte(b: number): boolean {
 	return (b & 0xff) === b

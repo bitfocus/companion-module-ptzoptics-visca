@@ -1,5 +1,6 @@
 import type { CompanionOptionValues, InstanceStatus } from '@companion-module/base'
 import type { Command, Inquiry } from '../../command.js'
+import type { Bytes } from '../../../utils/byte.js'
 
 /**
  * A matcher defining the expected error message for a fatal or nonfatal failed
@@ -27,12 +28,12 @@ type SendCameraInquiry = {
 
 type CameraIncomingBytes = {
 	readonly type: 'camera-expect-incoming-bytes'
-	readonly bytes: readonly number[]
+	readonly bytes: Bytes
 }
 
 type CameraReply = {
 	readonly type: 'camera-reply'
-	readonly bytes: Uint8Array
+	readonly bytes: Bytes
 }
 
 type CommandSuccess = {
@@ -177,7 +178,7 @@ export function SendInquiry(inquiry: Inquiry, id: string): SendCameraInquiry {
  * bytes than these have been sent at this time, as long as these bytes are the
  * earliest-sent bytes that have not yet been indicated to be expected.)
  */
-export function CameraExpectIncomingBytes(bytes: readonly number[]): CameraIncomingBytes {
+export function CameraExpectIncomingBytes(bytes: Bytes): CameraIncomingBytes {
 	return { type: 'camera-expect-incoming-bytes', bytes }
 }
 
@@ -202,12 +203,12 @@ type NetworkChangeFirstByte = 0x80 | 0x90 | 0xa0 | 0xb0 | 0xc0 | 0xd0 | 0xe0 | 0
  *   A network change reply sequence: `z0 38 FF` where `z = Device address + 8`.
  */
 export function CameraReplyNetworkChange(bytes: readonly [NetworkChangeFirstByte, 0x38, 0xff]): CameraReply {
-	return { type: 'camera-reply', bytes: new Uint8Array(bytes) }
+	return { type: 'camera-reply', bytes }
 }
 
 /** Make the "camera" reply with the given bytes. */
-export function CameraReplyBytes(bytes: readonly number[]): CameraReply {
-	return { type: 'camera-reply', bytes: new Uint8Array(bytes) }
+export function CameraReplyBytes(bytes: Bytes): CameraReply {
+	return { type: 'camera-reply', bytes }
 }
 
 /**

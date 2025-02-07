@@ -1,5 +1,5 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import { checkBytes } from '../utils/byte.js'
+import { type Bytes, checkBytes } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
 
 // TERMINOLOGY NOTE:
@@ -10,7 +10,7 @@ import { prettyBytes } from '../utils/pretty.js'
  * Verify that the provided command bytes have the expected start byte and
  * terminator byte and contain no other terminator byte.
  */
-function validateCommand(command: readonly number[]): void {
+function validateCommand(command: Bytes): void {
 	checkBytes(command)
 
 	const err = checkCommandBytes(command)
@@ -46,7 +46,7 @@ export type CommandParams = Readonly<PartialCommandParams>
  * Verify that the given parameters are internally consistent and consistent
  * against the given command.
  */
-function validateCommandParams(params: CommandParams | null, command: readonly number[]): void {
+function validateCommandParams(params: CommandParams | null, command: Bytes): void {
 	if (params === null) {
 		return
 	}
@@ -72,7 +72,7 @@ function validateCommandParams(params: CommandParams | null, command: readonly n
 }
 
 /** Verify that a return message has valid format. */
-function validateReturn(command: readonly number[]): void {
+function validateReturn(command: Bytes): void {
 	checkBytes(command)
 	if (command[0] !== 0x90) {
 		throw new RangeError('return message must start with 0x90')
@@ -107,8 +107,8 @@ export type ResponseParams = {
  * nibbles corresponding to the provided list of parameters.
  */
 export type Response = {
-	readonly value: readonly number[]
-	readonly mask: readonly number[]
+	readonly value: Bytes
+	readonly mask: Bytes
 	readonly params: ResponseParams
 }
 
@@ -184,7 +184,7 @@ export abstract class Message {
  * response consists of an ACK followed by a Completion.
  */
 export abstract class Command extends Message {
-	readonly #commandBytes: readonly number[]
+	readonly #commandBytes: Bytes
 	readonly #params: CommandParams | null
 
 	/**
@@ -206,7 +206,7 @@ export abstract class Command extends Message {
 	 *    triggers are logged but, unlike commands this module itself defines,
 	 *    will not fail the connection
 	 */
-	constructor(commandBytes: readonly number[], params: CommandParams | null, userDefined: boolean) {
+	constructor(commandBytes: Bytes, params: CommandParams | null, userDefined: boolean) {
 		super(userDefined)
 
 		validateCommand(commandBytes)
@@ -228,7 +228,7 @@ export abstract class Command extends Message {
 	 *    Bytes representing this command, with any parameters filled according
 	 *    to the provided options.
 	 */
-	toBytes(options: CompanionOptionValues | null): readonly number[] {
+	toBytes(options: CompanionOptionValues | null): Bytes {
 		const commandBytes = this.#commandBytes
 		const params = this.#params
 		if (params === null || options === null) {
@@ -278,7 +278,7 @@ export class ModuleDefinedCommand extends Command {
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
 	 */
-	constructor(commandBytes: readonly number[], params: CommandParams | null = null) {
+	constructor(commandBytes: Bytes, params: CommandParams | null = null) {
 		super(commandBytes, params, false)
 	}
 }
@@ -298,7 +298,7 @@ export class UserDefinedCommand extends Command {
 	 *    function converting option values to the number to store across those
 	 *    nibbles.
 	 */
-	constructor(commandBytes: readonly number[], params: CommandParams | null = null) {
+	constructor(commandBytes: Bytes, params: CommandParams | null = null) {
 		super(commandBytes, params, true)
 	}
 }
@@ -309,7 +309,7 @@ export class UserDefinedCommand extends Command {
  * the inquiry.
  */
 export abstract class Inquiry extends Message {
-	readonly #commandBytes: readonly number[]
+	readonly #commandBytes: Bytes
 	readonly #response: Response
 
 	/**
@@ -327,7 +327,7 @@ export abstract class Inquiry extends Message {
 	 *    will not fail the connection
 	 */
 
-	constructor(commandBytes: readonly number[], response: Response, userDefined: boolean) {
+	constructor(commandBytes: Bytes, response: Response, userDefined: boolean) {
 		super(userDefined)
 
 		validateCommand(commandBytes)
@@ -343,19 +343,19 @@ export abstract class Inquiry extends Message {
 	}
 
 	/** Compute the bytes of this inquiry. */
-	toBytes(): readonly number[] {
+	toBytes(): Bytes {
 		return this.#commandBytes
 	}
 }
 
 export class ModuleDefinedInquiry extends Inquiry {
-	constructor(commandBytes: readonly number[], response: Response) {
+	constructor(commandBytes: Bytes, response: Response) {
 		super(commandBytes, response, false)
 	}
 }
 
 export class UserDefinedInquiry extends Inquiry {
-	constructor(commandBytes: readonly number[], response: Response) {
+	constructor(commandBytes: Bytes, response: Response) {
 		super(commandBytes, response, true)
 	}
 }
@@ -364,11 +364,7 @@ export class UserDefinedInquiry extends Inquiry {
  * Check whether the bytes of VISCA response `response`, when masked, equal
  * those of `values`.
  */
-export function responseMatches(
-	response: readonly number[],
-	mask: readonly number[],
-	values: readonly number[],
-): boolean {
+export function responseMatches(response: Bytes, mask: Bytes, values: Bytes): boolean {
 	if (response.length !== values.length) return false
 	for (let i = 0; i < response.length; i++) {
 		if ((response[i] & mask[i]) !== values[i]) return false
@@ -381,7 +377,7 @@ export function responseMatches(
  *
  * @returns null if the bytes are valid, an error message string if not
  */
-export function checkCommandBytes(bytes: readonly number[]): string | null {
+export function checkCommandBytes(bytes: Bytes): string | null {
 	if (bytes.length === 0) {
 		return 'command must not be empty'
 	}

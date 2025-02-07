@@ -6,6 +6,7 @@ import type {
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import type { Bytes } from '../utils/byte.js'
 import { type CommandParams, type PartialCommandParams, UserDefinedCommand } from '../visca/command.js'
 
 export enum CustomCommandActionId {
@@ -13,7 +14,7 @@ export enum CustomCommandActionId {
 }
 
 /** Parse a VISCA message string into an array of byte values. */
-function parseMessage(msg: string): readonly number[] {
+function parseMessage(msg: string): Bytes {
 	const hexData = msg.replace(/\s+/g, '')
 	const command = []
 	for (let i = 0; i < hexData.length; i += 2) {

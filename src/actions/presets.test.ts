@@ -10,6 +10,7 @@ import {
 	tryUpdateRecallSetPresetActions,
 } from './presets.js'
 import { MockContext } from '../__tests__/mock-context.js'
+import type { Bytes } from '../utils/byte.js'
 import { repr } from '../utils/repr.js'
 import type { Command } from '../visca/command.js'
 
@@ -24,7 +25,7 @@ function optionsWithPresetOption(textinput: string, preset: number): CompanionOp
 function expectResolvesToCommandBytes(
 	result: string | CompanionOptionValues,
 	command: Command,
-	expectedBytes: readonly number[],
+	expectedBytes: Bytes,
 ): void {
 	if (typeof result === 'string') {
 		throw new TypeError('Result should not have been an error, instead got: ' + result)

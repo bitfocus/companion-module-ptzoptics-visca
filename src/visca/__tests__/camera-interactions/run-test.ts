@@ -2,6 +2,7 @@ import { assertNever, type CompanionOptionValues, InstanceStatus, type LogLevel 
 import { type Interaction, type Match } from './interactions.js'
 import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
+import type { Bytes } from '../../../utils/byte.js'
 import { prettyBytes } from '../../../utils/pretty.js'
 import { repr } from '../../../utils/repr.js'
 
@@ -198,7 +199,7 @@ type Camera = {
 	 * Passing a negative `amount` consumes and returns all currently-received
 	 * bytes.
 	 */
-	readIncomingBytes: (amount: number) => Promise<readonly number[]>
+	readIncomingBytes: (amount: number) => Promise<Bytes>
 
 	/**
 	 * A promise that resolves when the "camera"'s incoming connection socket
@@ -264,7 +265,7 @@ async function verifyInteractions(
 				})
 			})()
 
-			async function readIncomingBytes(amount: number): Promise<readonly number[]> {
+			async function readIncomingBytes(amount: number): Promise<Bytes> {
 				if (amount < 0) {
 					amount = cameraIncomingBytes.length
 				}
@@ -326,7 +327,7 @@ async function verifyInteractions(
 				}
 				case 'camera-reply': {
 					const { bytes } = interaction
-					if (!(await camera).socket.write(bytes)) {
+					if (!(await camera).socket.write(new Uint8Array(bytes))) {
 						throw new Error(`Writing ${prettyBytes(bytes)} failed, socket closed`)
 					}
 					LOG(`Wrote ${prettyBytes(bytes)} to socket`)

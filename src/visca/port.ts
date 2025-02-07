@@ -7,6 +7,7 @@ import {
 } from '@companion-module/base'
 import { checkCommandBytes, type Command, type Inquiry, type Response, responseMatches } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import type { Bytes } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
 import { promiseWithResolvers } from '../utils/promise-with-resolvers.js'
 
@@ -44,7 +45,7 @@ abstract class PendingBase {
 	 * The bytes that make up the message.  If this message is a command with
 	 * parameters, their values will be interpolated into these bytes.
 	 */
-	readonly bytes: readonly number[]
+	readonly bytes: Bytes
 
 	/**
 	 * Whether the message corresponds to a user-defined command that a camera
@@ -80,7 +81,7 @@ abstract class PendingBase {
 	 *    A handler function to use if a fatal error occurred while processing
 	 *    the response to this message.
 	 */
-	constructor(bytes: readonly number[], userDefined: boolean, reject: MessageRejectFatally) {
+	constructor(bytes: Bytes, userDefined: boolean, reject: MessageRejectFatally) {
 		this.bytes = bytes
 		this.userDefined = userDefined
 		this.#reject = reject
@@ -170,7 +171,7 @@ class PendingCommand extends PendingBase {
 	 *    A handler function to use if a fatal error occurred while processing
 	 *    the response to this message.
 	 */
-	constructor(bytes: readonly number[], userDefined: boolean, resolve: CommandResolve, reject: MessageRejectFatally) {
+	constructor(bytes: Bytes, userDefined: boolean, resolve: CommandResolve, reject: MessageRejectFatally) {
 		super(bytes, userDefined, reject)
 
 		this.resolve = resolve
@@ -223,7 +224,7 @@ class PendingInquiry extends PendingBase {
 	 *    the response to this inquiry.
 	 */
 	constructor(
-		bytes: readonly number[],
+		bytes: Bytes,
 		userDefined: boolean,
 		resolve: InquiryResolve,
 		reject: MessageRejectFatally,
@@ -270,7 +271,7 @@ export interface PartialInstance {
  * An async generator of arrays of bytes constituting distinct return messages
  * returned by the camera.
  */
-type ReturnMessages = AsyncGenerator<readonly number[], void, unknown>
+type ReturnMessages = AsyncGenerator<Bytes, void, unknown>
 
 type DisconnectedStatus = { type: 'disconnected' }
 
@@ -364,7 +365,7 @@ export class VISCAPort {
 	 * @returns
 	 *    An error containing the message and pretty-printed `bytes`
 	 */
-	#errorWhileProcessingMessage(msg: string, bytes: readonly number[]): Error {
+	#errorWhileProcessingMessage(msg: string, bytes: Bytes): Error {
 		return new Error(`${msg} (VISCA bytes ${prettyBytes(bytes)})`)
 	}
 
@@ -1099,7 +1100,7 @@ export class VISCAPort {
 	}
 
 	/** Send a message of the given type and bytes. */
-	async #sendMessage(type: MessageType, userDefined: boolean, messageBytes: readonly number[]): Promise<void | Error> {
+	async #sendMessage(type: MessageType, userDefined: boolean, messageBytes: Bytes): Promise<void | Error> {
 		const err = checkCommandBytes(messageBytes)
 		if (err !== null) {
 			// The bytes should already have been validated, so if this is hit,
@@ -1131,11 +1132,11 @@ export class VISCAPort {
 	}
 
 	/** Write the supplied bytes to the socket. */
-	async #sendBytes(socket: TCPHelper, message: readonly number[]): Promise<void | Error> {
+	async #sendBytes(socket: TCPHelper, bytes: Bytes): Promise<void | Error> {
 		if (this.#instance.debugLogging) {
-			this.#instance.log('info', `SEND: ${prettyBytes(message)}...`)
+			this.#instance.log('info', `SEND: ${prettyBytes(bytes)}...`)
 		}
-		const sent = await socket.send(Buffer.from(message))
+		const sent = await socket.send(Buffer.from(bytes))
 		if (!sent) {
 			return new Error('Data not sent: socket is closed')
 		}
