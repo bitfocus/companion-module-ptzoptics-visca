@@ -1,5 +1,5 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import { type Bytes, checkBytes } from '../utils/byte.js'
+import { type Bytes, checkBytes, type Nibbles } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
 
 // TERMINOLOGY NOTE:
@@ -88,7 +88,7 @@ function validateReturn(command: Bytes): void {
  * choice value by the specified function..
  */
 export type ResponseParam = {
-	readonly nibbles: readonly number[]
+	readonly nibbles: Nibbles
 	readonly paramToChoice: (param: number) => string
 }
 
