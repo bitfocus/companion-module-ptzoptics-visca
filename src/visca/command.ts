@@ -248,7 +248,7 @@ export abstract class Command extends Message {
 				val >>= 4
 
 				if ((bytes[byteOffset] & (isLower ? 0xf : 0xf0)) !== 0) {
-					throw new RangeError(`Error: nibble ${nibble} in [${prettyBytes(commandBytes)}] must be zero`)
+					throw new RangeError(`Error: nibble ${nibble} in ${prettyBytes(commandBytes)} must be zero`)
 				}
 
 				bytes[byteOffset] |= contrib << (isLower ? 0 : 4)
