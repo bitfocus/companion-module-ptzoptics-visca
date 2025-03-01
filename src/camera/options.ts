@@ -1,3 +1,5 @@
+import { twoDigitHex } from '../utils/two-digit-hex.js'
+
 const SPEED_CHOICES = [
 	{ id: '18', label: 'Speed 24 (Fast)' },
 	{ id: '17', label: 'Speed 23' },
@@ -263,11 +265,6 @@ export const AutoWhiteBalanceSensitivityOption = {
 	choiceToParam: (choice: string): number => {
 		return Number(choice)
 	},
-}
-
-/** Convert a number to a two-digit hex string. */
-export function twoDigitHex(n: number): string {
-	return n.toString(16).padStart(2, '0')
 }
 
 /**

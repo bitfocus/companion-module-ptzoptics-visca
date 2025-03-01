@@ -17,10 +17,10 @@ import {
 	PresetSaveOption,
 	PresetSetDefault,
 	PresetValueOptionId,
-	twoDigitHex,
 } from '../camera/options.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { repr } from '../utils/repr.js'
+import { twoDigitHex } from '../utils/two-digit-hex.js'
 
 export enum PresetActionId {
 	RecallPset = 'recallPset',

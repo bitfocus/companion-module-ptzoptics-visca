@@ -22,8 +22,8 @@ import {
 	OnScreenDisplayNavigateOption,
 	OnScreenDisplayOption,
 	PresetValueOptionId,
-	twoDigitHex,
 } from './camera/options.js'
+import { twoDigitHex } from './utils/two-digit-hex.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}

@@ -1,7 +1,7 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
 import { PresetRecall, PresetSave } from '../camera/commands.js'
-import { PresetRecallDefault, PresetSetDefault, PresetValueOptionId, twoDigitHex } from '../camera/options.js'
+import { PresetRecallDefault, PresetSetDefault, PresetValueOptionId } from '../camera/options.js'
 import {
 	parsePresetVariableOption,
 	PresetActionId,
@@ -12,6 +12,7 @@ import {
 import { MockContext } from '../__tests__/mock-context.js'
 import type { Bytes } from '../utils/byte.js'
 import { repr } from '../utils/repr.js'
+import { twoDigitHex } from '../utils/two-digit-hex.js'
 import type { Command } from '../visca/command.js'
 
 function optionsWithPresetOption(textinput: string, preset: number): CompanionOptionValues {
