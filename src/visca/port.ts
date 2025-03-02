@@ -1,5 +1,5 @@
 import { assertNever, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
-import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './newcommand.js'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { checkMessageBytes } from './message.js'
 import type { Answer, AnswerMessage, AnswerParameters, Inquiry } from './inquiry.js'

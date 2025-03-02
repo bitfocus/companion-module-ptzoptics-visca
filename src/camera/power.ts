@@ -1,5 +1,5 @@
 import { assertNever } from '@companion-module/base'
-import { ModuleDefinedCommand } from '../visca/newcommand.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 
 export type CameraPowerState = 'standby' | 'on'
 

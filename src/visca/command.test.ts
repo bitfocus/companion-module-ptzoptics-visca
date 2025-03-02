@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals'
 import { OnScreenDisplayInquiry } from '../camera/osd.js'
-import { ModuleDefinedCommand, UserDefinedCommand } from './newcommand.js'
+import { ModuleDefinedCommand, UserDefinedCommand } from './command.js'
 
 describe('isUserDefined function', () => {
 	test('module-defined command is not user-defined', () => {

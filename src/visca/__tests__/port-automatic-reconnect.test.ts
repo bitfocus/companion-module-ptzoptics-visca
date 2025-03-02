@@ -14,7 +14,7 @@ import {
 } from './camera-interactions/interactions.js'
 import { CameraClosedConnectionMatcher } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
-import { ModuleDefinedCommand } from '../newcommand.js'
+import { ModuleDefinedCommand } from '../command.js'
 import { ModuleDefinedInquiry } from '../inquiry.js'
 
 describe('When the camera closes the connection, the VISCA port should attempt to reconnect', () => {

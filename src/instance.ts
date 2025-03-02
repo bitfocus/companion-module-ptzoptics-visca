@@ -9,7 +9,7 @@ import {
 } from './options.js'
 import { getPresets } from './presets.js'
 import { repr } from './utils/repr.js'
-import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './visca/newcommand.js'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './visca/command.js'
 import type { Answer, AnswerParameters, Inquiry } from './visca/inquiry.js'
 import { VISCAPort } from './visca/port.js'
 

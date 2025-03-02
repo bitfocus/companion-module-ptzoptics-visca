@@ -1,5 +1,5 @@
 import type { PtzOpticsInstance } from '../instance.js'
-import { ModuleDefinedCommand } from '../visca/newcommand.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 
 export enum PanTiltAction {
 	Up,

@@ -1,7 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
 import { describe, test } from '@jest/globals'
-import { UserDefinedCommand } from '../newcommand.js'
-import { UserDefinedInquiry } from '../inquiry.js'
 import { SyntaxErrorBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
@@ -17,6 +15,8 @@ import {
 	UserDefinedMessageMatcher,
 } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
+import { UserDefinedCommand } from '../command.js'
+import { UserDefinedInquiry } from '../inquiry.js'
 
 describe('syntax error in user-defined message', () => {
 	test('syntax error in user-defined command', async () => {
