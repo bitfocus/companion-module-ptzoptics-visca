@@ -1,6 +1,6 @@
 import type { InstanceStatus } from '@companion-module/base'
+import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from '../../command.js'
 import type { AnswerParameters, Inquiry } from '../../inquiry.js'
-import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from '../../newcommand.js'
 import type { Bytes } from '../../../utils/byte.js'
 
 /**

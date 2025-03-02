@@ -1,4 +1,4 @@
-import { ModuleDefinedCommand } from '../visca/newcommand.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 
 export const ZoomIn = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x07, 0x02, 0xff])
 export const ZoomOut = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x07, 0x03, 0xff])

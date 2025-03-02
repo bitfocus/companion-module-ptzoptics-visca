@@ -1,4 +1,4 @@
-import { ModuleDefinedCommand } from '../visca/newcommand.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 
 /**
  * Determine whether a number is a valid preset.

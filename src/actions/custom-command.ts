@@ -7,7 +7,7 @@ import type {
 import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import type { Bytes } from '../utils/byte.js'
-import { type CommandParameters, type CommandParamValues, UserDefinedCommand } from '../visca/newcommand.js'
+import { type CommandParameters, type CommandParamValues, UserDefinedCommand } from '../visca/command.js'
 
 export enum CustomCommandActionId {
 	SendCustomCommand = 'custom',

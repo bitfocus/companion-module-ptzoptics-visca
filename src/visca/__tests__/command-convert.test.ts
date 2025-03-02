@@ -8,7 +8,7 @@ import {
 	SendCommand,
 } from './camera-interactions/interactions.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
-import { ModuleDefinedCommand } from '../newcommand.js'
+import { ModuleDefinedCommand } from '../command.js'
 
 describe('command parameter conversions', () => {
 	test('command with no parameters (omitted)', async () => {

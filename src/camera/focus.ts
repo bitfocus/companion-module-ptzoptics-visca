@@ -1,5 +1,5 @@
 import { assertNever } from '@companion-module/base'
-import { ModuleDefinedCommand } from '../visca/newcommand.js'
+import { ModuleDefinedCommand } from '../visca/command.js'
 import { ModuleDefinedInquiry } from '../visca/inquiry.js'
 
 export const FocusStop = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x00, 0xff])
