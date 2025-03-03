@@ -4,6 +4,16 @@ import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from
 import { SPEED_CHOICES } from './speeds.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
+/**
+ * The id of the obsolete action to set module-global pan/tilt speed using
+ * options storing the preset and speed as two-digit hex number strings.
+ *
+ * This action has been replaced by the action below that defines those options
+ * to both accept simple numbers instead.  The upgrade from obsolete to new
+ * action is performed in `tryUpdatePresetAndSpeedEncodingsInActions` because of
+ * the shared preset-number and speed choice encodings used across actions that
+ * span two action subsets.
+ */
 export const ObsoletePtSpeedSId = 'ptSpeedS'
 
 export enum PanTiltActionId {
@@ -17,12 +27,16 @@ export enum PanTiltActionId {
 	PanTiltDownRight = 'downRight',
 	PanTiltStop = 'stop',
 	PanTiltHome = 'home',
-	PanTiltSetSpeed = ObsoletePtSpeedSId,
+	PanTiltSpeedSet = 'ptSpeedSet',
 	PanTiltSpeedUp = 'ptSpeedU',
 	PanTiltSpeedDown = 'ptSpeedD',
 }
 
-const PanTiltSpeedOptionId = 'speed'
+/**
+ * The id of the option on the set-global-pan/tilt-speed action that specifies
+ * the speed.
+ */
+export const PanTiltSpeedSetSpeedId = 'speed'
 
 export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<PanTiltActionId> {
 	function createPanTiltCallback(direction: readonly [number, number]) {
@@ -85,19 +99,19 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 				instance.sendCommand(PanTiltHome)
 			},
 		},
-		[PanTiltActionId.PanTiltSetSpeed]: {
+		[PanTiltActionId.PanTiltSpeedSet]: {
 			name: 'P/T Speed',
 			options: [
 				{
 					type: 'dropdown',
 					label: 'Speed setting',
-					id: PanTiltSpeedOptionId,
+					id: PanTiltSpeedSetSpeedId,
 					choices: SPEED_CHOICES,
-					default: '0C',
+					default: 12,
 				},
 			],
 			callback: async ({ options }) => {
-				const speed = parseInt(String(options[PanTiltSpeedOptionId]), 16)
+				const speed = Number(options[PanTiltSpeedSetSpeedId])
 				instance.setPanTiltSpeed(speed)
 			},
 		},

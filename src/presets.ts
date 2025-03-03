@@ -4,13 +4,7 @@ import { FocusActionId, FocusModeId } from './actions/focus.js'
 import { AutoTrackingActionId, TrackingId } from './actions/auto-tracking.js'
 import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
-import {
-	PresetUseVariablesOptionId,
-	PresetValueOptionId,
-	PresetVariableOptionId,
-	RecallPsetId,
-	SavePsetId,
-} from './actions/presets.js'
+import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from './actions/presets.js'
 import { WhiteBalanceActionId, WhiteBalanceModeId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
 import {
@@ -24,7 +18,6 @@ import {
 	IMAGE_DOWN_RIGHT,
 } from './assets/assets.js'
 import { isValidPreset } from './camera/presets.js'
-import { twoDigitHex } from './utils/two-digit-hex.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
@@ -985,11 +978,11 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: SavePsetId,
+								actionId: SetPresetId,
 								options: {
-									[PresetUseVariablesOptionId]: false,
-									[PresetValueOptionId]: twoDigitHex(save),
-									[PresetVariableOptionId]: `${save}`,
+									[PresetIsTextId]: false,
+									[PresetAsNumberId]: save,
+									[PresetAsTextId]: `${save}`,
 								},
 							},
 						],
@@ -1018,11 +1011,11 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: RecallPsetId,
+								actionId: RecallPresetId,
 								options: {
-									[PresetUseVariablesOptionId]: false,
-									[PresetValueOptionId]: twoDigitHex(recall),
-									[PresetVariableOptionId]: `${recall}`,
+									[PresetIsTextId]: false,
+									[PresetAsNumberId]: recall,
+									[PresetAsTextId]: `${recall}`,
 								},
 							},
 						],

@@ -1,10 +1,9 @@
 import type {
 	CompanionActionContext,
-	CompanionInputFieldCheckbox,
-	CompanionInputFieldTextInput,
 	CompanionMigrationAction,
 	CompanionOptionValues,
 	DropdownChoice,
+	SomeCompanionActionInputField,
 } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import { isValidPreset, PresetDriveSpeed, PresetRecall, PresetSave } from '../camera/presets.js'
@@ -12,20 +11,21 @@ import type { PtzOpticsInstance } from '../instance.js'
 import { SPEED_CHOICES } from './speeds.js'
 import { repr } from '../utils/repr.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
+import { ObsoletePtSpeedSId, PanTiltActionId, PanTiltSpeedSetSpeedId } from './pan-tilt.js'
 
 /** The id of the recall-preset action. */
-export const RecallPsetId = 'recallPset'
+export const RecallPresetId = 'recallPreset'
 
-/** The id of the save-preset action. */
-export const SavePsetId = 'savePset'
+/** The id of the set-preset action. */
+export const SetPresetId = 'setPreset'
 
-/** The id of the set-preset-drive-speed action. */
-export const SpeedPsetId = 'speedPset'
+/** The id of the set-a-preset's-drive-speed action. */
+const SetPresetDriveSpeedId = 'speedPreset'
 
 export enum PresetActionId {
-	RecallPset = RecallPsetId,
-	SavePset = SavePsetId,
-	SetPresetDriveSpeed = SpeedPsetId,
+	RecallPreset = RecallPresetId,
+	SetPreset = SetPresetId,
+	SetPresetDriveSpeed = SetPresetDriveSpeedId,
 }
 
 /**
@@ -44,25 +44,24 @@ export const ObsoleteSavePsetFromVar = 'savePsetFromVar'
 export const ObsoleteRecallPsetFromVar = 'recallPsetFromVar'
 
 /**
- * The id of the use-variables option checkbox for preset recall/save actions.
- *
- * This value must be kept in sync with `OptionWithoutVariablesIsVisible` and
- * `OptionWithVariablesIsVisible`.
+ * The obsolete id of the use-variables option checkbox for preset recall/save
+ * actions.  Replaced by `PresetIsTextId`.
  */
-export const PresetUseVariablesOptionId = 'useVariables'
+export const ObsoletePresetUseVariablesOptionId = 'useVariables'
 
 /**
- * The id of the option defining a variables-supporting textinput to specify the
- * preset in preset recall/save actions, when the use-variables checkbox is
- * checked.
+ * The obsolete id of the option defining a variables-supporting textinput to
+ * specify the preset in preset recall/save actions, when the use-variables
+ * checkbox is checked.  Replaced by `PresetFromTextId`.
  */
-export const PresetVariableOptionId = 'presetVariable'
+export const ObsoletePresetVariableOptionId = 'presetVariable'
 
 /**
- * The id of the option that identifies the preset in preset recall/save actions
- * when the use-variables checkbox is unchecked.
+ * The obsolete id of the option that identifies the preset in preset
+ * recall/save actions when the use-variables checkbox is unchecked.  Replaced
+ * by `PresetAsNumberId`.
  */
-export const PresetValueOptionId = 'val'
+export const ObsoletePresetValueOptionId = 'val'
 
 /**
  * If the entirety of `s` is a decimal number, return it.  Otherwise return
@@ -73,6 +72,18 @@ function parseCompleteDecimal(s: string): number {
 	// decimal numbers.
 	return /^\d+$/.test(s) ? parseInt(s, 10) : NaN
 }
+
+/**
+ * The id of the obsolete save-preset action that specified preset from either
+ * constant two-digit hex number or a variables-supporting text input.
+ */
+export const ObsoleteSavePsetId = 'savePset'
+
+/**
+ * The id of the obsolete recall-preset action that specified preset from either
+ * constant two-digit hex number or a variables-supporting text input.
+ */
+export const ObsoleteRecallPsetId = 'recallPset'
 
 /**
  * Given a migration action, if it's a preset recall/save action with the preset
@@ -96,45 +107,45 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 	const { actionId, options } = action
 	switch (actionId) {
 		case ObsoleteRecallPsetFromVar: {
-			action.actionId = RecallPsetId
-			options[PresetUseVariablesOptionId] = true
+			action.actionId = ObsoleteRecallPsetId
+			options[ObsoletePresetUseVariablesOptionId] = true
 
-			const textinput = String(options[PresetValueOptionId])
-			options[PresetVariableOptionId] = textinput
+			const textinput = String(options[ObsoletePresetValueOptionId])
+			options[ObsoletePresetVariableOptionId] = textinput
 
 			const n = parseCompleteDecimal(textinput)
-			options[PresetValueOptionId] = twoDigitHex(isValidPreset(n) ? n : PresetRecallDefault)
+			options[ObsoletePresetValueOptionId] = twoDigitHex(isValidPreset(n) ? n : PresetRecallDefault)
 			return true
 		}
 
 		case ObsoleteSavePsetFromVar: {
-			action.actionId = SavePsetId
-			options[PresetUseVariablesOptionId] = true
+			action.actionId = ObsoleteSavePsetId
+			options[ObsoletePresetUseVariablesOptionId] = true
 
-			const textinput = String(options[PresetValueOptionId])
-			options[PresetVariableOptionId] = textinput
+			const textinput = String(options[ObsoletePresetValueOptionId])
+			options[ObsoletePresetVariableOptionId] = textinput
 
 			const n = parseCompleteDecimal(textinput)
-			options[PresetValueOptionId] = twoDigitHex(isValidPreset(n) ? n : PresetSetDefault)
+			options[ObsoletePresetValueOptionId] = twoDigitHex(isValidPreset(n) ? n : PresetSetDefault)
 			return true
 		}
 
-		case RecallPsetId:
-			if (!(PresetUseVariablesOptionId in options)) {
-				options[PresetUseVariablesOptionId] = false
+		case ObsoleteRecallPsetId:
+			if (!(ObsoletePresetUseVariablesOptionId in options)) {
+				options[ObsoletePresetUseVariablesOptionId] = false
 
-				const n = parseInt(String(options[PresetValueOptionId]), 16)
-				options[PresetVariableOptionId] = String(isValidPreset(n) ? n : PresetRecallDefault)
+				const n = parseInt(String(options[ObsoletePresetValueOptionId]), 16)
+				options[ObsoletePresetVariableOptionId] = String(isValidPreset(n) ? n : PresetRecallDefault)
 				return true
 			}
 			return false
 
-		case SavePsetId:
-			if (!(PresetUseVariablesOptionId in options)) {
-				options[PresetUseVariablesOptionId] = false
+		case ObsoleteSavePsetId:
+			if (!(ObsoletePresetUseVariablesOptionId in options)) {
+				options[ObsoletePresetUseVariablesOptionId] = false
 
-				const n = parseInt(String(options[PresetValueOptionId]), 16)
-				options[PresetVariableOptionId] = String(isValidPreset(n) ? n : PresetSetDefault)
+				const n = parseInt(String(options[ObsoletePresetValueOptionId]), 16)
+				options[ObsoletePresetVariableOptionId] = String(isValidPreset(n) ? n : PresetSetDefault)
 				return true
 			}
 			return false
@@ -145,35 +156,149 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 }
 
 /**
+ * The id of the obsolete set-preset-drive-speed action that specified preset
+ * fromeither constant two-digit hex number or a variables-supporting text
+ * input.
+ */
+export const ObsoleteSpeedPsetId = 'speedPset'
+
+/**
+ * The id of the option checkbox for preset recall/save actions that determines
+ * whether the number dropdown determines the desired preset, or the text field
+ * (parsed supporting variables) determines the desired preset.
+ *
+ * This value must be kept in sync with `OptionWithoutVariablesIsVisible` and
+ * `OptionWithVariablesIsVisible`.
+ */
+export const PresetIsTextId = 'isText'
+
+/**
+ * The id of the option that defines a dropdown of preset numbers in preset
+ * recall/save actions, when the use-the-textinput checkbox is unchecked.
+ */
+export const PresetAsNumberId = 'presetAsNumber'
+
+/**
+ * The id of the option defining a variables-supporting textinput to specify the
+ * preset in preset recall/save actions, when the use-the-textinput checkbox is
+ * checked.
+ */
+export const PresetAsTextId = 'presetAsText'
+
+/**
+ * The id of the option on the set-preset's-drive-speed action that specifies
+ * the preset.
+ */
+export const SetPresetDriveSpeedPresetId = 'preset'
+
+/**
+ * The id of the option on the set-preset's-drive-speed action that specifies
+ * the speed.
+ */
+export const SetPresetDriveSpeedSpeedId = 'speed'
+
+/**
+ * Given a migration action, attempt to perform these potential upgrades to it:
+ *
+ *   * If the action is an obsolete preset recall/save action, that had its
+ *     preset specified by either two-digit lowercase hex number string or by
+ *     text input that supports variables, rewrite it to a modernized form with
+ *     the former encoding choice simply being the preset number.
+ *
+ *         { useVariables: boolean, val: twoDigitHex(N), presetVariable: "..." } ⇒
+ *         { isText: boolean, presetAsNumber: N, presetAsText: "..." }
+ *
+ *   * If the action is an obsolete set-preset-recall-speed action, that had its
+ *     preset encoded as a two-digit lowercase hex number string and its speed
+ *     encoded as a two-digit uppercase hex number string, rewrite it to a
+ *     modernized form that encodes both as simple numbers.
+ *
+ *         { val: twoDigitHex(N), speed: twoDigitHex(S).toUpperCase() } ⇒
+ *         { preset: N, speed: S }
+ *
+ *   * If the action is an obsolete set-global-pan/tilt-speed action, that
+ *     encoded the speed as a two-digit uppercase hex number string, rewrite it
+ *     to a modernized form that encodes the speed as a simple number.
+ *
+ *         { speed: twoDigitHex(S).toUpperCase() }⇒
+ *         { speed: S }
+ *
+ * If one of these upgrades was performed, return true.  Otherwise return false.
+ *
+ * @returns
+ *   Whether the action was upgraded.
+ */
+export function tryUpdatePresetAndSpeedEncodingsInActions(action: CompanionMigrationAction): boolean {
+	const { actionId, options } = action
+	switch (actionId) {
+		case ObsoleteSavePsetId:
+		case ObsoleteRecallPsetId: {
+			action.actionId = actionId === ObsoleteSavePsetId ? SetPresetId : RecallPresetId
+
+			options[PresetIsTextId] = options[ObsoletePresetUseVariablesOptionId]
+			delete options[ObsoletePresetUseVariablesOptionId]
+
+			options[PresetAsNumberId] = parseInt(String(options[ObsoletePresetValueOptionId]), 16)
+			delete options[ObsoletePresetValueOptionId]
+
+			options[PresetAsTextId] = options[ObsoletePresetVariableOptionId]
+			delete options[ObsoletePresetVariableOptionId]
+			return true
+		}
+
+		case ObsoleteSpeedPsetId: {
+			action.actionId = SetPresetDriveSpeedId
+
+			options[SetPresetDriveSpeedPresetId] = parseInt(String(options[ObsoletePresetValueOptionId]), 16)
+			delete options[ObsoletePresetValueOptionId]
+
+			options[SetPresetDriveSpeedSpeedId] = parseInt(String(options[SetPresetDriveSpeedSpeedId]), 16)
+
+			return true
+		}
+
+		case ObsoletePtSpeedSId: {
+			action.actionId = PanTiltActionId.PanTiltSpeedSet
+
+			options[PanTiltSpeedSetSpeedId] = parseInt(String(options[PanTiltSpeedSetSpeedId]), 16)
+			return true
+		}
+
+		default:
+			return false
+	}
+}
+
+/**
  * An `isVisible` function used with preset recall/save action options that
- * apply when the user has chosen to specify the preset using variables.
+ * apply when the user has chosen to specify the preset using text input.
  *
  * @param options
  *   The options specified by the user for the action.
  * @returns
  *   Whether `options` specifies to use the variable-supporting text input.
  */
-function OptionWithVariablesIsVisible(options: CompanionOptionValues): boolean {
-	// Don't use `PresetUseVariablesOptionId` because this function can't depend
-	// on enclosing-scope names.
+function OptionPresetAsTextIsVisible(options: CompanionOptionValues): boolean {
+	// Don't use `PresetIsTextId` because this function can't depend on
+	// enclosing-scope names.
 	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !!options.useVariables
+	return !!options.isText
 }
 
 /**
  * An `isVisible` function used with preset recall/save action options that
- * apply when the user has chosen to specify the preset *not* using variables.
+ * apply when the user has chosen to specify the preset by number.
  *
  * @param options
  *   The options specified by the user for the action.
  * @returns
  *   Whether `options` specifies not to use the variable-supporting text input.
  */
-function OptionWithoutVariablesIsVisible(options: CompanionOptionValues): boolean {
-	// Don't use `PresetUseVariablesOptionId` because this function can't depend
-	// on enclosing-scope names.
+function OptionPresetAsNumberIsVisible(options: CompanionOptionValues): boolean {
+	// Don't use `PresetIsTextId` because this function can't depend on
+	// enclosing-scope names.
 	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !options.useVariables
+	return !options.isText
 }
 
 /**
@@ -191,21 +316,20 @@ export async function getPresetNumber(
 	options: CompanionOptionValues,
 	context: CompanionActionContext,
 ): Promise<number | string> {
-	const useVariables = Boolean(options[PresetUseVariablesOptionId])
+	const isText = Boolean(options[PresetIsTextId])
 	let preset
-	if (useVariables) {
-		const presetStr = String(options[PresetVariableOptionId])
+	if (isText) {
+		const presetStr = String(options[PresetAsTextId])
 		preset = parseCompleteDecimal(await context.parseVariablesInString(presetStr))
 
 		if (!isValidPreset(preset)) {
 			return `Preset field ${repr(presetStr)} evaluated to an invalid preset`
 		}
 	} else {
-		const presetStr = String(options[PresetValueOptionId])
-		preset = parseInt(presetStr, 16)
+		preset = Number(options[PresetAsNumberId])
 
 		if (!isValidPreset(preset)) {
-			return `Invalid preset selected: ${repr(presetStr)}`
+			return `Invalid preset selected: ${preset}`
 		}
 	}
 
@@ -228,48 +352,44 @@ export const PresetSetDefault = 253
 const PRESET_CHOICES: DropdownChoice[] = []
 for (let i = 0; i < 255; ++i) {
 	if (isValidPreset(i)) {
-		PRESET_CHOICES.push({ id: twoDigitHex(i), label: String(i) })
+		PRESET_CHOICES.push({ id: i, label: String(i) })
 	}
 }
 
-const PresetDriveSpeedSpeedId = 'speed'
-
 export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<PresetActionId> {
-	const PresetUseVariablesOption: CompanionInputFieldCheckbox = {
-		type: 'checkbox',
-		label: 'Use variables for preset',
-		id: PresetUseVariablesOptionId,
-		default: false,
-	} as const
-
-	function presetNumberTextInput(defaultPreset: number): CompanionInputFieldTextInput {
-		return {
-			type: 'textinput',
-			label: 'Preset number',
-			id: PresetVariableOptionId,
-			useVariables: true,
-			tooltip: 'Preset number range of 0-89, 100-254',
-			default: `${defaultPreset}`,
-			isVisible: OptionWithVariablesIsVisible,
-		}
+	function presetNumberOptions(defaultPreset: number): SomeCompanionActionInputField[] {
+		return [
+			{
+				type: 'checkbox',
+				label: 'Specify preset textually (supporting variables)',
+				id: PresetIsTextId,
+				default: false,
+			},
+			{
+				type: 'dropdown',
+				label: 'Preset number',
+				id: PresetAsNumberId,
+				choices: PRESET_CHOICES,
+				minChoicesForSearch: 1,
+				default: defaultPreset,
+				isVisible: OptionPresetAsNumberIsVisible,
+			},
+			{
+				type: 'textinput',
+				label: 'Preset number',
+				id: PresetAsTextId,
+				useVariables: true,
+				tooltip: 'Preset number range of 0-89, 100-254',
+				default: `${defaultPreset}`,
+				isVisible: OptionPresetAsTextIsVisible,
+			},
+		]
 	}
 
 	return {
-		[PresetActionId.SavePset]: {
-			name: 'Save Preset',
-			options: [
-				PresetUseVariablesOption,
-				{
-					type: 'dropdown',
-					label: 'Preset number',
-					id: PresetValueOptionId,
-					choices: PRESET_CHOICES,
-					minChoicesForSearch: 1,
-					default: twoDigitHex(PresetSetDefault),
-					isVisible: OptionWithoutVariablesIsVisible,
-				},
-				presetNumberTextInput(PresetSetDefault),
-			],
+		[PresetActionId.SetPreset]: {
+			name: 'Set Preset',
+			options: presetNumberOptions(PresetSetDefault),
 			callback: async ({ options }, context) => {
 				const preset = await getPresetNumber(options, context)
 				if (typeof preset === 'string') {
@@ -280,21 +400,9 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				instance.sendCommand(PresetSave, { preset })
 			},
 		},
-		[PresetActionId.RecallPset]: {
+		[PresetActionId.RecallPreset]: {
 			name: 'Recall Preset',
-			options: [
-				PresetUseVariablesOption,
-				{
-					type: 'dropdown',
-					label: 'Preset number',
-					id: PresetValueOptionId,
-					choices: PRESET_CHOICES,
-					minChoicesForSearch: 1,
-					default: twoDigitHex(PresetRecallDefault),
-					isVisible: OptionWithoutVariablesIsVisible,
-				},
-				presetNumberTextInput(PresetRecallDefault),
-			],
+			options: presetNumberOptions(PresetRecallDefault),
 			callback: async ({ options }, context) => {
 				const preset = await getPresetNumber(options, context)
 				if (typeof preset === 'string') {
@@ -311,23 +419,23 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				{
 					type: 'dropdown',
 					label: 'Preset number',
-					id: PresetValueOptionId,
+					id: SetPresetDriveSpeedPresetId,
 					choices: PRESET_CHOICES,
 					minChoicesForSearch: 1,
-					default: '01',
+					default: 1,
 				},
 				{
 					type: 'dropdown',
 					label: 'Speed setting',
-					id: PresetDriveSpeedSpeedId,
+					id: SetPresetDriveSpeedSpeedId,
 					choices: SPEED_CHOICES,
 					minChoicesForSearch: 1,
-					default: '0C',
+					default: 12,
 				},
 			],
 			callback: async ({ options }) => {
-				const preset = parseInt(String(options[PresetValueOptionId]), 16)
-				const speed = parseInt(String(options[PresetDriveSpeedSpeedId]), 16)
+				const preset = Number(options[SetPresetDriveSpeedPresetId])
+				const speed = Number(options[SetPresetDriveSpeedSpeedId])
 				instance.sendCommand(PresetDriveSpeed, { preset, speed })
 			},
 		},
