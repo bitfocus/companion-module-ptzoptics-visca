@@ -7,7 +7,7 @@ export enum AutoTrackingActionId {
 	AutoTracking = 'autoTracking',
 }
 
-const TrackingId = 'tracking'
+export const TrackingId = 'tracking'
 
 const [getAutoTrackingState] = optionNullConversions<AutoTrackingState, typeof TrackingId>(
 	TrackingId,

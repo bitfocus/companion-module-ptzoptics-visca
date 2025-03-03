@@ -14,7 +14,7 @@ export enum FocusActionId {
 	UnlockFocus = 'focusU',
 }
 
-const FocusModeId = 'bol'
+export const FocusModeId = 'bol'
 
 const [getFocusMode, focusModeToOption] = optionConversions<FocusMode, typeof FocusModeId>(
 	FocusModeId,

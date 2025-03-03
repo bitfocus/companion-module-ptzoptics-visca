@@ -1,7 +1,7 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { ExposureActionId } from './actions/exposure.js'
-import { FocusActionId } from './actions/focus.js'
-import { AutoTrackingActionId } from './actions/auto-tracking.js'
+import { ExposureActionId, ExposureModeId } from './actions/exposure.js'
+import { FocusActionId, FocusModeId } from './actions/focus.js'
+import { AutoTrackingActionId, TrackingId } from './actions/auto-tracking.js'
 import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import {
@@ -10,7 +10,7 @@ import {
 	PresetValueOptionId,
 	PresetVariableOptionId,
 } from './actions/presets.js'
-import { WhiteBalanceActionId } from './actions/white-balance.js'
+import { WhiteBalanceActionId, WhiteBalanceModeId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
 import {
 	IMAGE_UP,
@@ -480,7 +480,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: FocusActionId.SelectFocusMode,
 						options: {
-							bol: 0,
+							[FocusModeId]: 0,
 						},
 					},
 				],
@@ -488,7 +488,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: FocusActionId.SelectFocusMode,
 						options: {
-							bol: 1,
+							[FocusModeId]: 1,
 						},
 					},
 				],
@@ -561,7 +561,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: ExposureActionId.SelectExposureMode,
 						options: {
-							val: 0,
+							[ExposureModeId]: 0,
 						},
 					},
 				],
@@ -572,7 +572,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: ExposureActionId.SelectExposureMode,
 						options: {
-							val: 1,
+							[ExposureModeId]: 1,
 						},
 					},
 				],
@@ -694,7 +694,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
-							val: 'automatic',
+							[WhiteBalanceModeId]: 'automatic',
 						},
 					},
 				],
@@ -720,7 +720,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
-							val: 'indoor',
+							[WhiteBalanceModeId]: 'indoor',
 						},
 					},
 				],
@@ -746,7 +746,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
-							val: 'outdoor',
+							[WhiteBalanceModeId]: 'outdoor',
 						},
 					},
 				],
@@ -772,7 +772,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: WhiteBalanceActionId.SelectWhiteBalance,
 						options: {
-							val: 'onepush',
+							[WhiteBalanceModeId]: 'onepush',
 						},
 					},
 				],
@@ -822,7 +822,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: AutoTrackingActionId.AutoTracking,
 						options: {
-							tracking: 'on',
+							[TrackingId]: 'on',
 						},
 					},
 				],
@@ -848,7 +848,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						actionId: AutoTrackingActionId.AutoTracking,
 						options: {
-							tracking: 'off',
+							[TrackingId]: 'off',
 						},
 					},
 				],

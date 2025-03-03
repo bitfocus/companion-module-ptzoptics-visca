@@ -16,7 +16,7 @@ export enum WhiteBalanceActionId {
 	SelectAutoWhiteBalanceSensitivity = 'awbS',
 }
 
-const WhiteBalanceModeId = 'val'
+export const WhiteBalanceModeId = 'val'
 
 const [getWhiteBalanceMode] = optionNullConversions<WhiteBalanceMode, typeof WhiteBalanceModeId>(
 	WhiteBalanceModeId,
