@@ -4,6 +4,8 @@ import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from
 import { SPEED_CHOICES } from './speeds.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
+export const ObsoletePtSpeedSId = 'ptSpeedS'
+
 export enum PanTiltActionId {
 	PanTiltLeft = 'left',
 	PanTiltRight = 'right',
@@ -15,7 +17,7 @@ export enum PanTiltActionId {
 	PanTiltDownRight = 'downRight',
 	PanTiltStop = 'stop',
 	PanTiltHome = 'home',
-	PanTiltSetSpeed = 'ptSpeedS',
+	PanTiltSetSpeed = ObsoletePtSpeedSId,
 	PanTiltSpeedUp = 'ptSpeedU',
 	PanTiltSpeedDown = 'ptSpeedD',
 }
