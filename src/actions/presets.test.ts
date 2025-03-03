@@ -1,9 +1,8 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from '@jest/globals'
-import { PresetValueOptionId } from './presets.js'
+import { PresetValueOptionId, RecallPsetId, SavePsetId } from './presets.js'
 import {
 	getPresetNumber,
-	PresetActionId,
 	PresetRecallDefault,
 	PresetSetDefault,
 	PresetUseVariablesOptionId,
@@ -121,7 +120,7 @@ describe('obsolete preset recall upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.RecallPset)
+		expect(actionId).toBe(RecallPsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(false)
 		expect(options[PresetValueOptionId]).toBe('42')
 		expect(options[PresetVariableOptionId]).toBe(`66`)
@@ -140,7 +139,7 @@ describe('obsolete preset recall upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.RecallPset)
+		expect(actionId).toBe(RecallPsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(true)
 		expect(options[PresetValueOptionId]).toBe(twoDigitHex(42))
 		expect(options[PresetVariableOptionId]).toBe('42')
@@ -159,7 +158,7 @@ describe('obsolete preset recall upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.RecallPset)
+		expect(actionId).toBe(RecallPsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(true)
 		expect(options[PresetValueOptionId]).toBe(twoDigitHex(PresetRecallDefault))
 		expect(options[PresetVariableOptionId]).toBe('1$(internal:custom_var)')
@@ -180,7 +179,7 @@ describe('obsolete preset save upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.SavePset)
+		expect(actionId).toBe(SavePsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(false)
 		expect(options[PresetValueOptionId]).toBe('42')
 		expect(options[PresetVariableOptionId]).toBe('66')
@@ -199,7 +198,7 @@ describe('obsolete preset save upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.SavePset)
+		expect(actionId).toBe(SavePsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(true)
 		expect(options[PresetValueOptionId]).toBe(twoDigitHex(42))
 		expect(options[PresetVariableOptionId]).toBe('42')
@@ -218,7 +217,7 @@ describe('obsolete preset save upgrades', () => {
 		expect(tryUpdateRecallSetPresetActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PresetActionId.SavePset)
+		expect(actionId).toBe(SavePsetId)
 		expect(options[PresetUseVariablesOptionId]).toBe(true)
 		expect(options[PresetValueOptionId]).toBe(twoDigitHex(PresetSetDefault))
 		expect(options[PresetVariableOptionId]).toBe('1$(internal:custom_var)')

@@ -5,10 +5,11 @@ import { AutoTrackingActionId, TrackingId } from './actions/auto-tracking.js'
 import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from './actions/osd.js'
 import { PanTiltActionId } from './actions/pan-tilt.js'
 import {
-	PresetActionId,
 	PresetUseVariablesOptionId,
 	PresetValueOptionId,
 	PresetVariableOptionId,
+	RecallPsetId,
+	SavePsetId,
 } from './actions/presets.js'
 import { WhiteBalanceActionId, WhiteBalanceModeId } from './actions/white-balance.js'
 import { ZoomActionId } from './actions/zoom.js'
@@ -984,7 +985,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PresetActionId.SavePset,
+								actionId: SavePsetId,
 								options: {
 									[PresetUseVariablesOptionId]: false,
 									[PresetValueOptionId]: twoDigitHex(save),
@@ -1017,7 +1018,7 @@ export function getPresets(): CompanionPresetDefinitions {
 					{
 						down: [
 							{
-								actionId: PresetActionId.RecallPset,
+								actionId: RecallPsetId,
 								options: {
 									[PresetUseVariablesOptionId]: false,
 									[PresetValueOptionId]: twoDigitHex(recall),

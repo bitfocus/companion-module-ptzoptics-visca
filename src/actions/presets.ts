@@ -13,10 +13,19 @@ import { SPEED_CHOICES } from './speeds.js'
 import { repr } from '../utils/repr.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
 
+/** The id of the recall-preset action. */
+export const RecallPsetId = 'recallPset'
+
+/** The id of the save-preset action. */
+export const SavePsetId = 'savePset'
+
+/** The id of the set-preset-drive-speed action. */
+export const SpeedPsetId = 'speedPset'
+
 export enum PresetActionId {
-	RecallPset = 'recallPset',
-	SavePset = 'savePset',
-	SetPresetDriveSpeed = 'speedPset',
+	RecallPset = RecallPsetId,
+	SavePset = SavePsetId,
+	SetPresetDriveSpeed = SpeedPsetId,
 }
 
 /**
@@ -87,7 +96,7 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 	const { actionId, options } = action
 	switch (actionId) {
 		case ObsoleteRecallPsetFromVar: {
-			action.actionId = PresetActionId.RecallPset
+			action.actionId = RecallPsetId
 			options[PresetUseVariablesOptionId] = true
 
 			const textinput = String(options[PresetValueOptionId])
@@ -99,7 +108,7 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 		}
 
 		case ObsoleteSavePsetFromVar: {
-			action.actionId = PresetActionId.SavePset
+			action.actionId = SavePsetId
 			options[PresetUseVariablesOptionId] = true
 
 			const textinput = String(options[PresetValueOptionId])
@@ -110,8 +119,7 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 			return true
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-		case PresetActionId.RecallPset:
+		case RecallPsetId:
 			if (!(PresetUseVariablesOptionId in options)) {
 				options[PresetUseVariablesOptionId] = false
 
@@ -121,8 +129,7 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
 			}
 			return false
 
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-		case PresetActionId.SavePset:
+		case SavePsetId:
 			if (!(PresetUseVariablesOptionId in options)) {
 				options[PresetUseVariablesOptionId] = false
 
