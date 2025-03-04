@@ -42,7 +42,7 @@ describe('obsolete preset/speed encoding upgrades to pan/tilt set-speed action',
 		expect(tryUpdatePresetAndSpeedEncodingsInActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PanTiltActionId.PanTiltSpeedSet)
+		expect(actionId).toBe(PanTiltActionId.SetMovementSpeed)
 		expect(options[PanTiltSpeedSetSpeedId]).toBe(1)
 		expect(ObsoletePresetUseVariablesOptionId in options).toBe(false)
 		expect(ObsoletePresetValueOptionId in options).toBe(false)
@@ -65,7 +65,7 @@ describe('obsolete preset/speed encoding upgrades to pan/tilt set-speed action',
 		expect(tryUpdatePresetAndSpeedEncodingsInActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PanTiltActionId.PanTiltSpeedSet)
+		expect(actionId).toBe(PanTiltActionId.SetMovementSpeed)
 		expect(options[PanTiltSpeedSetSpeedId]).toBe(12)
 		expect(ObsoletePresetUseVariablesOptionId in options).toBe(false)
 		expect(ObsoletePresetValueOptionId in options).toBe(false)
@@ -88,7 +88,7 @@ describe('obsolete preset/speed encoding upgrades to pan/tilt set-speed action',
 		expect(tryUpdatePresetAndSpeedEncodingsInActions(action)).toBe(true)
 
 		const { actionId, options } = action
-		expect(actionId).toBe(PanTiltActionId.PanTiltSpeedSet)
+		expect(actionId).toBe(PanTiltActionId.SetMovementSpeed)
 		expect(options[PanTiltSpeedSetSpeedId]).toBe(24)
 		expect(ObsoletePresetUseVariablesOptionId in options).toBe(false)
 		expect(ObsoletePresetValueOptionId in options).toBe(false)

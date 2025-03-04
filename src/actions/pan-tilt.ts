@@ -17,19 +17,19 @@ import type { PtzOpticsInstance } from '../instance.js'
 export const ObsoletePtSpeedSId = 'ptSpeedS'
 
 export enum PanTiltActionId {
-	PanTiltLeft = 'left',
-	PanTiltRight = 'right',
-	PanTiltUp = 'up',
-	PanTiltDown = 'down',
-	PanTiltUpLeft = 'upLeft',
-	PanTiltUpRight = 'upRight',
-	PanTiltDownLeft = 'downLeft',
-	PanTiltDownRight = 'downRight',
-	PanTiltStop = 'stop',
-	PanTiltHome = 'home',
-	PanTiltSpeedSet = 'ptSpeedSet',
-	PanTiltSpeedUp = 'ptSpeedU',
-	PanTiltSpeedDown = 'ptSpeedD',
+	PanLeft = 'left',
+	PanRight = 'right',
+	TiltUp = 'up',
+	TiltDown = 'down',
+	MoveUpLeft = 'upLeft',
+	MoveUpRight = 'upRight',
+	MoveDownLeft = 'downLeft',
+	MoveDownRight = 'downRight',
+	StopMoving = 'stop',
+	ResetToHome = 'home',
+	SetMovementSpeed = 'ptSpeedSet',
+	SpeedUpMovement = 'ptSpeedU',
+	SlowDownMovement = 'ptSpeedD',
 }
 
 /**
@@ -47,59 +47,59 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 	}
 
 	return {
-		[PanTiltActionId.PanTiltLeft]: {
+		[PanTiltActionId.PanLeft]: {
 			name: 'Pan Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Left]),
 		},
-		[PanTiltActionId.PanTiltRight]: {
+		[PanTiltActionId.PanRight]: {
 			name: 'Pan Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Right]),
 		},
-		[PanTiltActionId.PanTiltUp]: {
+		[PanTiltActionId.TiltUp]: {
 			name: 'Tilt Up',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Up]),
 		},
-		[PanTiltActionId.PanTiltDown]: {
+		[PanTiltActionId.TiltDown]: {
 			name: 'Tilt Down',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Down]),
 		},
-		[PanTiltActionId.PanTiltUpLeft]: {
+		[PanTiltActionId.MoveUpLeft]: {
 			name: 'Up Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.UpLeft]),
 		},
-		[PanTiltActionId.PanTiltUpRight]: {
+		[PanTiltActionId.MoveUpRight]: {
 			name: 'Up Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.UpRight]),
 		},
-		[PanTiltActionId.PanTiltDownLeft]: {
+		[PanTiltActionId.MoveDownLeft]: {
 			name: 'Down Left',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.DownLeft]),
 		},
-		[PanTiltActionId.PanTiltDownRight]: {
+		[PanTiltActionId.MoveDownRight]: {
 			name: 'Down Right',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.DownRight]),
 		},
-		[PanTiltActionId.PanTiltStop]: {
+		[PanTiltActionId.StopMoving]: {
 			name: 'P/T Stop',
 			options: [],
 			callback: createPanTiltCallback(PanTiltDirection[PanTiltAction.Stop]),
 		},
-		[PanTiltActionId.PanTiltHome]: {
+		[PanTiltActionId.ResetToHome]: {
 			name: 'P/T Home',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
 				instance.sendCommand(PanTiltHome)
 			},
 		},
-		[PanTiltActionId.PanTiltSpeedSet]: {
+		[PanTiltActionId.SetMovementSpeed]: {
 			name: 'P/T Speed',
 			options: [
 				{
@@ -115,14 +115,14 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 				instance.setPanTiltSpeed(speed)
 			},
 		},
-		[PanTiltActionId.PanTiltSpeedUp]: {
+		[PanTiltActionId.SpeedUpMovement]: {
 			name: 'P/T Speed Up',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
 				instance.increasePanTiltSpeed()
 			},
 		},
-		[PanTiltActionId.PanTiltSpeedDown]: {
+		[PanTiltActionId.SlowDownMovement]: {
 			name: 'P/T Speed Down',
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {

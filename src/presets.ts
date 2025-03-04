@@ -38,13 +38,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltUp,
+						actionId: PanTiltActionId.TiltUp,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -69,13 +69,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltDown,
+						actionId: PanTiltActionId.TiltDown,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -100,13 +100,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltLeft,
+						actionId: PanTiltActionId.PanLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -131,13 +131,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltRight,
+						actionId: PanTiltActionId.PanRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -162,13 +162,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltUpRight,
+						actionId: PanTiltActionId.MoveUpRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -193,13 +193,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltUpLeft,
+						actionId: PanTiltActionId.MoveUpLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -224,13 +224,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltDownLeft,
+						actionId: PanTiltActionId.MoveDownLeft,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -255,13 +255,13 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltDownRight,
+						actionId: PanTiltActionId.MoveDownRight,
 						options: {},
 					},
 				],
 				up: [
 					{
-						actionId: PanTiltActionId.PanTiltStop,
+						actionId: PanTiltActionId.StopMoving,
 						options: {},
 					},
 				],
@@ -284,7 +284,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltHome,
+						actionId: PanTiltActionId.ResetToHome,
 						options: {},
 					},
 				],
@@ -308,7 +308,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltSpeedUp,
+						actionId: PanTiltActionId.SpeedUpMovement,
 						options: {},
 					},
 				],
@@ -332,7 +332,7 @@ export function getPresets(): CompanionPresetDefinitions {
 			{
 				down: [
 					{
-						actionId: PanTiltActionId.PanTiltSpeedDown,
+						actionId: PanTiltActionId.SlowDownMovement,
 						options: {},
 					},
 				],

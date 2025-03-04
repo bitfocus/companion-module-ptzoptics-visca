@@ -258,7 +258,7 @@ export function tryUpdatePresetAndSpeedEncodingsInActions(action: CompanionMigra
 		}
 
 		case ObsoletePtSpeedSId: {
-			action.actionId = PanTiltActionId.PanTiltSpeedSet
+			action.actionId = PanTiltActionId.SetMovementSpeed
 
 			options[PanTiltSpeedSetSpeedId] = parseInt(String(options[PanTiltSpeedSetSpeedId]), 16)
 			return true
