@@ -1,5 +1,36 @@
 import type { PtzOpticsInstance } from '../instance.js'
 import { ModuleDefinedCommand } from '../visca/command.js'
+import { ModuleDefinedInquiry } from '../visca/inquiry.js'
+
+export const PanTiltPositionInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x06, 0x12, 0xff], {
+	bytes: [0x90, 0x50, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff],
+	params: {
+		panPosition: {
+			nibbles: [5, 7, 9, 11],
+		},
+		tiltPosition: {
+			nibbles: [13, 15, 17, 19],
+		},
+	},
+})
+
+export const MoveToAbsolutePanTilt = new ModuleDefinedCommand(
+	[0x81, 0x01, 0x06, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff],
+	{
+		panSpeed: {
+			nibbles: [8, 9],
+		},
+		tiltSpeed: {
+			nibbles: [10, 11],
+		},
+		panPosition: {
+			nibbles: [13, 15, 17, 19],
+		},
+		tiltPosition: {
+			nibbles: [21, 23, 25, 27],
+		},
+	},
+)
 
 export enum PanTiltAction {
 	Up,
