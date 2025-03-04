@@ -1,26 +1,20 @@
-export const SPEED_CHOICES = [
-	{ id: 24, label: 'Speed 24 (Fast)' },
-	{ id: 23, label: 'Speed 23' },
-	{ id: 22, label: 'Speed 22' },
-	{ id: 21, label: 'Speed 21' },
-	{ id: 20, label: 'Speed 20' },
-	{ id: 19, label: 'Speed 19' },
-	{ id: 18, label: 'Speed 18' },
-	{ id: 17, label: 'Speed 17' },
-	{ id: 16, label: 'Speed 16' },
-	{ id: 15, label: 'Speed 15' },
-	{ id: 14, label: 'Speed 14' },
-	{ id: 13, label: 'Speed 13' },
-	{ id: 12, label: 'Speed 12' },
-	{ id: 11, label: 'Speed 11' },
-	{ id: 10, label: 'Speed 10' },
-	{ id: 9, label: 'Speed 09' },
-	{ id: 8, label: 'Speed 08' },
-	{ id: 7, label: 'Speed 07' },
-	{ id: 6, label: 'Speed 06' },
-	{ id: 5, label: 'Speed 05' },
-	{ id: 4, label: 'Speed 04' },
-	{ id: 3, label: 'Speed 03' },
-	{ id: 2, label: 'Speed 02' },
-	{ id: 1, label: 'Speed 01 (Slow)' },
-]
+import type { DropdownChoice } from '@companion-module/base'
+
+/**
+ * Generate a dropdown choice list of integral speeds from `slow` to `fast`.
+ *
+ * @param slow
+ *   The slowest speed.
+ * @param fast
+ *   The fastest speed.
+ * @returns
+ *   Dropdown choices for `Speed ${slow} (Slow)`, `Speed ${slow + 1}`, ...,
+ *   `Speed ${fast - 1}`, `Speed ${fast} (Fast)`.
+ */
+export function speedChoices(slow: number, fast: number): DropdownChoice[] {
+	const speeds: DropdownChoice[] = []
+	for (let id = slow; id <= fast; id++) {
+		speeds.push({ id, label: `Speed ${id}${id === slow ? ' (Slow)' : id === fast ? ' (Fast)' : ''}` })
+	}
+	return speeds
+}

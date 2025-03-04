@@ -1,8 +1,8 @@
 import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import { PanTiltAction, PanTiltDirection, PanTiltHome, sendPanTiltCommand } from '../camera/pan-tilt.js'
-import { SPEED_CHOICES } from './speeds.js'
 import type { PtzOpticsInstance } from '../instance.js'
+import { speedChoices } from './speeds.js'
 
 /**
  * The id of the obsolete action to set module-global pan/tilt speed using
@@ -106,7 +106,7 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 					type: 'dropdown',
 					label: 'Speed setting',
 					id: PanTiltSpeedSetSpeedId,
-					choices: SPEED_CHOICES,
+					choices: speedChoices(1, 24),
 					default: 12,
 				},
 			],

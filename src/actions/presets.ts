@@ -8,7 +8,7 @@ import type {
 import type { ActionDefinitions } from './actionid.js'
 import { isValidPreset, PresetDriveSpeed, PresetRecall, PresetSave } from '../camera/presets.js'
 import type { PtzOpticsInstance } from '../instance.js'
-import { SPEED_CHOICES } from './speeds.js'
+import { speedChoices } from './speeds.js'
 import { repr } from '../utils/repr.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
 import { ObsoletePtSpeedSId, PanTiltActionId, PanTiltSpeedSetSpeedId } from './pan-tilt.js'
@@ -428,7 +428,7 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 					type: 'dropdown',
 					label: 'Speed setting',
 					id: SetPresetDriveSpeedSpeedId,
-					choices: SPEED_CHOICES,
+					choices: speedChoices(1, 24),
 					minChoicesForSearch: 1,
 					default: 12,
 				},
