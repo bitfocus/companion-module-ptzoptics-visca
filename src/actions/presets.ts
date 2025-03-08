@@ -33,7 +33,7 @@ export enum PresetActionId {
  * textinput whose contents would be parsed for variable references -- replaced
  * with an action that allows specifying the preset from dropdown or textually.
  */
-export const ObsoleteSavePsetFromVar = 'savePsetFromVar'
+const ObsoleteSavePsetFromVar = 'savePsetFromVar'
 
 /**
  * The action ID of an obsolete action that would recall a preset identified by
@@ -41,7 +41,7 @@ export const ObsoleteSavePsetFromVar = 'savePsetFromVar'
  * replaced with an action that allows specifying the preset from dropdown or
  * textually.
  */
-export const ObsoleteRecallPsetFromVar = 'recallPsetFromVar'
+const ObsoleteRecallPsetFromVar = 'recallPsetFromVar'
 
 /**
  * The obsolete id of the use-variables option checkbox for preset recall/save
@@ -160,7 +160,7 @@ export function tryUpdateRecallSetPresetActions(action: CompanionMigrationAction
  * fromeither constant two-digit hex number or a variables-supporting text
  * input.
  */
-export const ObsoleteSpeedPsetId = 'speedPset'
+const ObsoleteSpeedPsetId = 'speedPset'
 
 /**
  * The id of the option checkbox for preset recall/save actions that determines

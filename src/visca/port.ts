@@ -260,7 +260,7 @@ export interface PartialInstance {
  * Check whether the bytes of VISCA return message `returnMessage`, when masked,
  * equal those of `bytes`.
  */
-export function returnMatches<Parameters extends AnswerParameters>(
+function returnMatches<Parameters extends AnswerParameters>(
 	returnMessage: Bytes,
 	{ mask, bytes }: PendingInquiry<Parameters>['expectedReturn'],
 ): boolean {

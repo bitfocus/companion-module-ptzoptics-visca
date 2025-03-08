@@ -1,8 +1,8 @@
 import type { CompanionOptionValues } from '@companion-module/base'
 
-export type GetSemantic<S> = (options: CompanionOptionValues) => S
+type GetSemantic<S> = (options: CompanionOptionValues) => S
 
-export type SemanticToOption<S, Id extends string> = (semantic: S) => CompanionOptionValues[Id]
+type SemanticToOption<S, Id extends string> = (semantic: S) => CompanionOptionValues[Id]
 
 /**
  * Generate functions to compute, from action options including the option

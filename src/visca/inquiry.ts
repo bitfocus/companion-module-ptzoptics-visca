@@ -7,7 +7,7 @@ import { prettyByte, prettyBytes } from '../utils/pretty.js'
  * value, for example convert `0` and `1` to `'off'` and `'on'`.  (Actual
  * conversion functions usually will convert to a narrower type than `any`.)
  */
-export type ToSemanticValue = (param: number) => any
+type ToSemanticValue = (param: number) => any
 
 /**
  * The unvalidated specification of the parameters in an answer and how their
@@ -31,14 +31,14 @@ export type AnswerParameters = Record<
  * A command parameter specification identical to `CommandParameters`, but with
  * the further restriction that nibbles lists are constrained to be nonempty.
  */
-export type ModuleAnswerParameters = AnswerParameters & Record<string, { readonly nibbles: Nibbles }>
+type ModuleAnswerParameters = AnswerParameters & Record<string, { readonly nibbles: Nibbles }>
 
 /**
  * The nibbles that constitute a particular answer parameter and a means of
  * converting the parameter's numeric value to its semantic representation (e.g.
  * converting `0` and `1` to `'off'` and `'on'`).
  */
-export class AnswerParam<Convert extends ToSemanticValue> {
+class AnswerParam<Convert extends ToSemanticValue> {
 	/**
 	 * The distinct nibbles that constitute this parameter, in big-endian order.
 	 * These nibbles are distinct from all other parameter nibbles in the
@@ -78,7 +78,7 @@ export class AnswerParam<Convert extends ToSemanticValue> {
  * identified nibbles are distinct and within the proper range for the
  * associated answer bytes.)
  */
-export type AnswerParams<ParamTypes extends AnswerParameters> = {
+type AnswerParams<ParamTypes extends AnswerParameters> = {
 	[Param in keyof ParamTypes]: Readonly<
 		AnswerParam<
 			ParamTypes[Param]['convert'] extends ToSemanticValue ? ParamTypes[Param]['convert'] : (param: number) => number
@@ -92,17 +92,17 @@ const AnswerInitialByte = 0x90
  * The bytes that constitute the answer message for some inquiry, with all
  * nibbles contained within parameters set to zero.
  */
-export type AnswerBytes = readonly [typeof AnswerInitialByte, ...Bytes, 0xff]
+type AnswerBytes = readonly [typeof AnswerInitialByte, ...Bytes, 0xff]
+
+/** The possible values of each mask byte in an inquiry answer. */
+type MaskByte = 0x00 | 0xf0 | 0x0f | 0xff
 
 /**
  * Mask bytes for the answer message for some inquiry, that match all nibbles
  * that aren't part of parameters in the answer message while zeroing out all
  * nibbles that are part of parameters.
  */
-export type AnswerMask = readonly [0xff, ...MaskByte[], 0xff]
-
-/** The possible values of each mask byte in an inquiry answer. */
-type MaskByte = 0x00 | 0xf0 | 0x0f | 0xff
+type AnswerMask = readonly [0xff, ...MaskByte[], 0xff]
 
 /**
  * The answer to some VISCA inquiry, consisting of the given bytes, with a mask
@@ -194,7 +194,7 @@ export class AnswerMessage<AnsParameters extends AnswerParameters> {
  */
 const InquiryInitialByte = 0x81
 
-export type InquiryBytes = readonly [typeof InquiryInitialByte, ...Bytes, 0xff]
+type InquiryBytes = readonly [typeof InquiryInitialByte, ...Bytes, 0xff]
 
 /**
  * A VISCA inquiry consisting of a fixed byte sequence sent to the camera, that

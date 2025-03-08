@@ -8,7 +8,7 @@ import { repr } from '../utils/repr.js'
  * example convert `'off'` and `'on'` to `0` and `1`.  (Actual conversion
  * functions usually will convert from a narrower type than `any`.)
  */
-export type ToParameterValue = (val: any) => number
+type ToParameterValue = (val: any) => number
 
 /**
  * The unvalidated specification of the parameters in a command and how the
@@ -76,7 +76,7 @@ export type NoCommandParameters = Record<string, never>
  * A command parameter specification identical to `CommandParameters`, but with
  * the further restriction that nibbles lists are constrained to be nonempty.
  */
-export type ModuleCommandParameters = Record<
+type ModuleCommandParameters = Record<
 	string,
 	{
 		/** The nibbles, in big-endian order, that form this parameter. */
@@ -95,7 +95,7 @@ export type ModuleCommandParameters = Record<
  * converting the parameter's semantic representation to its numeric value (e.g.
  * converting `'off'` and `'on'` to `0` and `1`).
  */
-export class CommandParam<Convert extends ToParameterValue> {
+class CommandParam<Convert extends ToParameterValue> {
 	/**
 	 * The distinct nibbles that constitute this parameter, in big-endian order.
 	 * These nibbles are distinct from all other parameter nibbles in the
@@ -135,7 +135,7 @@ export class CommandParam<Convert extends ToParameterValue> {
  * identified nibbles are distinct and within the proper range for the
  * associated command bytes.)
  */
-export type CommandParams<ParamTypes extends CommandParameters> = {
+type CommandParams<ParamTypes extends CommandParameters> = {
 	[Param in keyof ParamTypes]: Readonly<
 		CommandParam<
 			ParamTypes[Param]['convert'] extends ToParameterValue ? ParamTypes[Param]['convert'] : (val: number) => number
@@ -149,7 +149,7 @@ const CommandInitialByte = 0x81
  * The bytes that constitute some particular command, with all nibbles contained
  * within parameters set to zero.
  */
-export type CommandBytes = readonly [typeof CommandInitialByte, ...Bytes, 0xff]
+type CommandBytes = readonly [typeof CommandInitialByte, ...Bytes, 0xff]
 
 /**
  * Command parameters as specified when sending a command, with parameter values

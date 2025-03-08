@@ -42,7 +42,7 @@ const [getExposureMode, exposureModeToOption] = optionConversions<ExposureMode, 
 	String,
 )
 
-export const IrisSettingId = 'val'
+const IrisSettingId = 'val'
 
 const [getIrisSetting] = optionConversions<IrisSetting, typeof IrisSettingId>(
 	IrisSettingId,
@@ -66,7 +66,7 @@ const [getIrisSetting] = optionConversions<IrisSetting, typeof IrisSettingId>(
 	String,
 )
 
-export const ShutterSettingId = 'val'
+const ShutterSettingId = 'val'
 
 const DefaultShutterSetting = 4
 

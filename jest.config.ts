@@ -31,4 +31,5 @@ const config: JestConfigWithTsJest = {
 	testPathIgnorePatterns: ['/node_modules/'],
 }
 
+// ts-prune-ignore-next
 export default config
