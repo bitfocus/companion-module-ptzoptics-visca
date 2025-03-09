@@ -54,6 +54,7 @@ const customConfig = [
 	),
 	permitLimitedUnpublishedImports(['eslint.config.mjs'], ['@companion-module/tools']),
 	permitLimitedUnpublishedImports(['jest.config.ts'], ['ts-jest']),
+	permitLimitedUnpublishedImports(['knip.config.ts'], ['knip']),
 ]
 
 export default customConfig
