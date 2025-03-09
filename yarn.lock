@@ -3033,7 +3033,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-n@npm:^17.10.2, eslint-plugin-n@npm:~17.10.2":
+"eslint-plugin-n@npm:^17.10.2":
   version: 17.10.3
   resolution: "eslint-plugin-n@npm:17.10.3"
   dependencies:
@@ -6076,7 +6076,7 @@ __metadata:
     esbuild: "npm:^0.25.0"
     esbuild-jest: "npm:^0.5.0"
     eslint: "npm:~9.22.0"
-    eslint-plugin-n: "npm:~17.10.2"
+    eslint-plugin-n: "npm:^17.10.2"
     husky: "npm:^9.1.6"
     jest: "npm:^29.7.0"
     knip: "npm:^5.45.0"
