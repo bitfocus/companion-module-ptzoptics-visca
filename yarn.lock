@@ -423,7 +423,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@companion-module/tools@npm:^2.0.4":
+"@companion-module/tools@npm:~2.0.4":
   version: 2.0.4
   resolution: "@companion-module/tools@npm:2.0.4"
   dependencies:
@@ -4938,7 +4938,7 @@ __metadata:
   resolution: "ptzoptics-visca@workspace:."
   dependencies:
     "@companion-module/base": "npm:~1.10.0"
-    "@companion-module/tools": "npm:^2.0.4"
+    "@companion-module/tools": "npm:~2.0.4"
     "@jest/globals": "npm:^29.7.0"
     "@types/node": "npm:^22.13.10"
     eslint: "npm:~9.19.0"
