@@ -3276,6 +3276,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-n@npm:~17.10.2":
+  version: 17.10.3
+  resolution: "eslint-plugin-n@npm:17.10.3"
+  dependencies:
+    "@eslint-community/eslint-utils": "npm:^4.4.0"
+    enhanced-resolve: "npm:^5.17.0"
+    eslint-plugin-es-x: "npm:^7.5.0"
+    get-tsconfig: "npm:^4.7.0"
+    globals: "npm:^15.8.0"
+    ignore: "npm:^5.2.4"
+    minimatch: "npm:^9.0.5"
+    semver: "npm:^7.5.3"
+  peerDependencies:
+    eslint: ">=8.23.0"
+  checksum: 10c0/4da20f824327f244361dcc61d061e5621baafe48998e17fea5d749d9d96bd80fc39991effc39eb62fdbedddc04eac4e519a60adab4480f404469961ce888797d
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-prettier@npm:^5.2.1":
   version: 5.2.1
   resolution: "eslint-plugin-prettier@npm:5.2.1"
@@ -6286,6 +6304,7 @@ __metadata:
     esbuild: "npm:^0.25.0"
     esbuild-jest: "npm:^0.5.0"
     eslint: "npm:~9.19.0"
+    eslint-plugin-n: "npm:~17.10.2"
     husky: "npm:^9.1.6"
     jest: "npm:^29.7.0"
     lint-staged: "npm:^15.2.9"
