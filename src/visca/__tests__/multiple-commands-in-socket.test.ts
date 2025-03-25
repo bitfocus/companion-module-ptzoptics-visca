@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { FocusLock } from '../../camera/focus.js'
 import { PanTiltHome } from '../../camera/pan-tilt.js'
 import { CameraPower } from '../../camera/power.js'

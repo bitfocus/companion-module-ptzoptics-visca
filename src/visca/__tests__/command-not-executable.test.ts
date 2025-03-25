@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { ExposureModeInquiry } from '../../camera/exposure.js'
 import { FocusNearStandard } from '../../camera/focus.js'
 import { CommandNotExecutable, ExposureModeInquiryBytes, FocusNearStandardBytes } from './camera-interactions/bytes.js'

@@ -1,5 +1,5 @@
 import { type CompanionActionInfo } from '@companion-module/base'
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { computeCustomCommandAndOptions, tryUpdateCustomCommandsWithCommandParamOptions } from './custom-command.js'
 import { MockContext } from '../__tests__/mock-context.js'
 

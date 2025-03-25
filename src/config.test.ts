@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { DebugLoggingOptionId, type PtzOpticsConfig, tryUpdateConfigWithDebugLogging } from './config.js'
 
 describe('config upgrade to specify debug logging', () => {

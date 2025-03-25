@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { InstanceStatusIs, WaitUntilConnectedToCamera } from './camera-interactions/interactions.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'
 

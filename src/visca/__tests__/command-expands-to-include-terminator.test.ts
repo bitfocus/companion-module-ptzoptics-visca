@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { CommandFailed, SendCommand, WaitUntilConnectedToCamera } from './camera-interactions/interactions.js'
 import { AttemptSendInvalidMatcher, MatchVISCABytes } from './camera-interactions/matchers.js'
 import { RunCameraInteractionTest } from './camera-interactions/run-test.js'

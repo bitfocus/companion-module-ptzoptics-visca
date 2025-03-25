@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { FocusModeInquiry } from '../../camera/focus.js'
 import { PresetRecall } from '../../camera/presets.js'
 import { ACK, Completion, FocusModeInquiryBytes, PresetRecallBytes } from './camera-interactions/bytes.js'

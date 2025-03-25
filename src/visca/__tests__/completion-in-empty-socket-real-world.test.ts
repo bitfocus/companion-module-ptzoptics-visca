@@ -1,5 +1,5 @@
 import { InstanceStatus } from '@companion-module/base'
-import { describe, test } from '@jest/globals'
+import { describe, test } from 'vitest'
 import { FocusFarStandard, FocusNearStandard, FocusStop } from '../../camera/focus.js'
 import { OnScreenDisplayClose } from '../../camera/osd.js'
 import { PresetRecall } from '../../camera/presets.js'

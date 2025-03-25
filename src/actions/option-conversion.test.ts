@@ -1,5 +1,5 @@
 import type { CompanionOptionValues } from '@companion-module/base'
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { optionConversions, optionNullConversions } from './option-conversion'
 
 describe('optionConversions', () => {

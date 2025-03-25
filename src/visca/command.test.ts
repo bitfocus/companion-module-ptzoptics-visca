@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { OnScreenDisplayInquiry } from '../camera/osd.js'
 import { ModuleDefinedCommand, UserDefinedCommand } from './command.js'
 

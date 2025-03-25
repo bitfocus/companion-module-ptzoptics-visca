@@ -1,5 +1,5 @@
 import type { CompanionMigrationAction, CompanionOptionValues } from '@companion-module/base'
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import {
 	getPresetNumber,
 	ObsoletePresetUseVariablesOptionId,
