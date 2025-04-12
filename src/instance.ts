@@ -129,18 +129,16 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		if (this.#speed > 0x01) this.#speed--
 	}
 
-	// Return config fields for web config of the module instance
-	getConfigFields(): SomeCompanionConfigField[] {
+	override getConfigFields(): SomeCompanionConfigField[] {
 		return getConfigFields()
 	}
 
-	// When the module gets deleted
-	async destroy(): Promise<void> {
+	override async destroy(): Promise<void> {
 		this.log('info', `destroying module: ${this.id}`)
 		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
-	async init(config: PtzOpticsConfig): Promise<void> {
+	override async init(config: PtzOpticsConfig): Promise<void> {
 		this.#logConfig(config, 'init()')
 
 		this.setActionDefinitions(getActions(this))
@@ -149,7 +147,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		return this.configUpdated(config)
 	}
 
-	async configUpdated(config: PtzOpticsConfig): Promise<void> {
+	override async configUpdated(config: PtzOpticsConfig): Promise<void> {
 		this.#logConfig(config, 'configUpdated()')
 
 		const oldOptions = this.#options
