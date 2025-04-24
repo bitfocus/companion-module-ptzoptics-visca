@@ -163,7 +163,7 @@ export type CommandParamValues<CmdParameters extends CommandParameters> = {
 		: number
 }
 
-function toCommandBytes(bytes: Bytes): CommandBytes {
+function validateCommandBytes(bytes: Bytes): asserts bytes is CommandBytes {
 	if (bytes.length === 0) {
 		throw new RangeError('command must not be empty')
 	}
@@ -190,8 +190,6 @@ function toCommandBytes(bytes: Bytes): CommandBytes {
 	if (idx !== bytes.length - 1) {
 		throw new RangeError(`command must not contain embedded ${prettyByte(MessageDelimiter)}`)
 	}
-
-	return bytes as CommandBytes
 }
 
 /**
@@ -256,37 +254,6 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 
 			this.#parameters = validParams as CommandParams<CmdParameters>
 		}
-	}
-
-	static validateCommandBytes(bytes: Bytes): CommandBytes {
-		if (bytes.length === 0) {
-			throw new RangeError('command must not be empty')
-		}
-
-		// VISCA was first developed by Sony, then ad-hoc implemented by other
-		// camera vendors.  There doesn't appear to be a standardized message
-		// format, even as simple as defining the message start/end bytes.  But
-		// these assertions presently hold against PTZ Optics's documented VISCA
-		// commands, and if command start/end weren't delimited as required here,
-		// it's hard to say what series of sent bytes a camera response indicating a
-		// syntax error (90 60 02 FF) would apply to.
-
-		if (bytes[0] !== CommandInitialByte) {
-			// VISCA generally says the first byte is 8x, where x encodes the
-			// particular camera to which the command applies when cameras are
-			// connected in series.  But PTZOptics VISCA over TCP forces x=1.
-			throw new RangeError('first byte in command must be 0x81')
-		}
-
-		const idx = bytes.indexOf(MessageDelimiter, 1)
-		if (idx < 0) {
-			throw new RangeError(`command must end in ${prettyByte(MessageDelimiter)}`)
-		}
-		if (idx !== bytes.length - 1) {
-			throw new RangeError(`command must not contain embedded ${prettyByte(MessageDelimiter)}`)
-		}
-
-		return bytes as CommandBytes
 	}
 
 	/**
@@ -399,6 +366,7 @@ export class UserDefinedCommand<
 	 *    like.
 	 */
 	constructor(bytes: Bytes, ...params: CmdParameters extends NoCommandParameters ? [CmdParameters?] : [CmdParameters]) {
-		super(toCommandBytes(bytes), true, ...params)
+		validateCommandBytes(bytes)
+		super(bytes, true, ...params)
 	}
 }
