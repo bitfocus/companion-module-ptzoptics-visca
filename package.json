@@ -25,7 +25,7 @@
 		"*.{css,json,md,scss,yaml}": [
 			"prettier --write"
 		],
-		"*.{ts,tsx,js,jsx}": [
+		"*.{mjs,ts,tsx,js,jsx}": [
 			"yarn lint:raw --fix"
 		]
 	},
@@ -45,6 +45,7 @@
 		"lint-staged": "^15.5.1",
 		"prettier": "^3.5.3",
 		"rimraf": "^6.0.1",
+		"type-testing": "^0.2.0",
 		"typescript": "~5.8.2",
 		"typescript-eslint": "~8.26.1",
 		"vitest": "^3.1.2"
