@@ -857,7 +857,7 @@ export class VISCAPort {
 							paramval = (paramval << 4) | contrib
 						}
 
-						answer[id] = convert ? convert(paramval) : paramval
+						answer[id] = convert ? (convert(paramval) as any) : paramval
 					}
 
 					pendingInquiry.succeeded(answer)

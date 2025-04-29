@@ -7,7 +7,9 @@ import { prettyByte, prettyBytes } from '../utils/pretty.js'
  * value, for example convert `0` and `1` to `'off'` and `'on'`.  (Actual
  * conversion functions usually will convert to a narrower type than `any`.)
  */
-type ToSemanticValue = (param: number) => any
+type SomeNumericToSemantic = (param: number) => any
+
+type NumberToSemantic = (param: number) => unknown
 
 /**
  * The unvalidated specification of the parameters in an answer and how their
@@ -23,7 +25,7 @@ export type AnswerParameters = Record<
 		 * If supplied, a conversion function for the parameter.  If missing,
 		 * the parameter's numeric value is its semantic value.
 		 */
-		readonly convert?: ToSemanticValue
+		readonly convert?: SomeNumericToSemantic
 	}
 >
 
@@ -38,19 +40,19 @@ type ModuleAnswerParameters = AnswerParameters & Record<string, { readonly nibbl
  * converting the parameter's numeric value to its semantic representation (e.g.
  * converting `0` and `1` to `'off'` and `'on'`).
  */
-class AnswerParam<Convert extends ToSemanticValue> {
+class AnswerParam<Convert extends SomeNumericToSemantic | undefined> {
 	/**
 	 * The distinct nibbles that constitute this parameter, in big-endian order.
 	 * These nibbles are distinct from all other parameter nibbles in the
 	 * corresponding fully-defined answer.
 	 */
-	nibbles: Nibbles
+	readonly nibbles: Nibbles
 
 	/**
 	 * A conversion function for the parameter.  If `null`, the parameter's
 	 * numeric value is its semantic value.
 	 */
-	convert: Convert | null
+	readonly convert: NumberToSemantic | null
 
 	/**
 	 * Enforce deliberate construction of `AnswerParameter`, rather than
@@ -59,9 +61,9 @@ class AnswerParam<Convert extends ToSemanticValue> {
 	 */
 	#preventNominal
 
-	constructor(nibbles: Nibbles, convert: Convert | null) {
+	constructor(nibbles: Nibbles, convert: Convert) {
 		this.nibbles = nibbles
-		this.convert = convert
+		this.convert = convert || null
 
 		this.#preventNominal = true
 		void this.#preventNominal
@@ -79,11 +81,7 @@ class AnswerParam<Convert extends ToSemanticValue> {
  * associated answer bytes.)
  */
 type AnswerParams<ParamTypes extends AnswerParameters> = {
-	[Param in keyof ParamTypes]: Readonly<
-		AnswerParam<
-			ParamTypes[Param]['convert'] extends ToSemanticValue ? ParamTypes[Param]['convert'] : (param: number) => number
-		>
-	>
+	[Param in keyof ParamTypes]: Readonly<AnswerParam<ParamTypes[Param]['convert']>>
 }
 
 const AnswerInitialByte = 0x90
@@ -103,6 +101,26 @@ type MaskByte = 0x00 | 0xf0 | 0x0f | 0xff
  * nibbles that are part of parameters.
  */
 type AnswerMask = readonly [0xff, ...MaskByte[], 0xff]
+
+function validateAnswerBytes(bytes: Bytes): asserts bytes is AnswerBytes {
+	if (bytes.length < 2) {
+		throw new RangeError('answer message not long enough')
+	}
+
+	checkBytes(bytes)
+
+	if (bytes[0] !== AnswerInitialByte) {
+		throw new RangeError(`answer message must begin with ${prettyByte(AnswerInitialByte)}`)
+	}
+
+	const delimiterIndex = bytes.indexOf(MessageDelimiter, 1)
+	if (delimiterIndex < 0) {
+		throw new RangeError(`answer message must contain a ${prettyByte(MessageDelimiter)} delimiter`)
+	}
+	if (delimiterIndex !== bytes.length - 1) {
+		throw new RangeError(`answer message must end in a ${prettyByte(MessageDelimiter)} delimiter`)
+	}
+}
 
 /**
  * The answer to some VISCA inquiry, consisting of the given bytes, with a mask
@@ -157,33 +175,11 @@ export class AnswerMessage<AnsParameters extends AnswerParameters> {
 				mask[nibble >> 1] = nibbleByte & ~nibbleMask
 			}
 
-			validParams[id as keyof typeof params] = new AnswerParam(nibbles as Nibbles, convert || null)
+			validParams[id as keyof typeof params] = new AnswerParam(nibbles as Nibbles, convert)
 		}
 
 		this.mask = mask as readonly number[] as AnswerMask
 		this.params = validParams as AnswerParams<AnsParameters>
-	}
-
-	static validateAnswerBytes(bytes: Bytes): AnswerBytes {
-		if (bytes.length < 2) {
-			throw new RangeError('answer message not long enough')
-		}
-
-		checkBytes(bytes)
-
-		if (bytes[0] !== AnswerInitialByte) {
-			throw new RangeError(`answer message must begin with ${prettyByte(AnswerInitialByte)}`)
-		}
-
-		const delimiterIndex = bytes.indexOf(MessageDelimiter, 1)
-		if (delimiterIndex < 0) {
-			throw new RangeError(`answer message must contain a ${prettyByte(MessageDelimiter)} delimiter`)
-		}
-		if (delimiterIndex !== bytes.length - 1) {
-			throw new RangeError(`answer message must end in a ${prettyByte(MessageDelimiter)} delimiter`)
-		}
-
-		return bytes as AnswerBytes
 	}
 }
 
@@ -244,7 +240,7 @@ export class ModuleDefinedInquiry<Parameters extends ModuleAnswerParameters> ext
 	}
 }
 
-function toInquiryBytes(bytes: Bytes): InquiryBytes {
+function validateInquiryBytes(bytes: Bytes): asserts bytes is InquiryBytes {
 	if (bytes.length < 2) {
 		throw new RangeError(`inquiries are multiple bytes in length`)
 	}
@@ -262,8 +258,6 @@ function toInquiryBytes(bytes: Bytes): InquiryBytes {
 	if (delimiterIndex !== bytes.length - 1) {
 		throw new TypeError(`inquiry must end with ${prettyByte(MessageDelimiter)}`)
 	}
-
-	return bytes as InquiryBytes
 }
 
 /**
@@ -272,14 +266,16 @@ function toInquiryBytes(bytes: Bytes): InquiryBytes {
  */
 export class UserDefinedInquiry<Parameters extends AnswerParameters> extends Inquiry<Parameters> {
 	constructor(inquiry: Bytes, { bytes, params }: { bytes: Bytes; params: Parameters }) {
-		const answerMessageBytes = AnswerMessage.validateAnswerBytes(bytes)
-		super(toInquiryBytes(inquiry), new AnswerMessage(answerMessageBytes, params), true)
+		validateInquiryBytes(inquiry)
+		validateAnswerBytes(bytes)
+		super(inquiry, new AnswerMessage(bytes, params), true)
 	}
 }
 
 /**
- * A type exposing the numeric values of the parameters in the answer to an
- * inquiry.
+ * A type exposing the values of the parameters in the answer to an inquiry,
+ * consistent with the return type of each parameter's conversion function if
+ * defined, or simply `number` if not.
  */
 export type Answer<Parameters extends AnswerParameters> = {
 	[K in keyof Parameters]: Parameters[K]['convert'] extends (param: number) => any
