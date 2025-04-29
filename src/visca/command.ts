@@ -1,14 +1,21 @@
 import { Message, MessageDelimiter } from './message.js'
 import type { Bytes, Nibbles } from '../utils/byte.js'
+import type { Mutable } from '../utils/mutable.js'
 import { prettyByte, prettyBytes } from '../utils/pretty.js'
+import type { ReadonlyRecord } from '../utils/readonly-record.js'
 import { repr } from '../utils/repr.js'
 
 /**
  * Convert the semantic representation of a parameter to its numeric value.  For
  * example convert `'off'` and `'on'` to `0` and `1`.  (Actual conversion
- * functions usually will convert from a narrower type than `any`.)
+ * functions should use a narrower type than `any`.)
  */
-type ToParameterValue = (val: any) => number
+type SomeSemanticToNumeric = (val: any) => number
+
+/**
+ * The stored representation of all kinds of semantic-to-numeric conversions.
+ */
+type SemanticToNumeric = (val: unknown) => number
 
 /**
  * The unvalidated specification of the parameters in a command and how the
@@ -55,7 +62,7 @@ type ToParameterValue = (val: any) => number
  * }
  * ````
  */
-export type CommandParameters = Record<
+export type CommandParameters = ReadonlyRecord<
 	string,
 	{
 		/** The nibbles, in big-endian order, that form this parameter. */
@@ -65,18 +72,18 @@ export type CommandParameters = Record<
 		 * If supplied, a conversion function for the parameter.  If missing,
 		 * the parameter's semantic and numeric values are the same number.
 		 */
-		readonly convert?: ToParameterValue
+		readonly convert?: SomeSemanticToNumeric
 	}
 >
 
 /** A command parameter specification for a command with no parameters. */
-export type NoCommandParameters = Record<string, never>
+export type NoCommandParameters = ReadonlyRecord<string, never>
 
 /**
  * A command parameter specification identical to `CommandParameters`, but with
  * the further restriction that nibbles lists are constrained to be nonempty.
  */
-type ModuleCommandParameters = Record<
+type ModuleCommandParameters = ReadonlyRecord<
 	string,
 	{
 		/** The nibbles, in big-endian order, that form this parameter. */
@@ -86,7 +93,7 @@ type ModuleCommandParameters = Record<
 		 * If supplied, a conversion function for the parameter.  If missing,
 		 * the parameter's semantic and numeric values are the same number.
 		 */
-		readonly convert?: ToParameterValue
+		readonly convert?: SomeSemanticToNumeric
 	}
 >
 
@@ -95,19 +102,19 @@ type ModuleCommandParameters = Record<
  * converting the parameter's semantic representation to its numeric value (e.g.
  * converting `'off'` and `'on'` to `0` and `1`).
  */
-class CommandParam<Convert extends ToParameterValue> {
+class CommandParam<MaybeConvert extends SomeSemanticToNumeric | undefined> {
 	/**
 	 * The distinct nibbles that constitute this parameter, in big-endian order.
 	 * These nibbles are distinct from all other parameter nibbles in the
 	 * corresponding fully-defined answer.
 	 */
-	nibbles: Nibbles
+	readonly nibbles: Nibbles
 
 	/**
 	 * A conversion function for the parameter.  If `null`, the parameter's
 	 * semantic value is its numeric value.
 	 */
-	convert: Convert | null
+	readonly convert: SemanticToNumeric | null
 
 	/**
 	 * Enforce deliberate construction of `AnswerParameter`, rather than
@@ -116,9 +123,9 @@ class CommandParam<Convert extends ToParameterValue> {
 	 */
 	#preventNominal
 
-	constructor(nibbles: Nibbles, convert: Convert | null) {
+	constructor(nibbles: Nibbles, convert: MaybeConvert) {
 		this.nibbles = nibbles
-		this.convert = convert
+		this.convert = convert || null
 
 		this.#preventNominal = true
 		void this.#preventNominal
@@ -136,11 +143,7 @@ class CommandParam<Convert extends ToParameterValue> {
  * associated command bytes.)
  */
 type CommandParams<ParamTypes extends CommandParameters> = {
-	[Param in keyof ParamTypes]: Readonly<
-		CommandParam<
-			ParamTypes[Param]['convert'] extends ToParameterValue ? ParamTypes[Param]['convert'] : (val: number) => number
-		>
-	>
+	[Param in keyof ParamTypes]: CommandParam<ParamTypes[Param]['convert']>
 }
 
 const CommandInitialByte = 0x81
@@ -149,7 +152,7 @@ const CommandInitialByte = 0x81
  * The bytes that constitute some particular command, with all nibbles contained
  * within parameters set to zero.
  */
-type CommandBytes = readonly [typeof CommandInitialByte, ...Bytes, 0xff]
+type CommandBytes = readonly [typeof CommandInitialByte, ...Bytes, typeof MessageDelimiter]
 
 /**
  * Command parameters as specified when sending a command, with parameter values
@@ -158,7 +161,7 @@ type CommandBytes = readonly [typeof CommandInitialByte, ...Bytes, 0xff]
  * parameter's numeric value is used instead).
  */
 export type CommandParamValues<CmdParameters extends CommandParameters> = {
-	[K in keyof CmdParameters]: CmdParameters[K]['convert'] extends ToParameterValue
+	readonly [K in keyof CmdParameters]: CmdParameters[K]['convert'] extends SomeSemanticToNumeric
 		? Parameters<CmdParameters[K]['convert']>[0]
 		: number
 }
@@ -227,7 +230,7 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 		if (parameters === undefined) {
 			this.#parameters = null
 		} else {
-			const validParams: Partial<CommandParams<CmdParameters>> = {}
+			const validParams: Partial<Mutable<CommandParams<CmdParameters>>> = {}
 
 			const seen = new Set<number>()
 			const Start = 2
@@ -249,7 +252,7 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 					seen.add(nibble)
 				}
 
-				validParams[id as keyof CmdParameters] = new CommandParam(nibbles as Nibbles, convert || null)
+				validParams[id as keyof CmdParameters] = new CommandParam(nibbles as Nibbles, convert)
 			}
 
 			this.#parameters = validParams as CommandParams<CmdParameters>
@@ -268,8 +271,8 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 	 */
 	toBytes(
 		...paramValues: CmdParameters extends NoCommandParameters
-			? [Readonly<CommandParamValues<CmdParameters>>?]
-			: [Readonly<CommandParamValues<CmdParameters>>]
+			? [CommandParamValues<CmdParameters>?]
+			: [CommandParamValues<CmdParameters>]
 	): Bytes {
 		const commandBytes = this.#bytes
 		const paramVals = paramValues[0]
@@ -288,8 +291,7 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 		}
 
 		const bytes = commandBytes.slice()
-		for (const entry of Object.entries(paramVals)) {
-			const [id, semantic] = entry
+		for (const [id, semantic] of Object.entries(paramVals)) {
 			const { nibbles, convert } = commandParams[id]
 
 			let numeric = convert ? convert(semantic) : semantic

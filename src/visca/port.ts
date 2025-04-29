@@ -1065,8 +1065,8 @@ export class VISCAPort {
 	async sendCommand<CmdParameters extends CommandParameters>(
 		command: Command<CmdParameters>,
 		...paramValues: CmdParameters extends NoCommandParameters
-			? [Readonly<CommandParamValues<CmdParameters>>?]
-			: [Readonly<CommandParamValues<CmdParameters>>]
+			? [CommandParamValues<CmdParameters>?]
+			: [CommandParamValues<CmdParameters>]
 	): Promise<void | Error> {
 		const messageBytes = command.toBytes(...paramValues)
 		const isUserDefined = command.isUserDefined()

@@ -7,6 +7,7 @@ import type {
 import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import type { Bytes } from '../utils/byte.js'
+import type { Mutable } from '../utils/mutable.js'
 import { type CommandParameters, type CommandParamValues, UserDefinedCommand } from '../visca/command.js'
 
 export enum CustomCommandActionId {
@@ -174,12 +175,12 @@ export async function computeCustomCommandAndOptions(
 
 			return acc
 		},
-		{} as CommandParameters,
+		{} as Mutable<CommandParameters>,
 	)
 
 	const command = new UserDefinedCommand(commandBytes, commandParams)
 
-	const paramValues: CommandParamValues<CommandParameters> = {}
+	const paramValues: Mutable<CommandParamValues<CommandParameters>> = {}
 	for (const i of Object.keys(commandParams)) {
 		const val = await context.parseVariablesInString(String(options[`parameter${i}`]))
 		paramValues[i] = Number(val)

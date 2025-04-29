@@ -8,6 +8,8 @@ import {
 	ModuleDefinedCommand,
 	UserDefinedCommand,
 } from './command.js'
+import { OnScreenDisplayCloseBytes } from './__tests__/camera-interactions/bytes.js'
+import type { ReadonlyRecord } from '../utils/readonly-record.js'
 
 type ParametersForCommand<C extends Command<any>> =
 	C extends Command<infer P> ? (P extends CommandParameters ? CommandParamValues<P> : never) : never
@@ -18,7 +20,7 @@ type test_NoParameters_paramValues = Expect<
 	Equal<
 		// param values for parameter-less comment are empty
 		ParametersForCommand<typeof _NoParameters>,
-		Record<string, never>
+		ReadonlyRecord<string, never>
 	>
 >
 
@@ -32,7 +34,7 @@ type test_OneParameterNumeric_paramValues = Expect<
 	Equal<
 		// param values for one numeric parameter
 		ParametersForCommand<typeof _OneParameterNumeric>,
-		{ parameter: number }
+		{ readonly parameter: number }
 	>
 >
 
@@ -49,7 +51,7 @@ type test_OneParameterTyped_paramValues = Expect<
 	Equal<
 		// param values for one numeric parameter
 		ParametersForCommand<typeof _OneParameterTyped>,
-		{ parameter: string }
+		{ readonly parameter: string }
 	>
 >
 
@@ -69,9 +71,23 @@ type test_MixedParameters_paramValues = Expect<
 	Equal<
 		// param values for mixed parameters
 		ParametersForCommand<typeof _MixedParameters>,
-		{ stringParameter: string; numericParameter: number }
+		{ readonly stringParameter: string; readonly numericParameter: number }
 	>
 >
+
+describe('no command parameters', () => {
+	test('command with no parameters supports toBytes with no parameters', () => {
+		const cmdBytes = [0x81, 0x01, 0x02, 0xff] as const
+		const cmd = new ModuleDefinedCommand(cmdBytes)
+		expect(cmd.toBytes()).toEqual(cmdBytes)
+	})
+
+	test('command with explicit no parameters supports toBytes with no parameters', () => {
+		const cmdBytes = [0x81, 0x01, 0x02, 0xff] as const
+		const cmd = new ModuleDefinedCommand(cmdBytes, {})
+		expect(cmd.toBytes()).toEqual(cmdBytes)
+	})
+})
 
 describe('isUserDefined function', () => {
 	test('module-defined command is not user-defined', () => {
@@ -85,5 +101,6 @@ describe('isUserDefined function', () => {
 
 	test('OSD close command is not user-defined', () => {
 		expect(OnScreenDisplayClose.isUserDefined()).toBe(false)
+		expect(OnScreenDisplayClose.toBytes()).toEqual(OnScreenDisplayCloseBytes)
 	})
 })
