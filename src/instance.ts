@@ -1,4 +1,5 @@
 import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
+import DigestClient from 'digest-fetch'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import {
@@ -16,6 +17,7 @@ import { VISCAPort } from './visca/port.js'
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/** Options dictating the behavior of this instance. */
 	#options: PtzOpticsOptions = noCameraOptions()
+	tallyPollTimer: NodeJS.Timeout | null = null
 
 	/** Whether debug logging is enabled on this instance or not. */
 	get debugLogging(): boolean {
@@ -135,6 +137,10 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 	override async destroy(): Promise<void> {
 		this.log('info', `destroying module: ${this.id}`)
+		if (this.tallyPollTimer) {
+			clearInterval(this.tallyPollTimer)
+			this.tallyPollTimer = null
+		}
 		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
@@ -143,7 +149,13 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 		this.setActionDefinitions(getActions(this))
 		this.setPresetDefinitions(getPresets())
-
+		this.setVariableDefinitions([
+			{ variableId: 'tally', name: 'Tally Status' },
+			{ variableId: 'standby', name: 'Standby' },
+			{ variableId: 'privacy', name: 'Privacy' },
+			{ variableId: 'shoulddraw', name: 'Should Draw' },
+			{ variableId: 'target', name: 'Target' },
+		])
 		return this.configUpdated(config)
 	}
 
@@ -166,6 +178,51 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			// delay to fully establish it as `await this.#visca.connect()`
 			// would, because network vagaries might make this take a long time.
 			this.#visca.open(this.#options.host, this.#options.port)
+			// HTTP Status
+			if (this.tallyPollTimer) {
+				clearInterval(this.tallyPollTimer)
+				this.tallyPollTimer = null
+			}
+			// Starte Tally-Polling, wenn Intervall > 0
+			const interval = Number(config.tally_poll_interval)
+			if (interval > 0) {
+				const username = String(config.tally_username)
+				const password = String(config.tally_password)
+
+				if (username && password) {
+					const digestClient = new DigestClient(username, password, {
+						algorithm: 'SHA-256',
+						headers: {
+							'User-Agent': 'Mozilla/5.0',
+							'Accept': 'application/json',
+						},
+					});
+					this.tallyPollTimer = setInterval(() => {
+						void (async () => {
+							const response = await digestClient.fetch('http://' + this.#options.host + '/cgi-bin/param.cgi?get_tally_status');
+							
+							if (response.ok) {
+							try {
+								const data = await response.json();
+								if (this.debugLogging) {this.log('debug', JSON.stringify(data, null, 2))}
+								const json = typeof data === 'string' ? JSON.parse(data) : data
+								this.setVariableValues({
+									tally: json.data.tally,
+									standby: json.data.standby,
+									privacy: json.data.privacy,
+									shoulddraw: json.data.shoulddraw,
+									target: json.data.target,
+								})
+							} catch (err) {
+								this.log('error', `JSON parse error: ${err}`)
+							}
+							} else {
+							console.error(`HTTP Error: ${response.status}`);
+							}
+						})()
+					}, interval)
+				}
+			}
 		}
 	}
 
