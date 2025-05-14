@@ -100,6 +100,67 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	}
 
 	/**
+	 * Send HTTP/CGI command to the camera.
+	 */
+	#digestClient: DigestClient | null = null
+	#digestClient2: DigestClient | null = null
+
+	async sendHTTPCommand<T = unknown>(path: string, method: 'GET' | 'POST' = 'GET'): Promise<T> {
+		if (!this.#digestClient) {
+			const username = this.#options.HTTPusername
+			const password = this.#options.HTTPpassword
+			this.#digestClient = new DigestClient(username, password, {
+				algorithm: 'SHA-256',
+				headers: {
+					'User-Agent': 'Mozilla/5.0',
+					Accept: 'application/json',
+				},
+			})
+		}
+
+		const url = 'http://' + `${this.#options.host}${path}`
+		const response = (await this.#digestClient.fetch(url, {
+			method,
+			body: method === 'POST' ? '' : undefined,
+			data: '',
+		})) as Response
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}`)
+		}
+
+		const contentType = response.headers.get('content-type') || ''
+		if (contentType.includes('application/json')) {
+			return response.json() as Promise<T>
+		} else {
+			// HTML, text or XML-fallback
+			const text = await response.text()
+			const data = this.#parseAttributeString(text)
+			if (Object.keys(data).length > 0) {
+				return { data } as unknown as T
+			}
+			try {
+				return JSON.parse(text)
+			} catch {
+				throw new Error(`Unexpected content type: ${contentType}, and could not parse response`)
+			}
+		}
+	}
+
+	#parseAttributeString(input: string): Record<string, string> {
+		const result: Record<string, string> = {}
+		const regex = /(\w+)\s*=\s*"([^"]*)"/g
+		let match
+
+		while ((match = regex.exec(input)) !== null) {
+			const key = match[1]
+			const value = match[2]
+			result[key] = value
+		}
+
+		return result
+	}
+
+	/**
 	 * The speed to be passed in the pan/tilt speed parameters of Pan Tilt Drive
 	 * VISCA commands.  Ranges between 0x01 (low speed) and 0x18 (high speed).
 	 * However, as 0x15-0x18 are valid only for panning, tilt speed is capped at
@@ -149,13 +210,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 		this.setActionDefinitions(getActions(this))
 		this.setPresetDefinitions(getPresets())
-		this.setVariableDefinitions([
-			{ variableId: 'tally', name: 'Tally Status' },
-			{ variableId: 'standby', name: 'Standby' },
-			{ variableId: 'privacy', name: 'Privacy' },
-			{ variableId: 'shoulddraw', name: 'Should Draw' },
-			{ variableId: 'target', name: 'Target' },
-		])
 		return this.configUpdated(config)
 	}
 
@@ -178,50 +232,151 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			// delay to fully establish it as `await this.#visca.connect()`
 			// would, because network vagaries might make this take a long time.
 			this.#visca.open(this.#options.host, this.#options.port)
+
 			// HTTP Status
 			if (this.tallyPollTimer) {
 				clearInterval(this.tallyPollTimer)
 				this.tallyPollTimer = null
 			}
-			// Starte Tally-Polling, wenn Intervall > 0
-			const interval = Number(config.tally_poll_interval)
-			if (interval > 0) {
-				const username = String(config.tally_username)
-				const password = String(config.tally_password)
+			const username = config.HTTPusername
+			const password = config.HTTPpassword
+			let variableDefinitions: { variableId: string; name: string }[] = []
+			let variableValues: Record<string, string | number | boolean> = {}
+			let model = ''
+			let devVersion = ''
+			// get some informations at start
+			if (username && password) {
+				// device config
+				try {
+					const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_device_conf')
 
-				if (username && password) {
-					const digestClient = new DigestClient(username, password, {
-						algorithm: 'SHA-256',
+					if (result?.data) {
+						variableDefinitions = [
+							{
+								name: 'HTTP Device Name',
+								variableId: 'HTTPdevname',
+							},
+							{
+								name: 'HTTP Device Version',
+								variableId: 'HTTPdevVersion',
+							},
+							{
+								name: 'HTTP Serial Number',
+								variableId: 'HTTPserialNum',
+							},
+							{
+								name: 'HTTP Device Model',
+								variableId: 'HTTPdeviceModel',
+							},
+						]
+						result.data.device_model = result.data.device_model.trim()
+						model = result.data.device_model
+						devVersion = result.data.versioninfo
+						variableValues = {
+							HTTPdevname: result.data.devname,
+							HTTPdevVersion: devVersion,
+							HTTPserialNum: result.data.serial_num,
+							HTTPdeviceModel: result.data.device_model,
+						}
+					}
+				} catch (err) {
+					this.log('error', `device config fetch failed: ${err}`)
+				}
+				// check firmware version
+				try {
+					this.#digestClient2 = new DigestClient('', '')
+					const result = (await this.#digestClient2.fetch(`https://firmware.ptzoptics.com/${model}/RVU.json`, {
+						method: 'GET',
 						headers: {
 							'User-Agent': 'Mozilla/5.0',
-							'Accept': 'application/json',
+							Accept: 'application/json',
 						},
-					});
-					this.tallyPollTimer = setInterval(() => {
-						void (async () => {
-							const response = await digestClient.fetch('http://' + this.#options.host + '/cgi-bin/param.cgi?get_tally_status');
-							
-							if (response.ok) {
-							try {
-								const data = await response.json();
-								if (this.debugLogging) {this.log('debug', JSON.stringify(data, null, 2))}
-								const json = typeof data === 'string' ? JSON.parse(data) : data
-								this.setVariableValues({
-									tally: json.data.tally,
-									standby: json.data.standby,
-									privacy: json.data.privacy,
-									shoulddraw: json.data.shoulddraw,
-									target: json.data.target,
-								})
-							} catch (err) {
-								this.log('error', `JSON parse error: ${err}`)
-							}
-							} else {
-							console.error(`HTTP Error: ${response.status}`);
-							}
-						})()
-					}, interval)
+					})) as Response
+					if (!result.ok) {
+						throw new Error(`HTTP ${result.status}`)
+					}
+					const text = await result.text()
+					let parsed: any
+					try {
+						parsed = JSON.parse(text)
+					} catch {
+						throw new Error(`Unexpected content type, could not parse JSON.`)
+					}
+					devVersion = devVersion.split(' v')[1] || ''
+					variableDefinitions.push({ name: 'HTTP Device Updateable', variableId: 'HTTPdevUpdateable' })
+					if (parsed.data.soc_version !== devVersion) {
+						this.log(
+							'info',
+							`Firmware update from ${devVersion} to ${parsed.data.soc_version} available. Changelog: https://firmware.ptzoptics.com/${model}/${parsed.data.log_name}`,
+						)
+						variableValues = { ...variableValues, HTTPdevUpdateable: parsed.data.soc_version }
+					} else {
+						variableValues = { ...variableValues, HTTPdevUpdateable: 0 }
+					}
+				} catch (err) {
+					this.log('error', `PTZ Firmware fetch failed: ${err}`)
 				}
+			}
+			// start tally-polling, if interval > 0
+			const interval = Number(config.HTTPpollInterval)
+			if (interval > 0 && username && password) {
+				this.tallyPollTimer = setInterval(() => {
+					void (async () => {
+						let firstRun = true
+						// Get tally status
+						try {
+							const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_tally_status', 'GET')
+							if (result?.data) {
+								if (firstRun) {
+									for (const key of Object.keys(result.data)) {
+										const varId = `HTTP${key}`
+										variableDefinitions.push({
+											name: `HTTP ${key}`,
+											variableId: varId,
+										})
+									}
+								}
+								for (const [key, value] of Object.entries(result.data)) {
+									variableValues[`HTTP${key}`] = String(value)
+								}
+							}
+						} catch (err) {
+							this.log('error', `Tally fetch failed: ${err}`)
+						}
+						// Get advanced image config
+						try {
+							const result = await this.sendHTTPCommand<{ data: any }>(
+								'/cgi-bin/param.cgi?get_advance_image_conf',
+								'GET',
+							)
+
+							if (result?.data) {
+								if (firstRun) {
+									for (const key of Object.keys(result.data)) {
+										const varId = `HTTPimage_${key}`
+										variableDefinitions.push({
+											name: `HTTP image ${key}`,
+											variableId: varId,
+										})
+									}
+								}
+								for (const [key, value] of Object.entries(result.data)) {
+									variableValues[`HTTPimage_${key}`] = String(value)
+								}
+							}
+						} catch (err) {
+							this.log('error', `Tally fetch failed: ${err}`)
+						}
+						if (firstRun) {
+							firstRun = false
+							this.setVariableDefinitions(variableDefinitions)
+						}
+						this.setVariableValues(variableValues)
+					})()
+				}, interval)
+			} else {
+				this.setVariableDefinitions(variableDefinitions)
+				this.setVariableValues(variableValues)
 			}
 		}
 	}

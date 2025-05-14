@@ -11,6 +11,15 @@ export type PtzOpticsOptions = {
 	/** The TCP/IP port used to connect to the camera. */
 	port: number
 
+	/* poll interval for HTTP Status */
+	HTTPpollInterval: number
+
+	/* username for HTTP actions or polling */
+	HTTPusername: string | null
+
+	/* password for HTTP actions or polling */
+	HTTPpassword: string | null
+
 	/**
 	 * Whether to perform debug logging of extensive details concerning the
 	 * connection: messages sent and received, internal command/inquiry/reply
@@ -43,6 +52,34 @@ function toPort(port: PtzOpticsConfig['port']): number {
 	return DefaultPort
 }
 
+const DefaultHTTPpollInterval = 0
+
+function toHTTPpollInterval(HTTPpollInterval: PtzOpticsConfig['HTTPpollInterval']): number {
+	if (HTTPpollInterval !== undefined) {
+		return Number(HTTPpollInterval)
+	}
+
+	return DefaultHTTPpollInterval
+}
+
+function toHTTPusername(HTTPusername: PtzOpticsConfig['HTTPusername']): string | null {
+	if (HTTPusername !== undefined) {
+		const HTTPusernameStr = String(HTTPusername)
+		return HTTPusernameStr
+	}
+
+	return null
+}
+
+function toHTTPpassword(HTTPpassword: PtzOpticsConfig['HTTPpassword']): string | null {
+	if (HTTPpassword !== undefined) {
+		const HTTPpasswordStr = String(HTTPpassword)
+		return HTTPpasswordStr
+	}
+
+	return null
+}
+
 function toDebugLogging(debugLogging: PtzOpticsConfig['debugLogging']): boolean {
 	return Boolean(debugLogging)
 }
@@ -52,11 +89,17 @@ export function optionsFromConfig({
 	// Comments indicate the expected types of the various config fields.
 	host, // string
 	port, // string
+	HTTPpollInterval, // number
+	HTTPusername, // string
+	HTTPpassword, // string
 	debugLogging, // boolean
 }: PtzOpticsConfig): PtzOpticsOptions {
 	return {
 		host: toHost(host),
 		port: toPort(port),
+		HTTPpollInterval: toHTTPpollInterval(HTTPpollInterval),
+		HTTPusername: toHTTPusername(HTTPusername),
+		HTTPpassword: toHTTPpassword(HTTPpassword),
 		debugLogging: toDebugLogging(debugLogging),
 	}
 }
@@ -70,6 +113,9 @@ export function noCameraOptions(): PtzOpticsOptions {
 		// Null host ensures that these options won't trigger a connection.
 		host: null,
 		port: DefaultPort,
+		HTTPpollInterval: 0,
+		HTTPusername: null,
+		HTTPpassword: null,
 		debugLogging: false,
 	}
 }

@@ -7,6 +7,7 @@ import type { OSDActionId } from './osd.js'
 import type { PanTiltActionId } from './pan-tilt.js'
 import type { PowerActionId } from './power.js'
 import type { PresetActionId } from './presets.js'
+import type { HTTPActionId } from './http.js'
 import type { WhiteBalanceActionId } from './white-balance.js'
 import type { ZoomActionId } from './zoom.js'
 
@@ -26,5 +27,6 @@ export type PtzOpticsActionId =
 	| PanTiltActionId
 	| PowerActionId
 	| PresetActionId
+	| HTTPActionId
 	| WhiteBalanceActionId
 	| ZoomActionId
