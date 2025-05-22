@@ -320,11 +320,14 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			// start tally-polling, if interval > 0
 			const interval = Number(config.HTTPpollInterval)
 			if (interval > 0 && username && password) {
+				let isRequestInProgress = false
+				let firstRun = true
 				this.tallyPollTimer = setInterval(() => {
 					void (async () => {
-						let firstRun = true
+						if (isRequestInProgress) return // skip if already/still running
 						// Get tally status
 						try {
+							isRequestInProgress = true
 							const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_tally_status', 'GET')
 							if (result?.data) {
 								if (firstRun) {
@@ -342,14 +345,16 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 							}
 						} catch (err) {
 							this.log('error', `Tally fetch failed: ${err}`)
+						} finally {
+							isRequestInProgress = false
 						}
-						// Get advanced image config
+						// Get advanced image config 
 						try {
+							isRequestInProgress = true
 							const result = await this.sendHTTPCommand<{ data: any }>(
 								'/cgi-bin/param.cgi?get_advance_image_conf',
 								'GET',
 							)
-
 							if (result?.data) {
 								if (firstRun) {
 									for (const key of Object.keys(result.data)) {
@@ -365,7 +370,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 								}
 							}
 						} catch (err) {
-							this.log('error', `Tally fetch failed: ${err}`)
+							this.log('error', `Image fetch failed: ${err}`)
+						} finally {
+							isRequestInProgress = false
 						}
 						if (firstRun) {
 							firstRun = false
