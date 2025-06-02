@@ -5,6 +5,7 @@ import { optionConversions } from './option-conversion.js'
 
 export enum PowerActionId {
 	CameraPowerState = 'power',
+	Reboot = 'httpReboot',
 }
 
 const PowerStateId = 'bool'
@@ -38,6 +39,14 @@ export function powerActions(instance: PtzOpticsInstance): ActionDefinitions<Pow
 			callback: async ({ options }) => {
 				const state = getPowerState(options)
 				instance.sendCommand(CameraPower, { state })
+			},
+		},
+		[PowerActionId.Reboot]: {
+			name: 'Reboot',
+			description: 'HTTP authentication in config needed',
+			options: [],
+			callback: async () => {
+				await instance.sendHTTPCommand('/cgi-bin/param.cgi?post_reboot', 'POST')
 			},
 		},
 	}

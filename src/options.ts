@@ -12,13 +12,13 @@ export type PtzOpticsOptions = {
 	port: number
 
 	/* poll interval for HTTP Status */
-	HTTPpollInterval: number
+	httpPollInterval: number
 
 	/* username for HTTP actions or polling */
-	HTTPusername: string | null
+	httpUsername: string | null
 
 	/* password for HTTP actions or polling */
-	HTTPpassword: string | null
+	httpPassword: string | null
 
 	/**
 	 * Whether to perform debug logging of extensive details concerning the
@@ -54,27 +54,25 @@ function toPort(port: PtzOpticsConfig['port']): number {
 
 const DefaultHTTPpollInterval = 0
 
-function toHTTPpollInterval(HTTPpollInterval: PtzOpticsConfig['HTTPpollInterval']): number {
-	if (HTTPpollInterval !== undefined) {
-		return Number(HTTPpollInterval)
+function toHttpPollInterval(httpPollInterval: PtzOpticsConfig['httpPollInterval']): number {
+	if (httpPollInterval !== undefined) {
+		return Number(httpPollInterval)
 	}
 
 	return DefaultHTTPpollInterval
 }
 
-function toHTTPusername(HTTPusername: PtzOpticsConfig['HTTPusername']): string | null {
-	if (HTTPusername !== undefined) {
-		const HTTPusernameStr = String(HTTPusername)
-		return HTTPusernameStr
+function toHttpUsername(httpUsername: PtzOpticsConfig['httpUsername']): string | null {
+	if (httpUsername !== undefined) {
+		return String(httpUsername)
 	}
 
 	return null
 }
 
-function toHTTPpassword(HTTPpassword: PtzOpticsConfig['HTTPpassword']): string | null {
-	if (HTTPpassword !== undefined) {
-		const HTTPpasswordStr = String(HTTPpassword)
-		return HTTPpasswordStr
+function toHttpPassword(httpPassword: PtzOpticsConfig['httpPassword']): string | null {
+	if (httpPassword !== undefined) {
+		return String(httpPassword)
 	}
 
 	return null
@@ -89,17 +87,17 @@ export function optionsFromConfig({
 	// Comments indicate the expected types of the various config fields.
 	host, // string
 	port, // string
-	HTTPpollInterval, // number
-	HTTPusername, // string
-	HTTPpassword, // string
+	httpPollInterval, // number
+	httpUsername, // string
+	httpPassword, // string
 	debugLogging, // boolean
 }: PtzOpticsConfig): PtzOpticsOptions {
 	return {
 		host: toHost(host),
 		port: toPort(port),
-		HTTPpollInterval: toHTTPpollInterval(HTTPpollInterval),
-		HTTPusername: toHTTPusername(HTTPusername),
-		HTTPpassword: toHTTPpassword(HTTPpassword),
+		httpPollInterval: toHttpPollInterval(httpPollInterval),
+		httpUsername: toHttpUsername(httpUsername),
+		httpPassword: toHttpPassword(httpPassword),
 		debugLogging: toDebugLogging(debugLogging),
 	}
 }
@@ -113,9 +111,9 @@ export function noCameraOptions(): PtzOpticsOptions {
 		// Null host ensures that these options won't trigger a connection.
 		host: null,
 		port: DefaultPort,
-		HTTPpollInterval: 0,
-		HTTPusername: null,
-		HTTPpassword: null,
+		httpPollInterval: 0,
+		httpUsername: null,
+		httpPassword: null,
 		debugLogging: false,
 	}
 }

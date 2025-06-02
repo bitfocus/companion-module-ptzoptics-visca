@@ -1,5 +1,6 @@
 import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
-import DigestClient from 'digest-fetch'
+import { type Dispatcher, request } from 'undici'
+import { createDigestInterceptor } from 'undici-digest-interceptor'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import {
@@ -17,8 +18,9 @@ import { VISCAPort } from './visca/port.js'
 export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/** Options dictating the behavior of this instance. */
 	#options: PtzOpticsOptions = noCameraOptions()
-	tallyPollTimer: NodeJS.Timeout | null = null
-
+	/** Interval timer used to check tally status. */
+	private tallyPollTimer: NodeJS.Timeout | null = null
+	#digestInterceptor: Dispatcher | undefined
 	/** Whether debug logging is enabled on this instance or not. */
 	get debugLogging(): boolean {
 		return this.#options.debugLogging
@@ -102,41 +104,35 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/**
 	 * Send HTTP/CGI command to the camera.
 	 */
-	#digestClient: DigestClient | null = null
-	#digestClient2: DigestClient | null = null
-
-	async sendHTTPCommand<T = unknown>(path: string, method: 'GET' | 'POST' = 'GET'): Promise<T> {
-		if (!this.#digestClient) {
-			const username = this.#options.HTTPusername
-			const password = this.#options.HTTPpassword
-			this.#digestClient = new DigestClient(username, password, {
-				algorithm: 'SHA-256',
-				headers: {
-					'User-Agent': 'Mozilla/5.0',
-					Accept: 'application/json',
-				},
-			})
-		}
-
-		const url = 'http://' + `${this.#options.host}${path}`
-		const response = (await this.#digestClient.fetch(url, {
+	async sendHTTPCommand(path: string, method: 'GET' | 'POST'): Promise<unknown> {
+		const url = `http://${this.#options.host}${path}`
+		const { statusCode, headers, body } = await request(url, {
 			method,
+			headers: {
+				'User-Agent': 'Mozilla/5.0',
+				Accept: 'application/json',
+			},
 			body: method === 'POST' ? '' : undefined,
-			data: '',
-		})) as Response
-		if (!response.ok) {
-			throw new Error(`HTTP ${response.status}`)
+			dispatcher: this.#digestInterceptor,
+		})
+		const text = await body.text()
+		const rawContentType = headers['content-type'] // handle possible array in content-type
+		let contentType = ''
+		if (rawContentType !== null && rawContentType !== undefined) {
+			contentType = Array.isArray(rawContentType) ? rawContentType[0] : rawContentType || ''
 		}
 
-		const contentType = response.headers.get('content-type') || ''
-		if (contentType.includes('application/json')) {
-			return response.json() as Promise<T>
+		if (statusCode < 200 || statusCode >= 300) {
+			throw new Error(`HTTP error ${statusCode} invoking ${path}: ${text}`)
+		}
+
+		if (contentType.startsWith('application/json')) {
+			return JSON.parse(text)
 		} else {
 			// HTML, text or XML-fallback
-			const text = await response.text()
-			const data = this.#parseAttributeString(text)
+			const data = parseAttributeString(text)
 			if (Object.keys(data).length > 0) {
-				return { data } as unknown as T
+				return { data }
 			}
 			try {
 				return JSON.parse(text)
@@ -144,20 +140,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				throw new Error(`Unexpected content type: ${contentType}, and could not parse response`)
 			}
 		}
-	}
-
-	#parseAttributeString(input: string): Record<string, string> {
-		const result: Record<string, string> = {}
-		const regex = /(\w+)\s*=\s*"([^"]*)"/g
-		let match
-
-		while ((match = regex.exec(input)) !== null) {
-			const key = match[1]
-			const value = match[2]
-			result[key] = value
-		}
-
-		return result
 	}
 
 	/**
@@ -202,6 +184,10 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			clearInterval(this.tallyPollTimer)
 			this.tallyPollTimer = null
 		}
+		if (this.#digestInterceptor) {
+			await this.#digestInterceptor.close() // optional, if supported
+			this.#digestInterceptor = undefined
+		}
 		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
@@ -238,52 +224,65 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				clearInterval(this.tallyPollTimer)
 				this.tallyPollTimer = null
 			}
-			const username = config.HTTPusername
-			const password = config.HTTPpassword
-			let variableDefinitions: { variableId: string; name: string }[] = []
-			let variableValues: Record<string, string | number | boolean> = {}
-			let model = ''
-			let devVersion = ''
+			const username = this.#options.httpUsername
+			const password = this.#options.httpPassword
+
+			const variableDefinitions: { variableId: string; name: string }[] = []
+			const variableValues: Record<string, string | number | boolean> = {}
+			//let model = ''
+			//let devVersion = ''
 			// get some informations at start
-			if (username && password) {
+			if (
+				username !== undefined &&
+				username !== null &&
+				username !== '' &&
+				password !== undefined &&
+				password !== null &&
+				password !== ''
+			) {
+				this.#digestInterceptor = createDigestInterceptor({
+					username: this.#options.httpUsername ?? '',
+					password: this.#options.httpPassword ?? '',
+					urls: [`http://${this.#options.host}`],
+				})
 				// device config
 				try {
-					const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_device_conf')
-
-					if (result?.data) {
+					const result = await this.sendHTTPCommand('/cgi-bin/param.cgi?get_device_conf', 'GET')
+					this.log('debug', `result ${JSON.stringify(result)}`)
+					/*if (result?.data) {
 						variableDefinitions = [
 							{
 								name: 'HTTP Device Name',
-								variableId: 'HTTPdevname',
+								variableId: 'httpDevname',
 							},
 							{
 								name: 'HTTP Device Version',
-								variableId: 'HTTPdevVersion',
+								variableId: 'httpDevVersion',
 							},
 							{
 								name: 'HTTP Serial Number',
-								variableId: 'HTTPserialNum',
+								variableId: 'httpSerialNum',
 							},
 							{
 								name: 'HTTP Device Model',
-								variableId: 'HTTPdeviceModel',
+								variableId: 'httpDeviceModel',
 							},
 						]
 						result.data.device_model = result.data.device_model.trim()
 						model = result.data.device_model
 						devVersion = result.data.versioninfo
 						variableValues = {
-							HTTPdevname: result.data.devname,
-							HTTPdevVersion: devVersion,
-							HTTPserialNum: result.data.serial_num,
-							HTTPdeviceModel: result.data.device_model,
+							httpDevname: result.data.devname,
+							httpDevVersion: devVersion,
+							httpSerialNum: result.data.serial_num,
+							httpDeviceModel: result.data.device_model,
 						}
-					}
+					}*/
 				} catch (err) {
 					this.log('error', `device config fetch failed: ${err}`)
 				}
 				// check firmware version
-				try {
+				/*try {
 					this.#digestClient2 = new DigestClient('', '')
 					const result = (await this.#digestClient2.fetch(`https://firmware.ptzoptics.com/${model}/RVU.json`, {
 						method: 'GET',
@@ -303,23 +302,31 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 						throw new Error(`Unexpected content type, could not parse JSON.`)
 					}
 					devVersion = devVersion.split(' v')[1] || ''
-					variableDefinitions.push({ name: 'HTTP Device Updateable', variableId: 'HTTPdevUpdateable' })
+					variableDefinitions.push({ name: 'HTTP Device Updateable', variableId: 'httpDevUpdateable' })
 					if (parsed.data.soc_version !== devVersion) {
 						this.log(
 							'info',
 							`Firmware update from ${devVersion} to ${parsed.data.soc_version} available. Changelog: https://firmware.ptzoptics.com/${model}/${parsed.data.log_name}`,
 						)
-						variableValues = { ...variableValues, HTTPdevUpdateable: parsed.data.soc_version }
+						variableValues = { ...variableValues, httpDevUpdateable: parsed.data.soc_version }
 					} else {
-						variableValues = { ...variableValues, HTTPdevUpdateable: 0 }
+						variableValues = { ...variableValues, httpDevUpdateable: 0 }
 					}
 				} catch (err) {
 					this.log('error', `PTZ Firmware fetch failed: ${err}`)
-				}
+				}*/
 			}
 			// start tally-polling, if interval > 0
-			const interval = Number(config.HTTPpollInterval)
-			if (interval > 0 && username && password) {
+			const interval = Number(config.httpPollInterval)
+			if (
+				interval > 0 &&
+				username !== undefined &&
+				username !== null &&
+				username !== '' &&
+				password !== undefined &&
+				password !== null &&
+				password !== ''
+			) {
 				let isRequestInProgress = false
 				let firstRun = true
 				this.tallyPollTimer = setInterval(() => {
@@ -328,8 +335,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 						// Get tally status
 						try {
 							isRequestInProgress = true
-							const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_tally_status', 'GET')
-							if (result?.data) {
+							const result = await this.sendHTTPCommand('/cgi-bin/param.cgi?get_tally_status', 'GET')
+							this.log('debug', `tally result ${result}`)
+							/*if (result?.data) {
 								if (firstRun) {
 									for (const key of Object.keys(result.data)) {
 										const varId = `HTTP${key}`
@@ -342,14 +350,14 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 								for (const [key, value] of Object.entries(result.data)) {
 									variableValues[`HTTP${key}`] = String(value)
 								}
-							}
+							}*/
 						} catch (err) {
 							this.log('error', `Tally fetch failed: ${err}`)
 						} finally {
 							isRequestInProgress = false
 						}
-						// Get advanced image config 
-						try {
+						// Get advanced image config
+						/*try {
 							isRequestInProgress = true
 							const result = await this.sendHTTPCommand<{ data: any }>(
 								'/cgi-bin/param.cgi?get_advance_image_conf',
@@ -373,7 +381,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 							this.log('error', `Image fetch failed: ${err}`)
 						} finally {
 							isRequestInProgress = false
-						}
+						}*/
 						if (firstRun) {
 							firstRun = false
 							this.setVariableDefinitions(variableDefinitions)
@@ -399,4 +407,21 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
 		this.log('info', `PTZOptics module configuration on ${desc}: ${repr(config)}`)
 	}
+}
+/**
+ * Parses key="value" attribute strings from input text into an object.
+ * Example input: foo="bar" baz="qux"
+ */
+function parseAttributeString(input: string): Record<string, string> {
+	const result: Record<string, string> = {}
+	const regex = /(\w+)\s*=\s*"([^"]*)"/g
+	let match
+
+	while ((match = regex.exec(input)) !== null) {
+		const key = match[1]
+		const value = match[2]
+		result[key] = value
+	}
+
+	return result
 }
