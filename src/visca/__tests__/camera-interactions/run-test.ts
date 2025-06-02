@@ -328,10 +328,18 @@ async function verifyInteractions(
 				}
 				case 'camera-reply': {
 					const { bytes } = interaction
-					if (!(await camera).socket.write(new Uint8Array(bytes))) {
-						throw new Error(`Writing ${prettyBytes(bytes)} failed, socket closed`)
-					}
-					LOG(`Wrote ${prettyBytes(bytes)} to socket`)
+					const cameraSocket = (await camera).socket
+					await new Promise<void>((resolve: () => void, reject: (reason: any) => void) => {
+						cameraSocket.write(new Uint8Array(bytes), (err?: Error | null) => {
+							LOG(`Wrote ${prettyBytes(bytes)} to socket${err ? ` (${err})` : ''}`)
+							if (err) {
+								const reason = `Writing ${prettyBytes(bytes)} failed: ${err}`
+								reject(new Error(reason))
+							} else {
+								resolve()
+							}
+						})
+					})
 					break
 				}
 				case 'command-succeeded': {

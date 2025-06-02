@@ -16,6 +16,9 @@ type ParametersForCommand<C extends Command<any>> =
 
 const _NoParameters = new ModuleDefinedCommand([0x81, 0x01, 0x07, 0xff])
 
+// @ts-expect-error Perform a test that *must fail* to verify testing happens.
+type test_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
+
 type test_NoParameters_paramValues = Expect<
 	Equal<
 		// param values for parameter-less comment are empty

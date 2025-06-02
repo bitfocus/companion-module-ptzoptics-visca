@@ -1,11 +1,12 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "3.5.0-dev",
+	"version": "3.5.0",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
 		"postinstall": "husky",
 		"test": "vitest --run",
+		"check-types": "tsc -p tsconfig.json --noEmit --noUnusedLocals false",
 		"package": "yarn build && companion-module-build",
 		"build": "rimraf dist && yarn build:main",
 		"build:main": "tsc -p tsconfig.build.json",
@@ -13,7 +14,8 @@
 		"lint:raw": "eslint",
 		"lint": "yarn lint:raw .",
 		"knip": "knip",
-		"bt": "yarn install && yarn build && yarn lint && yarn test && yarn knip && echo PASS || echo FAIL"
+		"check": "yarn check-types && yarn lint && yarn knip && yarn build && echo PASS || echo FAIL",
+		"bt": "yarn install && yarn check-types && yarn lint && yarn knip && yarn build && yarn test && echo PASS || echo FAIL"
 	},
 	"license": "MIT",
 	"repository": {
@@ -39,7 +41,7 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "~2.0.4",
-		"@types/node": "^22.14.1",
+		"@types/node": "^22.15.18",
 		"eslint": "~9.22.0",
 		"eslint-plugin-n": "^17.17.0",
 		"husky": "^9.1.7",
