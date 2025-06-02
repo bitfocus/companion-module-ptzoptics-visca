@@ -11,6 +11,15 @@ export type PtzOpticsOptions = {
 	/** The TCP/IP port used to connect to the camera. */
 	port: number
 
+	/* poll interval for HTTP Status */
+	httpPollInterval: number
+
+	/* username for HTTP actions or polling */
+	httpUsername: string | null
+
+	/* password for HTTP actions or polling */
+	httpPassword: string | null
+
 	/**
 	 * Whether to perform debug logging of extensive details concerning the
 	 * connection: messages sent and received, internal command/inquiry/reply
@@ -43,6 +52,32 @@ function toPort(port: PtzOpticsConfig['port']): number {
 	return DefaultPort
 }
 
+const DefaultHTTPpollInterval = 0
+
+function toHttpPollInterval(httpPollInterval: PtzOpticsConfig['httpPollInterval']): number {
+	if (httpPollInterval !== undefined) {
+		return Number(httpPollInterval)
+	}
+
+	return DefaultHTTPpollInterval
+}
+
+function toHttpUsername(httpUsername: PtzOpticsConfig['httpUsername']): string | null {
+	if (httpUsername !== undefined) {
+		return String(httpUsername)
+	}
+
+	return null
+}
+
+function toHttpPassword(httpPassword: PtzOpticsConfig['httpPassword']): string | null {
+	if (httpPassword !== undefined) {
+		return String(httpPassword)
+	}
+
+	return null
+}
+
 function toDebugLogging(debugLogging: PtzOpticsConfig['debugLogging']): boolean {
 	return Boolean(debugLogging)
 }
@@ -52,11 +87,17 @@ export function optionsFromConfig({
 	// Comments indicate the expected types of the various config fields.
 	host, // string
 	port, // string
+	httpPollInterval, // number
+	httpUsername, // string
+	httpPassword, // string
 	debugLogging, // boolean
 }: PtzOpticsConfig): PtzOpticsOptions {
 	return {
 		host: toHost(host),
 		port: toPort(port),
+		httpPollInterval: toHttpPollInterval(httpPollInterval),
+		httpUsername: toHttpUsername(httpUsername),
+		httpPassword: toHttpPassword(httpPassword),
 		debugLogging: toDebugLogging(debugLogging),
 	}
 }
@@ -70,6 +111,9 @@ export function noCameraOptions(): PtzOpticsOptions {
 		// Null host ensures that these options won't trigger a connection.
 		host: null,
 		port: DefaultPort,
+		httpPollInterval: 0,
+		httpUsername: null,
+		httpPassword: null,
 		debugLogging: false,
 	}
 }

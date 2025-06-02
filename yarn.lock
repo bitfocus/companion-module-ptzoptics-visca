@@ -453,6 +453,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mreal/digest-auth@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "@mreal/digest-auth@npm:1.1.3"
+  dependencies:
+    class-transformer: "npm:^0.2.0"
+    class-validator: "npm:^0.9.1"
+    crypto-js: "npm:^3.1.9-1"
+    lodash: "npm:^4.17.15"
+    sha.js: "npm:^2.4.11"
+  checksum: 10c0/ce6b107b113b04b12f2dddbff013e0e2f26ec8ef885eaf09b52bce351ba1bb3e32934e8ab7fab4d7c33a17d0b06b21b1efcd353713d36bc5e2c1dda5c226f9ad
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -1388,6 +1401,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"class-transformer@npm:^0.2.0":
+  version: 0.2.3
+  resolution: "class-transformer@npm:0.2.3"
+  checksum: 10c0/0cdeec936a3005265c8ae06172ac193a9ca4a085230c69c9ebec1306a30fffccfe3859240b67bfff124da00bc46f901983b038df20f4b48c9a43d842df6f406e
+  languageName: node
+  linkType: hard
+
+"class-validator@npm:^0.9.1":
+  version: 0.9.1
+  resolution: "class-validator@npm:0.9.1"
+  dependencies:
+    google-libphonenumber: "npm:^3.1.6"
+    validator: "npm:10.4.0"
+  checksum: 10c0/2fd99e050912f40662decb97a7beac13860b3a249010edd9aff3880545766b6c18355ca47af14e7265fd88e827b7c4ecf6283a1532ba25656e3b5788a808e92f
+  languageName: node
+  linkType: hard
+
 "cli-cursor@npm:^5.0.0":
   version: 5.0.0
   resolution: "cli-cursor@npm:5.0.0"
@@ -1491,6 +1521,13 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
+  languageName: node
+  linkType: hard
+
+"crypto-js@npm:^3.1.9-1":
+  version: 3.3.0
+  resolution: "crypto-js@npm:3.3.0"
+  checksum: 10c0/10b5d91bdc85095df9be01f9d0d954b8a3aba6202f143efa6215b8b3d5dd984e0883e10aeff792ef4a51b77cd4442320242b496acf6dce5069d0e0fc2e1d75d2
   languageName: node
   linkType: hard
 
@@ -2298,6 +2335,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"google-libphonenumber@npm:^3.1.6":
+  version: 3.2.41
+  resolution: "google-libphonenumber@npm:3.2.41"
+  checksum: 10c0/6155edaca1564a32034063e870bd83b355b26400ab0e64995afd2dbd00e0b662672fed947c571b3e805155d71ee4b37ecc05409b19f570e4e7b08b7c03d17dee
+  languageName: node
+  linkType: hard
+
 "graceful-fs@npm:^4.1.2, graceful-fs@npm:^4.2.11, graceful-fs@npm:^4.2.4, graceful-fs@npm:^4.2.6":
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
@@ -2413,6 +2457,13 @@ __metadata:
   version: 0.1.4
   resolution: "imurmurhash@npm:0.1.4"
   checksum: 10c0/8b51313850dd33605c6c9d3fd9638b714f4c4c40250cff658209f30d40da60f78992fb2df5dabee4acf589a6a82bbc79ad5486550754bd9ec4e3fc0d4a57d6a6
+  languageName: node
+  linkType: hard
+
+"inherits@npm:^2.0.1":
+  version: 2.0.4
+  resolution: "inherits@npm:2.0.4"
+  checksum: 10c0/4e531f648b29039fb7426fb94075e6545faa1eb9fe83c29f0b6d9e7263aceb4289d2d4557db0d428188eeb449cc7c5e77b0a0b2c4e248ff2a65933a0dee49ef2
   languageName: node
   linkType: hard
 
@@ -2753,6 +2804,13 @@ __metadata:
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
   checksum: 10c0/402fa16a1edd7538de5b5903a90228aa48eb5533986ba7fa26606a49db2572bf414ff73a2c9f5d5fd36b31c46a5d5c7e1527749c07cbcf965ccff5fbdf32c506
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.17.15":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21"
+  checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
   languageName: node
   linkType: hard
 
@@ -3434,6 +3492,8 @@ __metadata:
     type-testing: "npm:^0.2.0"
     typescript: "npm:~5.8.2"
     typescript-eslint: "npm:~8.26.1"
+    undici: "npm:^7.10.0"
+    undici-digest-interceptor: "npm:^1.0.0"
     vitest: "npm:^3.1.2"
   languageName: unknown
   linkType: soft
@@ -3660,7 +3720,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:^5.1.0":
+"safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: 10c0/6501914237c0a86e9675d4e51d89ca3c21ffd6a31642efeba25ad65720bce6921c9e7e974e5be91a786b25aa058b5303285d3c15dbabf983a919f5f630d349f3
@@ -3701,6 +3761,18 @@ __metadata:
   dependencies:
     randombytes: "npm:^2.1.0"
   checksum: 10c0/2dd09ef4b65a1289ba24a788b1423a035581bef60817bea1f01eda8e3bda623f86357665fe7ac1b50f6d4f583f97db9615b3f07b2a2e8cbcb75033965f771dd2
+  languageName: node
+  linkType: hard
+
+"sha.js@npm:^2.4.11":
+  version: 2.4.11
+  resolution: "sha.js@npm:2.4.11"
+  dependencies:
+    inherits: "npm:^2.0.1"
+    safe-buffer: "npm:^5.0.1"
+  bin:
+    sha.js: ./bin.js
+  checksum: 10c0/b7a371bca8821c9cc98a0aeff67444a03d48d745cb103f17228b96793f455f0eb0a691941b89ea1e60f6359207e36081d9be193252b0f128e0daf9cfea2815a5
   languageName: node
   linkType: hard
 
@@ -4143,10 +4215,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-digest-interceptor@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "undici-digest-interceptor@npm:1.0.0"
+  dependencies:
+    "@mreal/digest-auth": "npm:^1.1.3"
+    undici: "npm:^6.10.2"
+  checksum: 10c0/9c7a145b7acb287175a1a0f2502adec66502bd458a5c4a0b478bc2756d2eac167d30bc5ebb960385a089f27a739819f4e3de8945e6168d5a7a701bf5b4618cca
+  languageName: node
+  linkType: hard
+
 "undici-types@npm:~6.21.0":
   version: 6.21.0
   resolution: "undici-types@npm:6.21.0"
   checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
+  languageName: node
+  linkType: hard
+
+"undici@npm:^6.10.2":
+  version: 6.21.3
+  resolution: "undici@npm:6.21.3"
+  checksum: 10c0/294da109853fad7a6ef5a172ad0ca3fb3f1f60cf34703d062a5ec967daf69ad8c03b52e6d536c5cba3bb65615769bf08e5b30798915cbccdddaca01045173dda
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.10.0":
+  version: 7.10.0
+  resolution: "undici@npm:7.10.0"
+  checksum: 10c0/756ac876a8df845bc89eb8348c35d33a0ff63c17eb45b664075c961a7fbd4a398f94f9dce438262f55fe66e4bbb0a46aa63a3fd58ce51361c616aff11a270450
   languageName: node
   linkType: hard
 
@@ -4195,6 +4291,13 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10c0/4ef57b45aa820d7ac6496e9208559986c665e49447cb072744c13b66925a362d96dd5a46c4530a6b8e203e5db5fe849369444440cb22ecfc26c679359e5dfa3c
+  languageName: node
+  linkType: hard
+
+"validator@npm:10.4.0":
+  version: 10.4.0
+  resolution: "validator@npm:10.4.0"
+  checksum: 10c0/a0a87c15c856055294d80069c257d7440c7b3e97afe2860a73fb39806350768c154a12a1fa0cb62ee7c6506fc196d8330380d52fdbd8cb159a30da6470d7e02e
   languageName: node
   linkType: hard
 

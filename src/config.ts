@@ -38,7 +38,8 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			id: 'info',
 			width: 12,
 			label: 'Information',
-			value: 'This module controls PTZ cameras with VISCA over IP protocol',
+			value:
+				'This module controls PTZ cameras using VISCA over TCP/IP. (Some additional functions are performed over password-protected HTTP.)',
 		},
 		{
 			type: 'textinput',
@@ -57,6 +58,30 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			default: '5678',
 			regex: Regex.PORT,
 			required: true,
+		},
+		{
+			type: 'number',
+			id: 'httpPollInterval',
+			label: 'HTTP Status poll interval (ms, 0 = disabled)',
+			width: 6,
+			default: 0,
+			min: 0,
+			max: 60000,
+			step: 100,
+		},
+		{
+			type: 'textinput',
+			id: 'httpUsername',
+			label: 'Username',
+			width: 6,
+			default: 'admin',
+		},
+		{
+			type: 'textinput',
+			id: 'httpPassword',
+			label: 'Password',
+			width: 6,
+			default: '',
 		},
 		{
 			type: 'checkbox',
