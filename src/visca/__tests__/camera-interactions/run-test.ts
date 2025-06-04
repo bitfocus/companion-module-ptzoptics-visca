@@ -1,7 +1,8 @@
 import { assertNever, InstanceStatus, type LogLevel } from '@companion-module/base'
+import net from 'net'
+import { isValidHost } from '../../../config.js'
 import type { Answer, AnswerParameters } from '../../inquiry.js'
 import { type ExpectedAnswer, type Interaction, type Match } from './interactions.js'
-import net from 'net'
 import { type MessageType, type PartialInstance, VISCAPort } from '../../port.js'
 import type { Bytes } from '../../../utils/byte.js'
 import { prettyBytes } from '../../../utils/pretty.js'
@@ -288,7 +289,11 @@ async function verifyInteractions(
 	// NOTE: This doesn't wait for the connection to be fully established.
 	//       Operations must either implicitly wait for it to be established or
 	//       `connect()` must be awaited.
-	clientViscaPort.open('127.0.0.1', port)
+	const host = '127.0.0.1'
+	if (!isValidHost(host)) {
+		throw new Error(`isValidHost mistakenly saying ${host} isn't a valid host`)
+	}
+	clientViscaPort.open(host, port)
 
 	try {
 		const sentCommands: Map<string, Promise<void | Error>> = new Map()

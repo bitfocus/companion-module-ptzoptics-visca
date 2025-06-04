@@ -3,6 +3,7 @@ import type { Command, CommandParameters, CommandParamValues, NoCommandParameter
 import type { PtzOpticsInstance } from '../instance.js'
 import { checkMessageBytes } from './message.js'
 import type { Answer, AnswerMessage, AnswerParameters, Inquiry } from './inquiry.js'
+import type { Host } from '../config.js'
 import type { Bytes } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
 import { promiseWithResolvers } from '../utils/promise-with-resolvers.js'
@@ -460,7 +461,7 @@ export class VISCAPort {
 	 * established, if needed.  If you require the connection to be established,
 	 * await `connect()` after calling this function.
 	 */
-	open(host: string, port: number): void {
+	open(host: Host, port: number): void {
 		this.close('Socket is being reopened', InstanceStatus.Connecting)
 
 		const instance = this.#instance

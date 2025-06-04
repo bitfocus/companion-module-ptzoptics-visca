@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { DebugLoggingOptionId, type PtzOpticsConfig, tryUpdateConfigWithDebugLogging } from './config.js'
+import { type RawConfig, DebugLoggingOptionId, tryUpdateConfigWithDebugLogging } from './config.js'
 
 describe('config upgrade to specify debug logging', () => {
 	test('config without debug logging', () => {
-		const configMissingDebugLogging: PtzOpticsConfig = {
+		const configMissingDebugLogging: RawConfig = {
 			host: '127.0.0.1',
 			port: '5678',
 		}
@@ -17,7 +17,7 @@ describe('config upgrade to specify debug logging', () => {
 	})
 
 	test('config with debug logging=false', () => {
-		const configWithDebugLoggingFalse: PtzOpticsConfig = {
+		const configWithDebugLoggingFalse: RawConfig = {
 			host: '127.0.0.1',
 			port: '5678',
 			debugLogging: false,
@@ -28,7 +28,7 @@ describe('config upgrade to specify debug logging', () => {
 	})
 
 	test('config with debug logging=true', () => {
-		const configWithDebugLoggingTrue: PtzOpticsConfig = {
+		const configWithDebugLoggingTrue: RawConfig = {
 			host: '127.0.0.1',
 			port: '5678',
 			debugLogging: true,
