@@ -1,6 +1,5 @@
 import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
-import { type Dispatcher, request } from 'undici'
-import { createDigestInterceptor } from 'undici-digest-interceptor'
+import DigestClient from 'digest-fetch'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
 import {
@@ -20,7 +19,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#options: PtzOpticsOptions = noCameraOptions()
 	/** Interval timer used to check tally status. */
 	private tallyPollTimer: NodeJS.Timeout | null = null
-	#digestInterceptor: Dispatcher | undefined
 	/** Whether debug logging is enabled on this instance or not. */
 	get debugLogging(): boolean {
 		return this.#options.debugLogging
@@ -104,37 +102,66 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	/**
 	 * Send HTTP/CGI command to the camera.
 	 */
-	async sendHTTPCommand(path: string, method: 'GET' | 'POST'): Promise<unknown> {
+	#digestClient: DigestClient | null = null
+
+	async sendHTTPCommand<T = any>(path: string, method: 'GET' | 'POST'): Promise<T> {
+		if (this.debugLogging) this.log('debug', `sendHTTPCommand: ${method} ${path}`)
+		if (!this.#digestClient) {
+			if (this.debugLogging) this.log('debug', `Creating new DigestClient for HTTP commands`)
+			const username = this.#options.httpUsername
+			const password = this.#options.httpPassword
+			this.#digestClient = new DigestClient(username, password, {
+				algorithm: 'SHA-256',
+				headers: {
+					'User-Agent': 'Mozilla/5.0',
+					Accept: 'application/json',
+				},
+			})
+		}
 		const url = `http://${this.#options.host}${path}`
-		const { statusCode, headers, body } = await request(url, {
+
+		const fetchPromise = this.#digestClient.fetch(url, {
 			method,
-			headers: {
-				'User-Agent': 'Mozilla/5.0',
-				Accept: 'application/json',
-			},
 			body: method === 'POST' ? '' : undefined,
-			dispatcher: this.#digestInterceptor,
+			data: '',
 		})
-		const text = await body.text()
-		const rawContentType = headers['content-type'] // handle possible array in content-type
-		let contentType = ''
-		if (rawContentType !== null && rawContentType !== undefined) {
-			contentType = Array.isArray(rawContentType) ? rawContentType[0] : rawContentType || ''
+		const timeoutPromise = new Promise<never>(
+			(_, reject) => setTimeout(() => reject(new Error('Request timed out')), 5000), // 5 seconds timeout
+		)
+
+		const response = await Promise.race([fetchPromise, timeoutPromise])
+
+		if (response !== null && response !== undefined && typeof response.ok === 'boolean' && response.ok === false) {
+			throw new Error(`HTTP ${response.status}`)
 		}
 
-		if (statusCode < 200 || statusCode >= 300) {
-			throw new Error(`HTTP error ${statusCode} invoking ${path}: ${text}`)
+		const text = await response.text()
+		const rawContentType = response.headers.get('content-type') // handle possible array in content-type
+		let contentType = ''
+		// If the content-type header is not set, assume JSON
+		if (typeof rawContentType === 'string') {
+			if (this.debugLogging) console.log(`Content-Type: String`)
+			contentType = rawContentType
+		} else if (Array.isArray(rawContentType) && rawContentType.length > 0 && typeof rawContentType[0] === 'string') {
+			if (this.debugLogging) console.log(`Content-Type: Array`)
+			contentType = rawContentType[0]
+		} else {
+			if (this.debugLogging) console.log(`Content-Type: None`)
+			contentType = ''
 		}
 
 		if (contentType.startsWith('application/json')) {
+			if (this.debugLogging) console.log(`Content-Type: JSON`)
 			return JSON.parse(text)
 		} else {
+			if (this.debugLogging) console.log(`Content-Type try to parse text to JSON: ${contentType}`)
 			// HTML, text or XML-fallback
 			const data = parseAttributeString(text)
 			if (Object.keys(data).length > 0) {
-				return { data }
+				return { data } as T
 			}
 			try {
+				if (this.debugLogging) console.log(`Content-Type: try JSON parsing`)
 				return JSON.parse(text)
 			} catch {
 				throw new Error(`Unexpected content type: ${contentType}, and could not parse response`)
@@ -184,10 +211,6 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			clearInterval(this.tallyPollTimer)
 			this.tallyPollTimer = null
 		}
-		if (this.#digestInterceptor) {
-			await this.#digestInterceptor.close() // optional, if supported
-			this.#digestInterceptor = undefined
-		}
 		this.#visca.close('Instance is being destroyed', InstanceStatus.Disconnected)
 	}
 
@@ -213,180 +236,72 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 		if (this.#options.host === null) {
 			this.#visca.close('no host specified', InstanceStatus.Disconnected)
-		} else {
-			// Initiate the connection (closing any prior connection), but don't
-			// delay to fully establish it as `await this.#visca.connect()`
-			// would, because network vagaries might make this take a long time.
-			this.#visca.open(this.#options.host, this.#options.port)
+			return
+		}
+		// Initiate the connection (closing any prior connection), but don't
+		// delay to fully establish it as `await this.#visca.connect()`
+		// would, because network vagaries might make this take a long time.
+		this.#visca.open(this.#options.host, this.#options.port)
 
-			// HTTP Status
-			if (this.tallyPollTimer) {
-				clearInterval(this.tallyPollTimer)
-				this.tallyPollTimer = null
+		// HTTP Status
+		if (this.tallyPollTimer) {
+			clearInterval(this.tallyPollTimer)
+			this.tallyPollTimer = null
+		}
+		const username = this.#options.httpUsername
+		const password = this.#options.httpPassword
+
+		let variableDefinitions: { variableId: string; name: string }[] = []
+		let variableValues: Record<string, string | number | boolean> = {}
+		let model = ''
+		let devVersion = ''
+		// get some informations at start
+		if (this.#hasHttpCredentials(username, password)) {
+			// device config
+			try {
+				;({ variableDefinitions, variableValues, model, devVersion } = await this.#fetchDeviceConfig(
+					variableDefinitions,
+					variableValues,
+				))
+			} catch (err) {
+				this.log('error', `device config fetch failed: ${err}`)
+				return this.init(config)
 			}
-			const username = this.#options.httpUsername
-			const password = this.#options.httpPassword
-
-			const variableDefinitions: { variableId: string; name: string }[] = []
-			const variableValues: Record<string, string | number | boolean> = {}
-			//let model = ''
-			//let devVersion = ''
-			// get some informations at start
-			if (
-				username !== undefined &&
-				username !== null &&
-				username !== '' &&
-				password !== undefined &&
-				password !== null &&
-				password !== ''
-			) {
-				this.#digestInterceptor = createDigestInterceptor({
-					username: this.#options.httpUsername ?? '',
-					password: this.#options.httpPassword ?? '',
-					urls: [`http://${this.#options.host}`],
-				})
-				// device config
-				try {
-					const result = await this.sendHTTPCommand('/cgi-bin/param.cgi?get_device_conf', 'GET')
-					this.log('debug', `result ${JSON.stringify(result)}`)
-					/*if (result?.data) {
-						variableDefinitions = [
-							{
-								name: 'HTTP Device Name',
-								variableId: 'httpDevname',
-							},
-							{
-								name: 'HTTP Device Version',
-								variableId: 'httpDevVersion',
-							},
-							{
-								name: 'HTTP Serial Number',
-								variableId: 'httpSerialNum',
-							},
-							{
-								name: 'HTTP Device Model',
-								variableId: 'httpDeviceModel',
-							},
-						]
-						result.data.device_model = result.data.device_model.trim()
-						model = result.data.device_model
-						devVersion = result.data.versioninfo
-						variableValues = {
-							httpDevname: result.data.devname,
-							httpDevVersion: devVersion,
-							httpSerialNum: result.data.serial_num,
-							httpDeviceModel: result.data.device_model,
-						}
-					}*/
-				} catch (err) {
-					this.log('error', `device config fetch failed: ${err}`)
-				}
-				// check firmware version
-				/*try {
-					this.#digestClient2 = new DigestClient('', '')
-					const result = (await this.#digestClient2.fetch(`https://firmware.ptzoptics.com/${model}/RVU.json`, {
-						method: 'GET',
-						headers: {
-							'User-Agent': 'Mozilla/5.0',
-							Accept: 'application/json',
-						},
-					})) as Response
-					if (!result.ok) {
-						throw new Error(`HTTP ${result.status}`)
-					}
-					const text = await result.text()
-					let parsed: any
-					try {
-						parsed = JSON.parse(text)
-					} catch {
-						throw new Error(`Unexpected content type, could not parse JSON.`)
-					}
-					devVersion = devVersion.split(' v')[1] || ''
-					variableDefinitions.push({ name: 'HTTP Device Updateable', variableId: 'httpDevUpdateable' })
-					if (parsed.data.soc_version !== devVersion) {
-						this.log(
-							'info',
-							`Firmware update from ${devVersion} to ${parsed.data.soc_version} available. Changelog: https://firmware.ptzoptics.com/${model}/${parsed.data.log_name}`,
-						)
-						variableValues = { ...variableValues, httpDevUpdateable: parsed.data.soc_version }
-					} else {
-						variableValues = { ...variableValues, httpDevUpdateable: 0 }
-					}
-				} catch (err) {
-					this.log('error', `PTZ Firmware fetch failed: ${err}`)
-				}*/
+			// check firmware version
+			try {
+				await this.#checkFirmwareVersion(model, devVersion, variableDefinitions, variableValues)
+			} catch (err) {
+				this.log('error', `PTZ Firmware fetch failed: ${err}`)
 			}
 			// start tally-polling, if interval > 0
 			const interval = Number(config.httpPollInterval)
-			if (
-				interval > 0 &&
-				username !== undefined &&
-				username !== null &&
-				username !== '' &&
-				password !== undefined &&
-				password !== null &&
-				password !== ''
-			) {
+			if (interval > 0) {
 				let isRequestInProgress = false
 				let firstRun = true
 				this.tallyPollTimer = setInterval(() => {
 					void (async () => {
-						if (isRequestInProgress) return // skip if already/still running
-						// Get tally status
+						if (isRequestInProgress) {
+							this.log('info', 'Tally or image request already in progress')
+							return
+						}
+						isRequestInProgress = true
 						try {
-							isRequestInProgress = true
-							const result = await this.sendHTTPCommand('/cgi-bin/param.cgi?get_tally_status', 'GET')
-							this.log('debug', `tally result ${result}`)
-							/*if (result?.data) {
-								if (firstRun) {
-									for (const key of Object.keys(result.data)) {
-										const varId = `HTTP${key}`
-										variableDefinitions.push({
-											name: `HTTP ${key}`,
-											variableId: varId,
-										})
-									}
-								}
-								for (const [key, value] of Object.entries(result.data)) {
-									variableValues[`HTTP${key}`] = String(value)
-								}
-							}*/
-						} catch (err) {
-							this.log('error', `Tally fetch failed: ${err}`)
-						} finally {
-							isRequestInProgress = false
-						}
-						// Get advanced image config
-						/*try {
-							isRequestInProgress = true
-							const result = await this.sendHTTPCommand<{ data: any }>(
-								'/cgi-bin/param.cgi?get_advance_image_conf',
-								'GET',
-							)
-							if (result?.data) {
-								if (firstRun) {
-									for (const key of Object.keys(result.data)) {
-										const varId = `HTTPimage_${key}`
-										variableDefinitions.push({
-											name: `HTTP image ${key}`,
-											variableId: varId,
-										})
-									}
-								}
-								for (const [key, value] of Object.entries(result.data)) {
-									variableValues[`HTTPimage_${key}`] = String(value)
-								}
+							const { tallyDefs, tallyValues } = await this.#pollTallyStatus(firstRun)
+							const { imageDefs, imageValues } = await this.#pollImageConfig(firstRun)
+							if (firstRun) {
+								this.setVariableDefinitions([...variableDefinitions, ...tallyDefs, ...imageDefs])
+								firstRun = false
 							}
+							this.setVariableValues({
+								...variableValues,
+								...tallyValues,
+								...imageValues,
+							})
 						} catch (err) {
-							this.log('error', `Image fetch failed: ${err}`)
+							this.log('error', `Tally or image fetch failed: ${err}`)
 						} finally {
 							isRequestInProgress = false
-						}*/
-						if (firstRun) {
-							firstRun = false
-							this.setVariableDefinitions(variableDefinitions)
 						}
-						this.setVariableValues(variableValues)
 					})()
 				}, interval)
 			} else {
@@ -407,10 +322,227 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	#logConfig(config: PtzOpticsConfig, desc = 'logConfig()'): void {
 		this.log('info', `PTZOptics module configuration on ${desc}: ${repr(config)}`)
 	}
+
+	/**
+	 * Check if the HTTP credentials are set.
+	 *
+	 * @param username
+	 *    The HTTP username.
+	 * @param password
+	 *    The HTTP password.
+	 * @returns
+	 *    True if both username and password are set, false otherwise.
+	 */
+	#hasHttpCredentials(username: string | null, password: string | null): boolean {
+		return typeof username === 'string' && username.length > 0 && typeof password === 'string' && password.length > 0
+	}
+
+	/**
+	 * Fetch the device configuration from the camera.
+	 * This method sends an HTTP GET request to the
+	 * /cgi-bin/param.cgi?get_device_conf endpoint
+	 * and retrieves the device configuration.
+	 * It populates the provided variable definitions
+	 * and values with the device configuration data.
+	 * It also extracts the device model and version
+	 * from the response data.
+	 *
+	 * @param variableDefinitions
+	 *    The variable definitions to be populated with the device configuration.
+	 * @param variableValues
+	 *    The variable values to be populated with the device configuration.
+	 * @returns
+	 *    An object containing the updated variable definitions and values,
+	 *    along with the model and device version.
+	 */
+	async #fetchDeviceConfig(
+		variableDefinitions: { variableId: string; name: string }[],
+		variableValues: Record<string, string | number | boolean>,
+	): Promise<{
+		variableDefinitions: typeof variableDefinitions
+		variableValues: typeof variableValues
+		model: string
+		devVersion: string
+	}> {
+		const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_device_conf', 'GET')
+		if (this.debugLogging) this.log('debug', `Device config: ${repr(result)}`)
+		let model = ''
+		let devVersion = ''
+		if (
+			result !== undefined &&
+			result !== null &&
+			typeof result === 'object' &&
+			'data' in result &&
+			result.data !== undefined &&
+			result.data !== null
+		) {
+			variableDefinitions = [
+				{ name: 'HTTP Device Name', variableId: 'httpDevname' },
+				{ name: 'HTTP Device Version', variableId: 'httpDevVersion' },
+				{ name: 'HTTP Serial Number', variableId: 'httpSerialNum' },
+				{ name: 'HTTP Device Model', variableId: 'httpDeviceModel' },
+			]
+			result.data.device_model = result.data.device_model.trim()
+			model = result.data.device_model
+			devVersion = result.data.versioninfo
+			variableValues = {
+				httpDevname: result.data.devname,
+				httpDevVersion: devVersion,
+				httpSerialNum: result.data.serial_num,
+				httpDeviceModel: result.data.device_model,
+			}
+		}
+		return { variableDefinitions, variableValues, model, devVersion }
+	}
+
+	/**
+	 * Check the firmware version of the camera and update the variable definitions
+	 * and values accordingly.
+	 * This method fetches the firmware information from the
+	 * https://firmware.ptzoptics.com/{model}/RVU.json endpoint,
+	 * parses the response, and updates the variable definitions
+	 * and values with the current firmware version.
+	 * If the firmware version is different from the current device version,
+	 * it logs a warning and updates the `httpDevUpdateable` variable
+	 * with the new version.
+	 * If the firmware is up to date, it logs an info message
+	 * and sets `httpDevUpdateable` to 0.
+	 *
+	 * @param model
+	 *    The model of the camera.
+	 * @param devVersion
+	 *    The current device version.
+	 * @param variableDefinitions
+	 *    The variable definitions to be updated.
+	 * @param variableValues
+	 *    The variable values to be updated.
+	 */
+	async #checkFirmwareVersion(
+		model: string,
+		devVersion: string,
+		variableDefinitions: { variableId: string; name: string }[],
+		variableValues: Record<string, string | number | boolean>,
+	): Promise<void> {
+		const digestClient2 = new DigestClient('', '')
+		const result = await digestClient2.fetch(`https://firmware.ptzoptics.com/${model}/RVU.json`, {
+			method: 'GET',
+			headers: {
+				'User-Agent': 'Mozilla/5.0',
+				Accept: 'application/json',
+			},
+		})
+		if (this.debugLogging) this.log('debug', `Firmware check: GET https://firmware.ptzoptics.com/${model}/RVU.json`)
+		if (result !== null && result !== undefined && typeof result.ok === 'boolean' && result.ok === false) {
+			throw new Error(`HTTP ${result.status}`)
+		}
+		const text = await result.text()
+		if (this.debugLogging) this.log('debug', `Firmware check: ${repr(text)}`)
+		let parsed: any
+		if (text === '') {
+			this.log('info', 'No firmware information available (empty response).')
+			return
+		} else {
+			try {
+				if (this.debugLogging) console.log(`Parsing firmware check response as JSON`)
+				parsed = JSON.parse(text)
+			} catch {
+				//throw new Error(`Unexpected content type, could not parse JSON.`)
+				this.log('info', 'No firmware information available (invalid JSON).')
+				return
+			}
+		}
+		const devVersionShort = devVersion.split(' v')[1] || ''
+		variableDefinitions.push({ name: 'HTTP Device Updateable', variableId: 'httpDevUpdateable' })
+		if (parsed.data.soc_version !== devVersionShort) {
+			this.log(
+				'warn',
+				`Firmware update from ${devVersionShort} to ${parsed.data.soc_version} available. Changelog: https://firmware.ptzoptics.com/${model}/${parsed.data.log_name}`,
+			)
+			variableValues.httpDevUpdateable = parsed.data.soc_version
+		} else {
+			this.log('info', `Firmware is up to date: ${devVersionShort}`)
+			variableValues.httpDevUpdateable = 0
+		}
+	}
+	/**
+	 * Poll the tally status from the camera.
+	 * This method populates the provided tally definitions and values
+	 * with the tally status data.
+	 *
+	 * @param firstRun
+	 *    Indicates if this is the first run of the polling.
+	 * @returns
+	 *    An object containing the tally definitions and values.
+	 */
+	async #pollTallyStatus(
+		firstRun: boolean,
+	): Promise<{ tallyDefs: { variableId: string; name: string }[]; tallyValues: Record<string, string> }> {
+		const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_tally_status', 'GET')
+		let tallyDefs: { variableId: string; name: string }[] = []
+		const tallyValues: Record<string, string> = {}
+		if (
+			result !== undefined &&
+			result !== null &&
+			typeof result === 'object' &&
+			'data' in result &&
+			result.data !== undefined &&
+			result.data !== null
+		) {
+			if (firstRun) {
+				tallyDefs = Object.keys(result.data).map((key) => ({
+					name: `HTTP ${key}`,
+					variableId: `HTTP${key}`,
+				}))
+			}
+			for (const [key, value] of Object.entries(result.data)) {
+				tallyValues[`HTTP${key}`] = String(value)
+			}
+		}
+		return { tallyDefs, tallyValues }
+	}
+	/**
+	 * Poll the advancedimage configuration from the camera.
+	 * This method fetches the advanced image configuration from the camera
+	 * and updates the variable definitions and values accordingly.
+	 *
+	 * @param firstRun
+	 *    Indicates if this is the first run of the polling.
+	 * @returns
+	 *   An object containing the image definitions and values.
+	 */
+	async #pollImageConfig(
+		firstRun: boolean,
+	): Promise<{ imageDefs: { variableId: string; name: string }[]; imageValues: Record<string, string> }> {
+		const result = await this.sendHTTPCommand<{ data: any }>('/cgi-bin/param.cgi?get_advance_image_conf', 'GET')
+		let imageDefs: { variableId: string; name: string }[] = []
+		const imageValues: Record<string, string> = {}
+		if (
+			result !== undefined &&
+			result !== null &&
+			typeof result === 'object' &&
+			'data' in result &&
+			result.data !== undefined &&
+			result.data !== null
+		) {
+			if (firstRun) {
+				imageDefs = Object.keys(result.data).map((key) => ({
+					name: `HTTP image ${key}`,
+					variableId: `HTTPimage_${key}`,
+				}))
+			}
+			for (const [key, value] of Object.entries(result.data)) {
+				imageValues[`HTTPimage_${key}`] = String(value)
+			}
+		}
+		return { imageDefs, imageValues }
+	}
 }
 /**
  * Parses key="value" attribute strings from input text into an object.
  * Example input: foo="bar" baz="qux"
+ * Returns: { foo: "bar", baz: "qux" }
+ * @param input - The input string containing key="value" pairs.
+ * @return An object mapping keys to their corresponding values.
  */
 function parseAttributeString(input: string): Record<string, string> {
 	const result: Record<string, string> = {}

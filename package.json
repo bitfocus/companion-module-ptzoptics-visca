@@ -36,8 +36,7 @@
 	},
 	"dependencies": {
 		"@companion-module/base": "~1.10.0",
-		"undici": "^7.10.0",
-		"undici-digest-interceptor": "^1.0.0"
+		"digest-fetch": "^3.1.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "~2.0.4",
@@ -54,5 +53,5 @@
 		"typescript-eslint": "~8.26.1",
 		"vitest": "^3.1.2"
 	},
-	"packageManager": "yarn@4.9.1"
+	"packageManager": "yarn@4.9.2"
 }
