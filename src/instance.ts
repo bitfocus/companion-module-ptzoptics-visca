@@ -136,7 +136,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		}
 
 		const text = await response.text()
-		const rawContentType = response.headers.get('content-type') // handle possible array in content-type
+		const rawContentType = response.headers.get('content-type') as string | string[] | null // handle possible array in content-type
 		let contentType = ''
 		// If the content-type header is not set, assume JSON
 		if (typeof rawContentType === 'string') {
