@@ -1,6 +1,6 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "3.5.0",
+	"version": "3.6.1",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
@@ -46,7 +46,6 @@
 		"husky": "^9.1.7",
 		"knip": "^5.50.5",
 		"lint-staged": "^15.5.1",
-		"node-fetch": "^3.3.2",
 		"prettier": "^3.5.3",
 		"rimraf": "^6.0.1",
 		"type-testing": "^0.2.0",
@@ -54,5 +53,5 @@
 		"typescript-eslint": "~8.26.1",
 		"vitest": "^3.1.2"
 	},
-	"packageManager": "yarn@4.9.2"
+	"packageManager": "yarn@4.9.3"
 }

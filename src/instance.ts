@@ -114,7 +114,8 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 				algorithm: 'SHA-256',
 				headers: {
 					'User-Agent': 'Mozilla/5.0',
-					Accept: 'application/json',
+					Accept: '*/*',
+					'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
 				},
 			})
 		}
@@ -122,7 +123,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 		const fetchPromise = this.#digestClient.fetch(url, {
 			method,
-			body: method === 'POST' ? '' : undefined,
+			body: method === 'POST' ? 'cururl=http://' : undefined,
 			data: '',
 		})
 		const timeoutPromise = new Promise<never>(
@@ -132,7 +133,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		const response = await Promise.race([fetchPromise, timeoutPromise])
 
 		if (response !== null && response !== undefined && typeof response.ok === 'boolean' && response.ok === false) {
-			throw new Error(`HTTP ${response.status}`)
+			throw new Error(`ERROR: ${JSON.stringify(response)}`)
 		}
 
 		const text = await response.text()
