@@ -117,6 +117,7 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 					Accept: '*/*',
 					'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
 				},
+				logger: this.debugLogging ? console : undefined,
 			})
 		}
 		const url = `http://${this.#options.host}${path}`
@@ -131,12 +132,15 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 		)
 
 		const response = await Promise.race([fetchPromise, timeoutPromise])
+		const text = await response.text()
+		console.log(`Response:`)
+		console.log(`Header: ${JSON.stringify([...response.headers])}`)
+		console.log(`Body: ${text}`)
 
 		if (response !== null && response !== undefined && typeof response.ok === 'boolean' && response.ok === false) {
-			throw new Error(`ERROR: ${JSON.stringify(response)}`)
+			throw new Error(`ERROR: HTTP status ${response.status}`) // include body in error message for debugging
 		}
 
-		const text = await response.text()
 		const rawContentType = response.headers.get('content-type') as string | string[] | null // handle possible array in content-type
 		let contentType = ''
 		// If the content-type header is not set, assume JSON
