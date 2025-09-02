@@ -1,4 +1,5 @@
 import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
+import fetch from 'node-fetch'
 import DigestClient from 'digest-fetch'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
@@ -100,6 +101,28 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	}
 
 	/**
+	 * Detect the digest authentication algorithm used by the camera.
+	 * @param host The hostname or IP address of the camera.
+	 * @returns The name of the digest authentication algorithm.
+	 */
+	async detectDigestAlgorithm(host: string | null): Promise<string> {
+		if (typeof host !== 'string' || host.length === 0) {
+			throw new Error('No valid host configured')
+		}
+		// /cgi-bin/param.cgi?get_device_conf is the same for G2 and G3 cameras
+		if (this.debugLogging) this.log('debug', `Fetching device configuration URL to detect digest algorithm`)
+		const res = await fetch(`http://${host}/cgi-bin/param.cgi?get_device_conf`)
+		const wwwAuth = res.headers.get('www-authenticate')
+		if (wwwAuth === null || wwwAuth.trim() === '') {
+			throw new Error('No WWW-Authenticate header from server')
+		}
+
+		const match = /algorithm="?([A-Za-z0-9-]+)"?/.exec(wwwAuth)
+		if (this.debugLogging) this.log('debug', `Detected digest algorithm: ${match}`)
+		return match ? match[1] : 'MD5' // default fallback
+	}
+
+	/**
 	 * Send HTTP/CGI command to the camera.
 	 */
 	#digestClient: DigestClient | null = null
@@ -107,11 +130,13 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 	async sendHTTPCommand<T = any>(path: string, method: 'GET' | 'POST'): Promise<T> {
 		if (this.debugLogging) this.log('debug', `sendHTTPCommand: ${method} ${path}`)
 		if (!this.#digestClient) {
+			// get required algorithm
+			const algorithm = await this.detectDigestAlgorithm(this.#options.host)
 			if (this.debugLogging) this.log('debug', `Creating new DigestClient for HTTP commands`)
 			const username = this.#options.httpUsername
 			const password = this.#options.httpPassword
 			this.#digestClient = new DigestClient(username, password, {
-				algorithm: 'SHA-256',
+				algorithm,
 				headers: {
 					'User-Agent': 'Mozilla/5.0',
 					Accept: '*/*',

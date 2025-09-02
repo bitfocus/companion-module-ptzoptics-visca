@@ -1,6 +1,6 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "3.6.2",
+	"version": "3.6.3",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
@@ -36,7 +36,8 @@
 	},
 	"dependencies": {
 		"@companion-module/base": "~1.10.0",
-		"digest-fetch": "^3.1.1"
+		"digest-fetch": "^3.1.1",
+		"node-fetch": "^3.3.2"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "~2.0.4",
@@ -46,7 +47,6 @@
 		"husky": "^9.1.7",
 		"knip": "^5.50.5",
 		"lint-staged": "^15.5.1",
-		"node-fetch": "^3.3.2",
 		"prettier": "^3.5.3",
 		"rimraf": "^6.0.1",
 		"type-testing": "^0.2.0",

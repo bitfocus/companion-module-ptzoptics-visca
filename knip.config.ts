@@ -7,7 +7,6 @@ const config: KnipConfig = {
 		// This is used by n/* lint rules which Knip doesn't seem to be smart
 		// enough to detect as being used and therefore requiring the plugin.
 		'eslint-plugin-n',
-		'node-fetch',
 	],
 }
 
