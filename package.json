@@ -1,6 +1,6 @@
 {
 	"name": "ptzoptics-visca",
-	"version": "3.6.3",
+	"version": "3.7.0",
 	"type": "module",
 	"main": "dist/main.js",
 	"scripts": {
