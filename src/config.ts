@@ -38,8 +38,7 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			id: 'info',
 			width: 12,
 			label: 'Information',
-			value:
-				'This module controls PTZ cameras using VISCA over TCP/IP. (Some additional functions are performed over password-protected HTTP.)',
+			value: 'This module controls PTZ cameras using VISCA over TCP/IP.',
 		},
 		{
 			type: 'textinput',
@@ -60,14 +59,11 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			required: true,
 		},
 		{
-			type: 'number',
-			id: 'httpPollInterval',
-			label: 'HTTP Status poll interval (ms, 0 = disabled)',
-			width: 6,
-			default: 0,
-			min: 0,
-			max: 60000,
-			step: 100,
+			type: 'static-text',
+			id: 'info',
+			width: 12,
+			label: 'HTTP Login (optional)',
+			value: 'Optionally enter your camera login information to access basic variables and use HTTP actions:',
 		},
 		{
 			type: 'textinput',
@@ -84,11 +80,28 @@ export function getConfigFields(): SomeCompanionConfigField[] {
 			default: '',
 		},
 		{
+			type: 'static-text',
+			id: 'info',
+			width: 12,
+			label: '',
+			value: 'Optionally enable polling for extended and updated variables and feedbacks:',
+		},
+		{
+			type: 'number',
+			id: 'httpPollInterval',
+			label: 'HTTP Status poll interval (ms, 0 = disabled)',
+			width: 12,
+			default: 0,
+			min: 0,
+			max: 60000,
+			step: 100,
+		},
+		{
 			type: 'checkbox',
 			id: DebugLoggingOptionId,
 			label: 'Log extra info during connection operations, for debugging purposes',
 			default: false,
-			width: 6,
+			width: 12,
 		},
 	]
 }

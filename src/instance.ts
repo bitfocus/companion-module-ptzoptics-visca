@@ -1,5 +1,5 @@
 import { InstanceBase, InstanceStatus, type SomeCompanionConfigField } from '@companion-module/base'
-import fetch from 'node-fetch'
+import fetch, { type Response } from 'node-fetch'
 import DigestClient from 'digest-fetch'
 import { getActions } from './actions/actions.js'
 import { getConfigFields, type PtzOpticsConfig } from './config.js'
@@ -110,8 +110,21 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 			throw new Error('No valid host configured')
 		}
 		// /cgi-bin/param.cgi?get_device_conf is the same for G2 and G3 cameras
-		if (this.debugLogging) this.log('debug', `Fetching device configuration URL to detect digest algorithm`)
-		const res = await fetch(`http://${host}/cgi-bin/param.cgi?get_device_conf`)
+		const url = `http://${host}/cgi-bin/param.cgi?get_device_conf`
+		if (this.debugLogging) this.log('debug', `Fetching ${url} to detect digest algorithm`)
+
+		const fetchPromise = fetch(url, { method: 'GET' })
+		const timeoutPromise = new Promise<never>(
+			(_, reject) => setTimeout(() => reject(new Error('Request timed out')), 1000), // 1s timeout
+		)
+		let res: Response | null = null
+		try {
+			// res = await fetch(url, { method: 'GET' })
+			res = await Promise.race([fetchPromise, timeoutPromise])
+		} catch (error) {
+			this.log('error', `Error fetching digest algorithm: ${error}`)
+			throw new Error('Failed to fetch digest algorithm')
+		}
 		const wwwAuth = res.headers.get('www-authenticate')
 		if (wwwAuth === null || wwwAuth.trim() === '') {
 			throw new Error('No WWW-Authenticate header from server')
@@ -158,9 +171,9 @@ export class PtzOpticsInstance extends InstanceBase<PtzOpticsConfig> {
 
 		const response = await Promise.race([fetchPromise, timeoutPromise])
 		const text = await response.text()
-		console.log(`Response:`)
-		console.log(`Header: ${JSON.stringify([...response.headers])}`)
-		console.log(`Body: ${text}`)
+		if (this.debugLogging) console.log(`Response:`)
+		if (this.debugLogging) console.log(`Header: ${JSON.stringify([...response.headers])}`)
+		if (this.debugLogging) console.log(`Body: ${text}`)
 
 		if (response !== null && response !== undefined && typeof response.ok === 'boolean' && response.ok === false) {
 			throw new Error(`ERROR: HTTP status ${response.status}`) // include body in error message for debugging
