@@ -10,7 +10,7 @@ import {
 	PanTiltAction,
 	PanTiltDirection,
 	PanTiltHome,
-  PanTiltReset,
+	PanTiltReset,
 	PanTiltPositionInquiry,
 	sendPanTiltCommand,
 } from '../camera/pan-tilt.js'
@@ -41,11 +41,11 @@ export enum PanTiltActionId {
 	MoveDownRight = 'downRight',
 	StopMoving = 'stop',
 	ResetToHome = 'home',
+	PanTiltReset = 'reset',
 	SetMovementSpeed = 'ptSpeedSet',
 	SpeedUpMovement = 'ptSpeedU',
 	SlowDownMovement = 'ptSpeedD',
 	AbsolutePosition = 'moveAbsolutePosition',
-  PanTiltReset = 'reset',
 }
 
 const PanTiltPosMin = 0x0000
