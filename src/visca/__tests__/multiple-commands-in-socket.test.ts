@@ -3,7 +3,7 @@ import { describe, test } from 'vitest'
 import { FocusLock } from '../../camera/focus.js'
 import { PanTiltHome } from '../../camera/pan-tilt.js'
 import { CameraPower } from '../../camera/power.js'
-import { ACK, CameraPowerBytes, Completion, FocusLockBytes, PanTiltHomeBytes } from './camera-interactions/bytes.js'
+import { ACK, CameraPowerBytes, Completion, FocusLockBytes, PanTiltHomeBytes, PanTiltResetBytes } from './camera-interactions/bytes.js'
 import {
 	CameraExpectIncomingBytes,
 	CameraReplyBytes,
@@ -23,6 +23,7 @@ describe('multiple ACKs in same socket', () => {
 				CameraReplyBytes(ACK(1)), // camera-power
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
 				CameraExpectIncomingBytes(PanTiltHomeBytes), // ptz-home
+				CameraExpectIncomingBytes(PanTiltResetBytes), // ptz-reset
 				CameraReplyBytes(ACK(2)), // focus-lock
 				CameraReplyBytes(ACK(1)), // ptz-home
 				CameraReplyBytes(Completion(1)), // camera-power
@@ -31,6 +32,8 @@ describe('multiple ACKs in same socket', () => {
 				CommandSucceeded('focus-lock'),
 				CameraReplyBytes(Completion(1)), // ptz-home
 				CommandSucceeded('ptz-home'),
+				CameraReplyBytes(Completion(1)), // ptz-reset
+				CommandSucceeded('ptz-reset'),
 			],
 			InstanceStatus.Ok,
 		)
@@ -46,12 +49,15 @@ describe('multiple ACKs in same socket', () => {
 				CameraReplyBytes(ACK(1)), // camera-power
 				CameraExpectIncomingBytes(FocusLockBytes), // focus-lock
 				CameraExpectIncomingBytes(PanTiltHomeBytes), // ptz-home
+				CameraExpectIncomingBytes(PanTiltResetBytes), // ptz-reset
 				CameraReplyBytes(ACK(2)), // focus-lock
 				CameraReplyBytes(ACK(1)), // ptz-home
 				CameraReplyBytes(Completion(1)), // camera-power
 				CommandSucceeded('camera-power'),
 				CameraReplyBytes(Completion(1)), // ptz-home (out of order!)
 				CommandSucceeded('ptz-home'),
+				CameraReplyBytes(Completion(1)), // ptz-reset (out of order!)
+				CommandSucceeded('ptz-reset'),
 				CameraReplyBytes(Completion(2)), // focus-lock
 				CommandSucceeded('focus-lock'),
 			],
