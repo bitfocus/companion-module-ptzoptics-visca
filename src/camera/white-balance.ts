@@ -1,5 +1,6 @@
 import { assertNever } from '@companion-module/base'
 import { ModuleDefinedCommand } from '../visca/command.js'
+import type { Equal, Expect } from 'type-testing'
 
 export type WhiteBalanceMode = 'automatic' | 'indoor' | 'outdoor' | 'onepush' | 'manual'
 
@@ -10,7 +11,8 @@ export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x
 			switch (mode) {
 				// @ts-expect-error intentional fallthrough
 				default:
-					assertNever(mode) // automatic white balance is least risky
+					type assert_ExpectedModesHandled = Expect<Equal<typeof mode, never>>
+				// automatic white balance is least risky
 				// eslint-disable-next-line no-fallthrough
 				case 'automatic':
 					return 0x0

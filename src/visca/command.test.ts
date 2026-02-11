@@ -17,9 +17,9 @@ type ParametersForCommand<C extends Command<any>> =
 const _NoParameters = new ModuleDefinedCommand([0x81, 0x01, 0x07, 0xff])
 
 // @ts-expect-error Perform a test that *must fail* to verify testing happens.
-type test_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
+type assert_VerifyThatExpectAndEqualWillErrorIfMisused = Expect<Equal<true, false>>
 
-type test_NoParameters_paramValues = Expect<
+type assert_NoParameters_paramValues = Expect<
 	Equal<
 		// param values for parameter-less comment are empty
 		ParametersForCommand<typeof _NoParameters>,
@@ -33,7 +33,7 @@ const _OneParameterNumeric = new ModuleDefinedCommand([0x81, 0x01, 0x02, 0x00, 0
 	},
 })
 
-type test_OneParameterNumeric_paramValues = Expect<
+type assert_OneParameterNumeric_paramValues = Expect<
 	Equal<
 		// param values for one numeric parameter
 		ParametersForCommand<typeof _OneParameterNumeric>,
@@ -50,7 +50,7 @@ const _OneParameterTyped = new ModuleDefinedCommand([0x81, 0x01, 0x02, 0x00, 0x0
 	},
 })
 
-type test_OneParameterTyped_paramValues = Expect<
+type assert_OneParameterTyped_paramValues = Expect<
 	Equal<
 		// param values for one numeric parameter
 		ParametersForCommand<typeof _OneParameterTyped>,
@@ -70,7 +70,7 @@ const _MixedParameters = new ModuleDefinedCommand([0x81, 0x01, 0x02, 0x00, 0x00,
 	},
 })
 
-type test_MixedParameters_paramValues = Expect<
+type assert_MixedParameters_paramValues = Expect<
 	Equal<
 		// param values for mixed parameters
 		ParametersForCommand<typeof _MixedParameters>,

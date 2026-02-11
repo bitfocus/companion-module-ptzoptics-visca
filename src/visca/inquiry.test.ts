@@ -10,7 +10,7 @@ const _InquiryNoParams = new ModuleDefinedInquiry([0x81, 0x12, 0x34, 0xff], {
 	params: {},
 })
 
-type test_NoParams_answer = Expect<
+type assert_NoParams_answer = Expect<
 	Equal<
 		// answer type with no parameters will be empty
 		keyof AnswerForInquiry<typeof _InquiryNoParams>,
@@ -38,7 +38,7 @@ const _InquiryOneTypedParam = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x38, 
 	},
 })
 
-type test_InquiryOneTypedParam_answer = Expect<
+type assert_InquiryOneTypedParam_answer = Expect<
 	Equal<
 		// answer type with one typed parameter
 		AnswerForInquiry<typeof _InquiryOneTypedParam>,
@@ -55,7 +55,7 @@ const _InquiryOneNumericParam = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x38
 	},
 })
 
-type test_InquiryOneNumericParam_answer = Expect<
+type assert_InquiryOneNumericParam_answer = Expect<
 	Equal<
 		// answer type with one parameter implicitly numeric
 		AnswerForInquiry<typeof _InquiryOneNumericParam>,
