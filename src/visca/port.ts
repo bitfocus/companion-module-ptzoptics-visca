@@ -246,16 +246,7 @@ class PendingInquiry<Parameters extends AnswerParameters> extends PendingMessage
  * The subset of the `PtzOpticsInstance` interface used by `VISCAPort` to log
  * messages and update instance connection status.
  */
-export interface PartialInstance {
-	/** See {@link PtzOpticsInstance.log}. */
-	log: PtzOpticsInstance['log']
-
-	/** See {@link PtzOpticsInstance.updateStatus}. */
-	updateStatus: PtzOpticsInstance['updateStatus']
-
-	/** See {@link PtzOpticsInstance.debugLogging}. */
-	readonly debugLogging: boolean
-}
+export type PartialInstance = Pick<PtzOpticsInstance, 'log' | 'updateStatus' | 'debugLogging'>
 
 /**
  * Check whether the bytes of VISCA return message `returnMessage`, when masked,
