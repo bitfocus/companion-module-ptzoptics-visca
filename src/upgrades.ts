@@ -20,11 +20,11 @@ function ActionUpdater(
 	}
 }
 
-function ConfigUpdater(tryUpdate: (config: RawConfig | null) => boolean): CompanionStaticUpgradeScript<RawConfig> {
+function ConfigUpdater(tryUpdate: (config: RawConfig) => boolean): CompanionStaticUpgradeScript<RawConfig> {
 	return (_context: CompanionUpgradeContext<RawConfig>, props: CompanionStaticUpgradeProps<RawConfig>) => {
 		return {
 			updatedActions: [],
-			updatedConfig: tryUpdate(props.config) ? props.config : null,
+			updatedConfig: props.config !== null && tryUpdate(props.config) ? props.config : null,
 			updatedFeedbacks: [],
 		}
 	}
@@ -35,4 +35,4 @@ export const UpgradeScripts = [
 	ConfigUpdater(tryUpdateConfigWithDebugLogging),
 	ActionUpdater(tryUpdateRecallSetPresetActions),
 	ActionUpdater(tryUpdatePresetAndSpeedEncodingsInActions),
-]
+] satisfies CompanionStaticUpgradeScript<RawConfig>[]

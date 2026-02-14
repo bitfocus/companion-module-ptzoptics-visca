@@ -22,8 +22,8 @@ export const DebugLoggingOptionId = 'debugLogging'
  * logs, to make it easier to debug the module in case of error.  Add a default
  * value for that option to older configs.
  */
-export function tryUpdateConfigWithDebugLogging(config: RawConfig | null): boolean {
-	if (config !== null && !(DebugLoggingOptionId in config)) {
+export function tryUpdateConfigWithDebugLogging(config: RawConfig): boolean {
+	if (!(DebugLoggingOptionId in config)) {
 		config[DebugLoggingOptionId] = false
 		return true
 	}
