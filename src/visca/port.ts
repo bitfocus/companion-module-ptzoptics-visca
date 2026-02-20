@@ -6,7 +6,6 @@ import type { Answer, AnswerMessage, AnswerParameters, Inquiry } from './inquiry
 import type { Host } from '../config.js'
 import type { Bytes } from '../utils/byte.js'
 import { prettyBytes } from '../utils/pretty.js'
-import { promiseWithResolvers } from '../utils/promise-with-resolvers.js'
 
 const BLAME_MODULE =
 	'This is likely a bug in the ptzoptics-visca Companion module.  Please ' +
@@ -523,7 +522,7 @@ export class VISCAPort {
 			promise: connectionOpenedPromise,
 			resolve: connectionResolve,
 			reject: connectionReject,
-		} = promiseWithResolvers<void>()
+		} = Promise.withResolvers<void>()
 
 		socket.once('connect', () => {
 			const connectionStatus = this.#connectionStatus.type
