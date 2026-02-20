@@ -1,8 +1,12 @@
-import type { CompanionActionContext } from '@companion-module/base'
+import type { CompanionActionContext, CompanionVariableValue } from '@companion-module/base'
 import { repr } from '../utils/repr.js'
 
 export class MockContext implements CompanionActionContext {
 	#variables = new Map<string, string>()
+
+	setCustomVariableValue(_variableName: string, _value: CompanionVariableValue): void {
+		// not used so not meaningfully implemented
+	}
 
 	setVariable(variable: string, value: string): void {
 		this.#variables.set(variable, value)

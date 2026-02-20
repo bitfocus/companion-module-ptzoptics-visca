@@ -24,29 +24,17 @@ function parseMessage(msg: string): Bytes {
 	return command
 }
 
-/**
- * The isVisible callback for inputs that correspond to parameters in the
- * command.
- */
-function commandParameterInputIsVisible(options: CompanionOptionValues, i: number): boolean {
-	const commandParams = String(options['command_parameters'])
-	if (commandParams === '') {
-		return false
-	}
-
-	// This must be a local, uninherited, duplicated constant because
-	// isVisible functions are converted to and from string.
-	const PARAMETERS_SPLITTER = /; ?/g
-
-	const commandParamCount = commandParams.split(PARAMETERS_SPLITTER).length
-	return i < commandParamCount
-}
-
 // Pan Tilt:Pan Tilt Drive:RelativePosition has 4 parameters.
 // 81 01 06 03 vv ww 0y 0y 0y 0y 0z 0z 0z 0z FF
 const MAX_PARAMETERS_IN_COMMAND = 4
 
 const CommandParameterDefault = ''
+
+const CommandParametersOptionId = 'command_parameters'
+const CommandParametersDefault = ''
+
+const PARAMETERS_SEPARATOR = ';'
+const PARAMETERS_SPLITTER = new RegExp(`${PARAMETERS_SEPARATOR} ?`, 'g')
 
 /**
  * Generate text inputs corresponding to values to set in parameters of the
@@ -61,14 +49,15 @@ function generateInputsForCommandParameters(): CompanionInputFieldTextInput[] {
 			label: `Command parameter #${i + 1}`,
 			default: CommandParameterDefault,
 			useVariables: true,
-			isVisibleData: i,
-			isVisible: commandParameterInputIsVisible,
+			isVisibleExpression: `
+commandParams = \`\${$(options:${CommandParametersOptionId})}\`;
+(commandParams !== "") && (${i} < length(split(commandParams, "${PARAMETERS_SEPARATOR}")))
+`,
 		})
 	}
 	return inputs
 }
 
-const PARAMETERS_SPLITTER = /; ?/g
 const NIBBLES_SPLITTER = /, ?/g
 
 /**
@@ -118,9 +107,6 @@ function parseParameters(command: readonly number[], parametersString: string): 
 }
 
 const CustomCommandOptionId = 'custom'
-
-const CommandParametersOptionId = 'command_parameters'
-const CommandParametersDefault = ''
 
 /**
  * At one time, the "Custom command" action took only a single option with id

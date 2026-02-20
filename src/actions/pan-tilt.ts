@@ -59,20 +59,6 @@ const speedMinMax = (type: PanOrTilt): [number, number] => (type === 'pan' ? [0x
 
 const speed = (type: PanOrTilt) => `${type}Speed`
 
-function AsNumberIsVisible(options: CompanionOptionValues, type: PanOrTilt): boolean {
-	// Don't use `posIsText` because this function can't depend on
-	// enclosing-scope names.
-	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !options[`${type}PosIsText`]
-}
-
-function AsTextIsVisible(options: CompanionOptionValues, type: PanOrTilt): boolean {
-	// Don't use `posIsText` because this function can't depend on
-	// enclosing-scope names.
-	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !!options[`${type}PosIsText`]
-}
-
 async function getPosition(
 	options: CompanionOptionValues,
 	type: 'pan' | 'tilt',
@@ -130,8 +116,7 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 				default: PanTiltPosMin,
 				min: PanTiltPosMin,
 				max: PanTiltPosMax,
-				isVisible: AsNumberIsVisible,
-				isVisibleData: type,
+				isVisibleExpression: `!$(options:${posIsText(type)})`,
 			},
 			{
 				type: 'textinput',
@@ -140,8 +125,7 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 				tooltip: positionTooltip,
 				useVariables: { local: true },
 				default: `${PanTiltPosMin}`,
-				isVisible: AsTextIsVisible,
-				isVisibleData: type,
+				isVisibleExpression: `!!$(options:${posIsText(type)})`,
 			},
 		]
 	}

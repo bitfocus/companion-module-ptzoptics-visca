@@ -35,7 +35,7 @@
 		"node": "^18.12"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.10.0"
+		"@companion-module/base": "~1.12.1"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.6.1",

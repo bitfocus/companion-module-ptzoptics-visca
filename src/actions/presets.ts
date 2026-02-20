@@ -166,9 +166,6 @@ const ObsoleteSpeedPsetId = 'speedPset'
  * The id of the option checkbox for preset recall/save actions that determines
  * whether the number dropdown determines the desired preset, or the text field
  * (parsed supporting variables) determines the desired preset.
- *
- * This value must be kept in sync with `OptionWithoutVariablesIsVisible` and
- * `OptionWithVariablesIsVisible`.
  */
 export const PresetIsTextId = 'isText'
 
@@ -270,38 +267,6 @@ export function tryUpdatePresetAndSpeedEncodingsInActions(action: CompanionMigra
 }
 
 /**
- * An `isVisible` function used with preset recall/save action options that
- * apply when the user has chosen to specify the preset using text input.
- *
- * @param options
- *   The options specified by the user for the action.
- * @returns
- *   Whether `options` specifies to use the variable-supporting text input.
- */
-function OptionPresetAsTextIsVisible(options: CompanionOptionValues): boolean {
-	// Don't use `PresetIsTextId` because this function can't depend on
-	// enclosing-scope names.
-	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !!options.isText
-}
-
-/**
- * An `isVisible` function used with preset recall/save action options that
- * apply when the user has chosen to specify the preset by number.
- *
- * @param options
- *   The options specified by the user for the action.
- * @returns
- *   Whether `options` specifies not to use the variable-supporting text input.
- */
-function OptionPresetAsNumberIsVisible(options: CompanionOptionValues): boolean {
-	// Don't use `PresetIsTextId` because this function can't depend on
-	// enclosing-scope names.
-	// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-	return !options.isText
-}
-
-/**
  * Given options for an action with a preset option that supports variables,
  * compute the desired preset.
  *
@@ -372,7 +337,7 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				choices: PRESET_CHOICES,
 				minChoicesForSearch: 1,
 				default: defaultPreset,
-				isVisible: OptionPresetAsNumberIsVisible,
+				isVisibleExpression: `!$(options:${PresetIsTextId})`,
 			},
 			{
 				type: 'textinput',
@@ -381,7 +346,7 @@ export function presetActions(instance: PtzOpticsInstance): ActionDefinitions<Pr
 				useVariables: true,
 				tooltip: 'Preset number range of 0-89, 100-254',
 				default: `${defaultPreset}`,
-				isVisible: OptionPresetAsTextIsVisible,
+				isVisibleExpression: `!!$(options:${PresetIsTextId})`,
 			},
 		]
 	}
