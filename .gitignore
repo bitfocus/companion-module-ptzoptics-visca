@@ -1,7 +1,7 @@
 node_modules/
 /pkg
 /pkg.tgz
-/companion-module-ptzoptics-visca.tar.gz
+/ptzoptics-visca-*.tgz
 /dist
 DEBUG-PACKAGED
 /.yarn
