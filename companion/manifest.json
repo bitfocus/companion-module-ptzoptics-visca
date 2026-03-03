@@ -1,4 +1,5 @@
 {
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
 	"id": "ptzoptics-visca",
 	"name": "PTZOptics Visca",
 	"shortname": "visca",
