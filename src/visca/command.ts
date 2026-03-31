@@ -276,7 +276,7 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 	): Bytes {
 		const commandBytes = this.#bytes
 		const paramVals = paramValues[0]
-		if (paramVals === undefined) {
+		if (paramVals === undefined || this.#parameters === null) {
 			return commandBytes
 		}
 
@@ -286,12 +286,8 @@ export abstract class Command<CmdParameters extends CommandParameters> extends M
 		}
 
 		const commandParams = this.#parameters
-		if (commandParams === null) {
-			return commandBytes
-		}
-
 		const bytes = commandBytes.slice()
-		for (const [id, semantic] of Object.entries(paramVals)) {
+		for (const [id, semantic] of entries) {
 			const { nibbles, convert } = commandParams[id]
 
 			let numeric = convert ? convert(semantic) : semantic
