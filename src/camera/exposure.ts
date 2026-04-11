@@ -1,4 +1,4 @@
-import { assertNever } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 import { ModuleDefinedInquiry } from '../visca/inquiry.js'
 
@@ -50,9 +50,10 @@ export const ExposureMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x39, 0x
 					return 0xb
 				case 'bright-mode-manual':
 					return 0xd
-				default:
-					assertNever(mode)
+				default: {
+					type assert_ModeIsNever = Expect<IsNever<typeof mode>>
 					return 0x0
+				}
 			}
 		},
 	},
@@ -93,7 +94,8 @@ export const IrisSet = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x4b, 0x00, 0
 					return 0x0d
 				// @ts-expect-error intentional fallthrough
 				default:
-					assertNever(setting) // reset to default for a bad setting
+					type assert_SettingIsNever = Expect<IsNever<typeof setting>>
+				// reset to default for a bad setting
 				// eslint-disable-next-line no-fallthrough
 				case 'F4.0':
 					return 0x0c

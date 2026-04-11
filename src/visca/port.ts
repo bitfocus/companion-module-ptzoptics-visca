@@ -1,4 +1,5 @@
-import { assertNever, InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
+import { InstanceStatus, TCPHelper, type TCPHelperEvents } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './command.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { checkMessageBytes } from './message.js'
@@ -497,9 +498,10 @@ export class VISCAPort {
 					this.open(host, port)
 					break
 
-				default:
-					assertNever(connectionStatus)
+				default: {
+					type assert_ConnectionStatusIsNever = Expect<IsNever<typeof connectionStatus>>
 					break
+				}
 			}
 		}
 
@@ -546,11 +548,12 @@ export class VISCAPort {
 				case 'connected':
 					error = 'Received multiple connection events'
 					break
-				default:
-					assertNever(connectionStatus)
+				default: {
+					type assert_ConnectionStatusIsNever = Expect<IsNever<typeof connectionStatus>>
 					error = 'Logic error handling connection'
 					status = InstanceStatus.UnknownError
 					break
+				}
 			}
 			instance.log('error', error)
 			this.close(error, status)
@@ -601,8 +604,9 @@ export class VISCAPort {
 
 			case 'connected':
 				return
-			default:
-				assertNever(status)
+			default: {
+				type assert_StatusIsNever = Expect<IsNever<typeof status>>
+			}
 		}
 	}
 

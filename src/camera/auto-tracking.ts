@@ -1,4 +1,4 @@
-import { assertNever } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 
 export type AutoTrackingState = 'on' | 'off'
@@ -14,7 +14,8 @@ export const AutoTracking = new ModuleDefinedCommand([0x81, 0x0a, 0x11, 0x54, 0x
 					return 0x2
 				// @ts-expect-error intentional fallthrough
 				default:
-					assertNever(state) // turn off abrupt movements on bad state
+					type assert_StateIsNever = Expect<IsNever<typeof state>>
+				// turn off abrupt movements on bad state
 				// eslint-disable-next-line no-fallthrough
 				case 'off':
 					return 0x3

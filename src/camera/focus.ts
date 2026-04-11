@@ -1,4 +1,4 @@
-import { assertNever } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 import { ModuleDefinedInquiry } from '../visca/inquiry.js'
 
@@ -33,7 +33,8 @@ export const FocusMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x38, 0x00,
 			switch (mode) {
 				// @ts-expect-error intentional fallthrough
 				default:
-					assertNever(mode) // autofocus seems least risky
+					type assert_ModeIsNever = Expect<IsNever<typeof mode>>
+				// autofocus seems least risky
 				// eslint-disable-next-line no-fallthrough
 				case 'auto':
 					return 2

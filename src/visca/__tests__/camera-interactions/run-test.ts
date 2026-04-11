@@ -1,5 +1,6 @@
-import { assertNever, InstanceStatus, type LogLevel } from '@companion-module/base'
+import { InstanceStatus, type LogLevel } from '@companion-module/base'
 import net from 'net'
+import type { Expect, IsNever } from 'type-testing'
 import { isValidHost } from '../../../config.js'
 import type { Answer, AnswerParameters } from '../../inquiry.js'
 import { type ExpectedAnswer, type Interaction, type Match } from './interactions.js'
@@ -531,7 +532,7 @@ async function verifyInteractions(
 					break
 				}
 				default:
-					assertNever(type)
+					type assert_TypeIsNever = Expect<IsNever<typeof type>>
 					break
 			}
 		}

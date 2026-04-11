@@ -1,4 +1,4 @@
-import { assertNever } from '@companion-module/base'
+import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 import { ModuleDefinedInquiry } from '../visca/inquiry.js'
 
@@ -40,7 +40,7 @@ export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
 						return 0x23
 					// @ts-expect-error intentional fallthrough
 					default:
-						assertNever(direction)
+						type assert_DirectionIsNever = Expect<IsNever<typeof direction>>
 					// eslint-disable-next-line no-fallthrough
 					case 'down':
 						return 0x32
