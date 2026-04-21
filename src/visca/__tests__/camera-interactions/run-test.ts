@@ -1,5 +1,5 @@
 import { InstanceStatus, type LogLevel } from '@companion-module/base'
-import net from 'net'
+import net from 'node:net'
 import type { Expect, IsNever } from 'type-testing'
 import { isValidHost } from '../../../config.js'
 import type { Answer, AnswerParameters } from '../../inquiry.js'
