@@ -1,6 +1,6 @@
 import type { CompanionOptionValues } from '@companion-module/base'
 import { describe, expect, test } from 'vitest'
-import { optionConversions, optionNullConversions } from './option-conversion'
+import { optionConversions, optionNullConversions } from './option-conversion.js'
 
 describe('optionConversions', () => {
 	const OptId = 'foobar'
