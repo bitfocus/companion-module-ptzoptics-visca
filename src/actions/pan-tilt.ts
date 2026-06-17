@@ -10,6 +10,7 @@ import {
 	PanTiltAction,
 	PanTiltDirection,
 	PanTiltHome,
+	PanTiltReset,
 	PanTiltPositionInquiry,
 	sendPanTiltCommand,
 } from '../camera/pan-tilt.js'
@@ -40,6 +41,7 @@ export enum PanTiltActionId {
 	MoveDownRight = 'downRight',
 	StopMoving = 'stop',
 	ResetToHome = 'home',
+	PanTiltReset = 'reset',
 	SetMovementSpeed = 'ptSpeedSet',
 	SpeedUpMovement = 'ptSpeedU',
 	SlowDownMovement = 'ptSpeedD',
@@ -263,6 +265,13 @@ export function panTiltActions(instance: PtzOpticsInstance): ActionDefinitions<P
 			options: [],
 			callback: async (_event: CompanionActionEvent) => {
 				instance.sendCommand(PanTiltHome)
+			},
+		},
+		[PanTiltActionId.PanTiltReset]: {
+			name: 'P/T Reset',
+			options: [],
+			callback: async (_event: CompanionActionEvent) => {
+				instance.sendCommand(PanTiltReset)
 			},
 		},
 		[PanTiltActionId.SetMovementSpeed]: {
