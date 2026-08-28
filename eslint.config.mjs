@@ -110,6 +110,11 @@ const customConfig = [
 							importNames: ['combineRgb'],
 							message: 'Define a named constant in src/utils/colors.ts using `0xABCDEF`.',
 						},
+						{
+							name: 'type-testing',
+							importNames: ['Extends'],
+							message: "Use `Equals` from 'type-testing' instead.",
+						},
 					],
 				},
 			],
