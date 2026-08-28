@@ -1,127 +1,15 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
-import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from '../actions/osd.js'
 import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from '../actions/presets.js'
-import { IMAGE_UP, IMAGE_DOWN, IMAGE_LEFT, IMAGE_RIGHT } from '../assets/assets.js'
 import { autoTrackingPresets } from './auto-tracking.js'
 import { isValidPreset } from '../camera/presets.js'
 import { exposurePresets } from './exposure.js'
 import { lensPresets } from './lens.js'
+import { osdPresets } from './osd.js'
 import { panTiltPresets } from './pan-tilt.js'
 import { Black, White } from '../utils/colors.js'
 import { whiteBalancePresets } from './white-balance.js'
 
 export function getPresets(): CompanionPresetDefinitions {
-	const osdPresets: CompanionPresetDefinitions = {
-		osd_toggle: {
-			type: 'button',
-			category: 'OSD Menu',
-			name: 'OSD Menu',
-			style: {
-				text: 'OSD\\nOpen/Close',
-				size: 12,
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: OSDActionId.OSD,
-							options: {
-								[OnScreenDisplayMenuStateId]: 'toggle',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-	}
-
-	for (const [DIRECTION, IMAGE] of [
-		['up', IMAGE_UP],
-		['right', IMAGE_RIGHT],
-		['down', IMAGE_DOWN],
-		['left', IMAGE_LEFT],
-	]) {
-		osdPresets['osd_navigate_' + DIRECTION] = {
-			type: 'button',
-			category: 'OSD Menu',
-			name: 'OSD Navigate',
-			style: {
-				text: '',
-				png64: IMAGE,
-				pngalignment: 'center:center',
-				size: '18',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: OSDActionId.OSDNavigate,
-							options: {
-								[OSDNavigateDirectionId]: DIRECTION,
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		}
-	}
-
-	osdPresets['osd_enter'] = {
-		type: 'button',
-		category: 'OSD Menu',
-		name: 'OSD Enter',
-		style: {
-			text: 'OSD\\nEnter',
-			size: '18',
-			color: White,
-			bgcolor: Black,
-		},
-		steps: [
-			{
-				down: [
-					{
-						actionId: OSDActionId.OSDEnter,
-						options: {},
-					},
-				],
-				up: [],
-			},
-		],
-		feedbacks: [],
-	}
-
-	osdPresets['osd_back'] = {
-		type: 'button',
-		category: 'OSD Menu',
-		name: 'OSD Back',
-		style: {
-			text: 'OSD\\nBack',
-			size: '18',
-			color: White,
-			bgcolor: Black,
-		},
-		steps: [
-			{
-				down: [
-					{
-						actionId: OSDActionId.OSDBack,
-						options: {},
-					},
-				],
-				up: [],
-			},
-		],
-		feedbacks: [],
-	}
-
 	const presetPresets: CompanionPresetDefinitions = {}
 
 	// generates presets for saving camera presets
@@ -196,7 +84,7 @@ export function getPresets(): CompanionPresetDefinitions {
 		...exposurePresets(),
 		...whiteBalancePresets(),
 		...autoTrackingPresets(),
-		...osdPresets,
+		...osdPresets(),
 		...presetPresets,
 	}
 }
