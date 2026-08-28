@@ -16,15 +16,17 @@ import type { PtzOpticsInstance } from '../instance.js'
 import { optionConversions } from './option-conversion.js'
 import { twoDigitHex } from '../utils/two-digit-hex.js'
 
-export enum ExposureActionId {
-	SelectExposureMode = 'expM',
-	IrisUp = 'irisU',
-	IrisDown = 'irisD',
-	SetIris = 'irisS',
-	ShutterUp = 'shutU',
-	ShutterDown = 'shutD',
-	SetShutter = 'shutS',
-}
+export const ExposureActionId = {
+	SelectExposureMode: 'expM',
+	IrisUp: 'irisU',
+	IrisDown: 'irisD',
+	SetIris: 'irisS',
+	ShutterUp: 'shutU',
+	ShutterDown: 'shutD',
+	SetShutter: 'shutS',
+} as const
+
+export type ExposureActionId = (typeof ExposureActionId)[keyof typeof ExposureActionId]
 
 export const ExposureModeId = 'val'
 

@@ -3,9 +3,11 @@ import { AutoTracking, type AutoTrackingState } from '../camera/auto-tracking.js
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionNullConversions } from './option-conversion.js'
 
-export enum AutoTrackingActionId {
-	AutoTracking = 'autoTracking',
-}
+export const AutoTrackingActionId = {
+	AutoTracking: 'autoTracking',
+} as const
+
+export type AutoTrackingActionId = (typeof AutoTrackingActionId)[keyof typeof AutoTrackingActionId]
 
 export const TrackingId = 'tracking'
 

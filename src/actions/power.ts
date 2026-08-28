@@ -3,9 +3,11 @@ import type { PtzOpticsInstance } from '../instance.js'
 import { CameraPower, type CameraPowerState } from '../camera/power.js'
 import { optionConversions } from './option-conversion.js'
 
-export enum PowerActionId {
-	CameraPowerState = 'power',
-}
+export const PowerActionId = {
+	CameraPowerState: 'power',
+} as const
+
+export type PowerActionId = (typeof PowerActionId)[keyof typeof PowerActionId]
 
 const PowerStateId = 'bool'
 

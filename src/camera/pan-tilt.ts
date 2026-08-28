@@ -32,17 +32,19 @@ export const MoveToAbsolutePanTilt = new ModuleDefinedCommand(
 	},
 )
 
-export enum PanTiltAction {
-	Up,
-	Down,
-	Left,
-	Right,
-	UpLeft,
-	UpRight,
-	DownLeft,
-	DownRight,
-	Stop,
-}
+export const PanTiltAction = {
+	Up: 0,
+	Down: 1,
+	Left: 2,
+	Right: 3,
+	UpLeft: 4,
+	UpRight: 5,
+	DownLeft: 6,
+	DownRight: 7,
+	Stop: 8,
+} as const
+
+export type PanTiltAction = (typeof PanTiltAction)[keyof typeof PanTiltAction]
 
 export const PanTiltDirection: Record<PanTiltAction, readonly [number, number]> = {
 	[PanTiltAction.Up]: [0x03, 0x01],

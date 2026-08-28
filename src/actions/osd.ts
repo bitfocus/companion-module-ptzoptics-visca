@@ -13,12 +13,14 @@ import { OnScreenDisplayInquiry } from '../camera/osd.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionNullConversions } from './option-conversion.js'
 
-export enum OSDActionId {
-	OSD = 'onScreenDisplay',
-	OSDNavigate = 'onScreenDisplayNavigate',
-	OSDEnter = 'onScreenDisplayEnter',
-	OSDBack = 'onScreenDisplayBack',
-}
+export const OSDActionId = {
+	OSD: 'onScreenDisplay',
+	OSDNavigate: 'onScreenDisplayNavigate',
+	OSDEnter: 'onScreenDisplayEnter',
+	OSDBack: 'onScreenDisplayBack',
+} as const
+
+export type OSDActionId = (typeof OSDActionId)[keyof typeof OSDActionId]
 
 export const OnScreenDisplayMenuStateId = 'state'
 

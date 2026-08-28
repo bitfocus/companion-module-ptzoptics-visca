@@ -10,9 +10,11 @@ import type { Bytes } from '../utils/byte.js'
 import type { Mutable } from '../utils/mutable.js'
 import { type CommandParameters, type CommandParamValues, UserDefinedCommand } from '../visca/command.js'
 
-export enum CustomCommandActionId {
-	SendCustomCommand = 'custom',
-}
+export const CustomCommandActionId = {
+	SendCustomCommand: 'custom',
+} as const
+
+export type CustomCommandActionId = (typeof CustomCommandActionId)[keyof typeof CustomCommandActionId]
 
 /** Parse a VISCA message string into an array of byte values. */
 function parseMessage(msg: string): Bytes {
@@ -120,11 +122,7 @@ const CustomCommandOptionId = 'custom'
  */
 export function tryUpdateCustomCommandsWithCommandParamOptions(action: CompanionMigrationAction): boolean {
 	const { actionId, options } = action
-	if (
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-		actionId === CustomCommandActionId.SendCustomCommand &&
-		!(CommandParametersOptionId in options)
-	) {
+	if (actionId === CustomCommandActionId.SendCustomCommand && !(CommandParametersOptionId in options)) {
 		options[CommandParametersOptionId] = CommandParametersDefault
 		for (let i = 0; i < MAX_PARAMETERS_IN_COMMAND; i++) {
 			options[`parameter${i}`] = CommandParameterDefault

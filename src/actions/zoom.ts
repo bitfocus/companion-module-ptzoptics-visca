@@ -3,11 +3,13 @@ import type { ActionDefinitions } from './actionid.js'
 import { ZoomIn, ZoomOut, ZoomStop } from '../camera/zoom.js'
 import type { PtzOpticsInstance } from '../instance.js'
 
-export enum ZoomActionId {
-	StartZoomIn = 'zoomI',
-	StartZoomOut = 'zoomO',
-	StopZoom = 'zoomS',
-}
+export const ZoomActionId = {
+	StartZoomIn: 'zoomI',
+	StartZoomOut: 'zoomO',
+	StopZoom: 'zoomS',
+} as const
+
+export type ZoomActionId = (typeof ZoomActionId)[keyof typeof ZoomActionId]
 
 export function zoomActions(instance: PtzOpticsInstance): ActionDefinitions<ZoomActionId> {
 	return {

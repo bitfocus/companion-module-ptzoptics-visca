@@ -5,14 +5,16 @@ import { FocusModeInquiry } from '../camera/focus.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionConversions } from './option-conversion.js'
 
-export enum FocusActionId {
-	SelectFocusMode = 'focusM',
-	StartFocusNearer = 'focusN',
-	StartFocusFarther = 'focusF',
-	StopFocus = 'focusS',
-	LockFocus = 'focusL',
-	UnlockFocus = 'focusU',
-}
+export const FocusActionId = {
+	SelectFocusMode: 'focusM',
+	StartFocusNearer: 'focusN',
+	StartFocusFarther: 'focusF',
+	StopFocus: 'focusS',
+	LockFocus: 'focusL',
+	UnlockFocus: 'focusU',
+} as const
+
+export type FocusActionId = (typeof FocusActionId)[keyof typeof FocusActionId]
 
 export const FocusModeId = 'bol'
 

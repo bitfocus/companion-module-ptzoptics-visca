@@ -29,22 +29,24 @@ import { repr } from '../utils/repr.js'
  */
 export const ObsoletePtSpeedSId = 'ptSpeedS'
 
-export enum PanTiltActionId {
-	PanLeft = 'left',
-	PanRight = 'right',
-	TiltUp = 'up',
-	TiltDown = 'down',
-	MoveUpLeft = 'upLeft',
-	MoveUpRight = 'upRight',
-	MoveDownLeft = 'downLeft',
-	MoveDownRight = 'downRight',
-	StopMoving = 'stop',
-	ResetToHome = 'home',
-	SetMovementSpeed = 'ptSpeedSet',
-	SpeedUpMovement = 'ptSpeedU',
-	SlowDownMovement = 'ptSpeedD',
-	AbsolutePosition = 'moveAbsolutePosition',
-}
+export const PanTiltActionId = {
+	PanLeft: 'left',
+	PanRight: 'right',
+	TiltUp: 'up',
+	TiltDown: 'down',
+	MoveUpLeft: 'upLeft',
+	MoveUpRight: 'upRight',
+	MoveDownLeft: 'downLeft',
+	MoveDownRight: 'downRight',
+	StopMoving: 'stop',
+	ResetToHome: 'home',
+	SetMovementSpeed: 'ptSpeedSet',
+	SpeedUpMovement: 'ptSpeedU',
+	SlowDownMovement: 'ptSpeedD',
+	AbsolutePosition: 'moveAbsolutePosition',
+} as const
+
+export type PanTiltActionId = (typeof PanTiltActionId)[keyof typeof PanTiltActionId]
 
 const PanTiltPosMin = 0x0000
 const PanTiltPosMax = 0xffff

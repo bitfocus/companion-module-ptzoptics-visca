@@ -10,11 +10,13 @@ import {
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionConversions, optionNullConversions } from './option-conversion.js'
 
-export enum WhiteBalanceActionId {
-	SelectWhiteBalance = 'wb',
-	WhiteBalanceOnePushTrigger = 'wbOPT',
-	SelectAutoWhiteBalanceSensitivity = 'awbS',
-}
+export const WhiteBalanceActionId = {
+	SelectWhiteBalance: 'wb',
+	WhiteBalanceOnePushTrigger: 'wbOPT',
+	SelectAutoWhiteBalanceSensitivity: 'awbS',
+} as const
+
+export type WhiteBalanceActionId = (typeof WhiteBalanceActionId)[keyof typeof WhiteBalanceActionId]
 
 export const WhiteBalanceModeId = 'val'
 

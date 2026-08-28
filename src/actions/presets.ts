@@ -22,11 +22,13 @@ export const SetPresetId = 'setPreset'
 /** The id of the set-a-preset's-drive-speed action. */
 const SetPresetDriveSpeedId = 'speedPreset'
 
-export enum PresetActionId {
-	RecallPreset = RecallPresetId,
-	SetPreset = SetPresetId,
-	SetPresetDriveSpeed = SetPresetDriveSpeedId,
-}
+export const PresetActionId = {
+	RecallPreset: RecallPresetId,
+	SetPreset: SetPresetId,
+	SetPresetDriveSpeed: SetPresetDriveSpeedId,
+} as const
+
+export type PresetActionId = (typeof PresetActionId)[keyof typeof PresetActionId]
 
 /**
  * The action ID of an obsolete action that would set a preset identified by a
