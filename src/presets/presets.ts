@@ -2,145 +2,15 @@ import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { AutoTrackingActionId, TrackingId } from '../actions/auto-tracking.js'
 import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from '../actions/osd.js'
 import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from '../actions/presets.js'
-import { WhiteBalanceActionId, WhiteBalanceModeId } from '../actions/white-balance.js'
 import { IMAGE_UP, IMAGE_DOWN, IMAGE_LEFT, IMAGE_RIGHT } from '../assets/assets.js'
 import { isValidPreset } from '../camera/presets.js'
 import { exposurePresets } from './exposure.js'
 import { lensPresets } from './lens.js'
 import { panTiltPresets } from './pan-tilt.js'
 import { Black, White } from '../utils/colors.js'
+import { whiteBalancePresets } from './white-balance.js'
 
 export function getPresets(): CompanionPresetDefinitions {
-	const whiteBalancePresets: CompanionPresetDefinitions = {
-		auto_white_balance_preset: {
-			type: 'button',
-			category: 'White balance',
-			name: 'Auto White Balance',
-			style: {
-				text: 'WB\\nAUTO',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: WhiteBalanceActionId.SelectWhiteBalance,
-							options: {
-								[WhiteBalanceModeId]: 'automatic',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-
-		indoor_white_balance_preset: {
-			type: 'button',
-			category: 'White balance',
-			name: 'Indoor White Balance',
-			style: {
-				text: 'WB\\nINDOOR',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: WhiteBalanceActionId.SelectWhiteBalance,
-							options: {
-								[WhiteBalanceModeId]: 'indoor',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-
-		outdoor_white_balance_preset: {
-			type: 'button',
-			category: 'White balance',
-			name: 'Outdoor White Balance',
-			style: {
-				text: 'WB\\nOUT\\nDOOR',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: WhiteBalanceActionId.SelectWhiteBalance,
-							options: {
-								[WhiteBalanceModeId]: 'outdoor',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-
-		one_push_white_balance_preset: {
-			type: 'button',
-			category: 'White balance',
-			name: 'One Push White Balance',
-			style: {
-				text: 'WB\\nONE PUSH',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: WhiteBalanceActionId.SelectWhiteBalance,
-							options: {
-								[WhiteBalanceModeId]: 'onepush',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-
-		trigger_one_push_white_balance_preset: {
-			type: 'button',
-			category: 'White balance',
-			name: 'Trigger One Push White Balance',
-			style: {
-				text: 'WB\\nTRIGGER\\nONE PUSH',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: WhiteBalanceActionId.WhiteBalanceOnePushTrigger,
-							options: {},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-	}
-
 	const autoTrackingPresets: CompanionPresetDefinitions = {
 		auto_tracking_on: {
 			type: 'button',
@@ -378,7 +248,7 @@ export function getPresets(): CompanionPresetDefinitions {
 		...panTiltPresets(),
 		...lensPresets(),
 		...exposurePresets(),
-		...whiteBalancePresets,
+		...whiteBalancePresets(),
 		...autoTrackingPresets,
 		...osdPresets,
 		...presetPresets,
