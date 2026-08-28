@@ -1,8 +1,8 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
-import { AutoTrackingActionId, TrackingId } from '../actions/auto-tracking.js'
 import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from '../actions/osd.js'
 import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from '../actions/presets.js'
 import { IMAGE_UP, IMAGE_DOWN, IMAGE_LEFT, IMAGE_RIGHT } from '../assets/assets.js'
+import { autoTrackingPresets } from './auto-tracking.js'
 import { isValidPreset } from '../camera/presets.js'
 import { exposurePresets } from './exposure.js'
 import { lensPresets } from './lens.js'
@@ -11,60 +11,6 @@ import { Black, White } from '../utils/colors.js'
 import { whiteBalancePresets } from './white-balance.js'
 
 export function getPresets(): CompanionPresetDefinitions {
-	const autoTrackingPresets: CompanionPresetDefinitions = {
-		auto_tracking_on: {
-			type: 'button',
-			category: 'Auto Tracking',
-			name: 'Auto Tracking On',
-			style: {
-				text: 'Auto\\nTracking\\nOn',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: AutoTrackingActionId.AutoTracking,
-							options: {
-								[TrackingId]: 'on',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-
-		auto_tracking_off: {
-			type: 'button',
-			category: 'Auto Tracking',
-			name: 'Auto Tracking Off',
-			style: {
-				text: 'Auto\\nTracking\\nOff',
-				size: '14',
-				color: White,
-				bgcolor: Black,
-			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: AutoTrackingActionId.AutoTracking,
-							options: {
-								[TrackingId]: 'off',
-							},
-						},
-					],
-					up: [],
-				},
-			],
-			feedbacks: [],
-		},
-	}
-
 	const osdPresets: CompanionPresetDefinitions = {
 		osd_toggle: {
 			type: 'button',
@@ -249,7 +195,7 @@ export function getPresets(): CompanionPresetDefinitions {
 		...lensPresets(),
 		...exposurePresets(),
 		...whiteBalancePresets(),
-		...autoTrackingPresets,
+		...autoTrackingPresets(),
 		...osdPresets,
 		...presetPresets,
 	}
