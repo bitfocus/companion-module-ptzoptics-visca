@@ -105,6 +105,11 @@ const customConfig = [
 							importNames: ['assertNever'],
 							message: "Use `Expect<IsNever<typeof val>>` from 'type-testing' instead.",
 						},
+						{
+							name: '@companion-module/base',
+							importNames: ['combineRgb'],
+							message: 'Define a named constant in src/utils/colors.ts using `0xABCDEF`.',
+						},
 					],
 				},
 			],

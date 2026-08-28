@@ -1,4 +1,4 @@
-import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
+import type { CompanionPresetDefinitions } from '@companion-module/base'
 import { ExposureActionId, ExposureModeId } from '../actions/exposure.js'
 import { FocusActionId, FocusModeId } from '../actions/focus.js'
 import { AutoTrackingActionId, TrackingId } from '../actions/auto-tracking.js'
@@ -18,6 +18,7 @@ import {
 	IMAGE_DOWN_RIGHT,
 } from '../assets/assets.js'
 import { isValidPreset } from '../camera/presets.js'
+import { Black, Blue, White } from '../utils/colors.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}
@@ -31,8 +32,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_UP,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 255),
+			color: White,
+			bgcolor: Blue,
 		},
 		steps: [
 			{
@@ -62,8 +63,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_DOWN,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -93,8 +94,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -124,8 +125,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -155,8 +156,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_UP_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -186,8 +187,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_UP_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -217,8 +218,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_DOWN_LEFT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -248,8 +249,8 @@ export function getPresets(): CompanionPresetDefinitions {
 			png64: IMAGE_DOWN_RIGHT,
 			pngalignment: 'center:center',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -277,8 +278,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'HOME',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -301,8 +302,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'SPEED\\nUP',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -325,8 +326,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'SPEED\\nDOWN',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -349,8 +350,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'ZOOM\\nIN',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -378,8 +379,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'ZOOM\\nOUT',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -407,8 +408,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'FOCUS\\nNEAR',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -436,8 +437,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'FOCUS\\nFAR',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -465,8 +466,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'AUTO\\nFOCUS',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -498,8 +499,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'FOCUS\\nLOCK',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -522,8 +523,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'FOCUS\\nUNLOCK',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -546,8 +547,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'EXP\\nMODE',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -583,8 +584,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'IRIS\\nUP',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -607,8 +608,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'IRIS\\nDOWN',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -631,8 +632,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'Shut\\nUP',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -655,8 +656,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'Shut\\nDOWN',
 			size: '18',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -679,8 +680,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'WB\\nAUTO',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -705,8 +706,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'WB\\nINDOOR',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -731,8 +732,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'WB\\nOUT\\nDOOR',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -757,8 +758,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'WB\\nONE PUSH',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -783,8 +784,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'WB\\nTRIGGER\\nONE PUSH',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -807,8 +808,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'Auto\\nTracking\\nOn',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -833,8 +834,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'Auto\\nTracking\\nOff',
 			size: '14',
-			color: combineRgb(255, 255, 255),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -859,8 +860,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'OSD\\nOpen/Close',
 			size: 12,
-			color: combineRgb(0xff, 0xff, 0xff),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -893,8 +894,8 @@ export function getPresets(): CompanionPresetDefinitions {
 				png64: IMAGE,
 				pngalignment: 'center:center',
 				size: '18',
-				color: combineRgb(0xff, 0xff, 0xff),
-				bgcolor: combineRgb(0, 0, 0),
+				color: White,
+				bgcolor: Black,
 			},
 			steps: [
 				{
@@ -920,8 +921,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'OSD\\nEnter',
 			size: '18',
-			color: combineRgb(0xff, 0xff, 0xff),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -944,8 +945,8 @@ export function getPresets(): CompanionPresetDefinitions {
 		style: {
 			text: 'OSD\\nBack',
 			size: '18',
-			color: combineRgb(0xff, 0xff, 0xff),
-			bgcolor: combineRgb(0, 0, 0),
+			color: White,
+			bgcolor: Black,
 		},
 		steps: [
 			{
@@ -971,8 +972,8 @@ export function getPresets(): CompanionPresetDefinitions {
 				style: {
 					text: `SAVE\\nPSET\\n${save}`,
 					size: '14',
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(0, 0, 0),
+					color: White,
+					bgcolor: Black,
 				},
 				steps: [
 					{
@@ -1004,8 +1005,8 @@ export function getPresets(): CompanionPresetDefinitions {
 				style: {
 					text: `Recall\\nPSET\\n${recall}`,
 					size: '14',
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(0, 0, 0),
+					color: White,
+					bgcolor: Black,
 				},
 				steps: [
 					{
