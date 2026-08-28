@@ -1,12 +1,12 @@
 import { combineRgb, type CompanionPresetDefinitions } from '@companion-module/base'
-import { ExposureActionId, ExposureModeId } from './actions/exposure.js'
-import { FocusActionId, FocusModeId } from './actions/focus.js'
-import { AutoTrackingActionId, TrackingId } from './actions/auto-tracking.js'
-import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from './actions/osd.js'
-import { PanTiltActionId } from './actions/pan-tilt.js'
-import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from './actions/presets.js'
-import { WhiteBalanceActionId, WhiteBalanceModeId } from './actions/white-balance.js'
-import { ZoomActionId } from './actions/zoom.js'
+import { ExposureActionId, ExposureModeId } from '../actions/exposure.js'
+import { FocusActionId, FocusModeId } from '../actions/focus.js'
+import { AutoTrackingActionId, TrackingId } from '../actions/auto-tracking.js'
+import { OnScreenDisplayMenuStateId, OSDActionId, OSDNavigateDirectionId } from '../actions/osd.js'
+import { PanTiltActionId } from '../actions/pan-tilt.js'
+import { PresetAsNumberId, PresetAsTextId, PresetIsTextId, RecallPresetId, SetPresetId } from '../actions/presets.js'
+import { WhiteBalanceActionId, WhiteBalanceModeId } from '../actions/white-balance.js'
+import { ZoomActionId } from '../actions/zoom.js'
 import {
 	IMAGE_UP,
 	IMAGE_DOWN,
@@ -16,8 +16,8 @@ import {
 	IMAGE_UP_LEFT,
 	IMAGE_DOWN_LEFT,
 	IMAGE_DOWN_RIGHT,
-} from './assets/assets.js'
-import { isValidPreset } from './camera/presets.js'
+} from '../assets/assets.js'
+import { isValidPreset } from '../camera/presets.js'
 
 export function getPresets(): CompanionPresetDefinitions {
 	const presets: CompanionPresetDefinitions = {}

@@ -9,7 +9,7 @@ import {
 	type PtzOpticsConfig,
 	validateConfig,
 } from './config.js'
-import { getPresets } from './presets.js'
+import { getPresets } from './presets/presets.js'
 import { repr } from './utils/repr.js'
 import type { Command, CommandParameters, CommandParamValues, NoCommandParameters } from './visca/command.js'
 import type { Answer, AnswerParameters, Inquiry } from './visca/inquiry.js'
