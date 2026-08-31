@@ -1,6 +1,14 @@
 import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
-import { FocusFarStandard, FocusLock, FocusMode, FocusNearStandard, FocusStop, FocusUnlock } from '../camera/focus.js'
+import {
+	FocusFarStandard,
+	FocusLock,
+	FocusMode,
+	FocusNearStandard,
+	FocusStop,
+	FocusUnlock,
+	SetFocusMode,
+} from '../camera/focus.js'
 import { FocusModeInquiry } from '../camera/focus.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionConversions } from './option-conversion.js'
@@ -21,10 +29,10 @@ export const FocusModeId = 'bol'
 const [getFocusMode, focusModeToOption] = optionConversions<FocusMode, typeof FocusModeId>(
 	FocusModeId,
 	[
-		['0', 'auto'],
-		['1', 'manual'],
+		['0', FocusMode.Auto],
+		['1', FocusMode.Manual],
 	],
-	'auto',
+	FocusMode.Auto,
 	'0',
 	String,
 )
@@ -47,7 +55,7 @@ export function focusActions(instance: PtzOpticsInstance): ActionDefinitions<Foc
 			],
 			callback: async ({ options }) => {
 				const mode = getFocusMode(options)
-				instance.sendCommand(FocusMode, { mode })
+				instance.sendCommand(SetFocusMode, { mode })
 			},
 			learn: async (_event: CompanionActionEvent) => {
 				const answer = await instance.sendInquiry(FocusModeInquiry)

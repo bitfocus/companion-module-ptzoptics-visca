@@ -2,9 +2,9 @@ import type { CompanionActionEvent } from '@companion-module/base'
 import type { ActionDefinitions } from './actionid.js'
 import {
 	AutoWhiteBalanceSensitivity,
-	type AutoWhiteBalanceSensitivityLevel,
+	AutoWhiteBalanceSensitivityLevel,
 	WhiteBalance,
-	type WhiteBalanceMode,
+	WhiteBalanceMode,
 	WhiteBalanceOnePushTrigger,
 } from '../camera/white-balance.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -22,8 +22,14 @@ export const WhiteBalanceModeId = 'val'
 
 const [getWhiteBalanceMode] = optionNullConversions<WhiteBalanceMode, typeof WhiteBalanceModeId>(
 	WhiteBalanceModeId,
-	['automatic', 'indoor', 'outdoor', 'onepush', 'manual'],
-	'automatic',
+	[
+		WhiteBalanceMode.Automatic,
+		WhiteBalanceMode.Indoor,
+		WhiteBalanceMode.Outdoor,
+		WhiteBalanceMode.OnePush,
+		WhiteBalanceMode.Manual,
+	],
+	WhiteBalanceMode.Automatic,
 )
 
 const AutoWhiteBalanceSensitivityId = 'val'
@@ -34,11 +40,11 @@ const [getAutoWhiteBalanceSensitivityLevel] = optionConversions<
 >(
 	AutoWhiteBalanceSensitivityId,
 	[
-		[0, 'high'],
-		[1, 'normal'],
-		[2, 'low'],
+		[0, AutoWhiteBalanceSensitivityLevel.High],
+		[1, AutoWhiteBalanceSensitivityLevel.Normal],
+		[2, AutoWhiteBalanceSensitivityLevel.Low],
 	],
-	'normal',
+	AutoWhiteBalanceSensitivityLevel.Normal,
 	1,
 )
 

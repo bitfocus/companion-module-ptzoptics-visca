@@ -1,5 +1,5 @@
 import type { ActionDefinitions } from './actionid.js'
-import { AutoTracking, type AutoTrackingState } from '../camera/auto-tracking.js'
+import { AutoTracking, AutoTrackingState } from '../camera/auto-tracking.js'
 import type { PtzOpticsInstance } from '../instance.js'
 import { optionNullConversions } from './option-conversion.js'
 
@@ -13,8 +13,8 @@ export const TrackingId = 'tracking'
 
 const [getAutoTrackingState] = optionNullConversions<AutoTrackingState, typeof TrackingId>(
 	TrackingId,
-	['off', 'on'],
-	'off',
+	[AutoTrackingState.Off, AutoTrackingState.On],
+	AutoTrackingState.Off,
 )
 
 export function autoTrackingActions(instance: PtzOpticsInstance): ActionDefinitions<AutoTrackingActionId> {

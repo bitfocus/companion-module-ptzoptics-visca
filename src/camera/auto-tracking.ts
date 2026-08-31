@@ -1,7 +1,12 @@
 import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 
-export type AutoTrackingState = 'on' | 'off'
+export const AutoTrackingState = {
+	On: 'on',
+	Off: 'off',
+} as const
+
+export type AutoTrackingState = (typeof AutoTrackingState)[keyof typeof AutoTrackingState]
 
 // PTZOptics G3 VISCA over IP Commands, 10/27/2023:
 // 81 0A 11 54 0p FF, p: 0x2=On, 0x3=Off

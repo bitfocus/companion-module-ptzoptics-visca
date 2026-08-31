@@ -1,6 +1,6 @@
 import type { ActionDefinitions } from './actionid.js'
 import type { PtzOpticsInstance } from '../instance.js'
-import { CameraPower, type CameraPowerState } from '../camera/power.js'
+import { CameraPower, CameraPowerState } from '../camera/power.js'
 import { optionConversions } from './option-conversion.js'
 
 export const PowerActionId = {
@@ -14,10 +14,10 @@ const PowerStateId = 'bool'
 const [getPowerState] = optionConversions<CameraPowerState, typeof PowerStateId>(
 	PowerStateId,
 	[
-		['off', 'standby'],
-		['on', 'on'],
+		['off', CameraPowerState.Standby],
+		['on', CameraPowerState.On],
 	],
-	'on',
+	CameraPowerState.On,
 	'on',
 )
 

@@ -1,7 +1,15 @@
 import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 
-export type WhiteBalanceMode = 'automatic' | 'indoor' | 'outdoor' | 'onepush' | 'manual'
+export const WhiteBalanceMode = {
+	Automatic: 'automatic',
+	Indoor: 'indoor',
+	Outdoor: 'outdoor',
+	OnePush: 'onepush',
+	Manual: 'manual',
+} as const
+
+export type WhiteBalanceMode = (typeof WhiteBalanceMode)[keyof typeof WhiteBalanceMode]
 
 export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x00, 0xff], {
 	mode: {
@@ -30,7 +38,14 @@ export const WhiteBalance = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x35, 0x
 
 export const WhiteBalanceOnePushTrigger = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x10, 0x05, 0xff])
 
-export type AutoWhiteBalanceSensitivityLevel = 'high' | 'normal' | 'low'
+export const AutoWhiteBalanceSensitivityLevel = {
+	High: 'high',
+	Normal: 'normal',
+	Low: 'low',
+} as const
+
+export type AutoWhiteBalanceSensitivityLevel =
+	(typeof AutoWhiteBalanceSensitivityLevel)[keyof typeof AutoWhiteBalanceSensitivityLevel]
 
 export const AutoWhiteBalanceSensitivity = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0xa9, 0x00, 0xff], {
 	level: {

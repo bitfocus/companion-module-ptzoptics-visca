@@ -4,10 +4,10 @@ import {
 	OnScreenDisplayBack,
 	OnScreenDisplayClose,
 	OnScreenDisplayEnter,
-	type OnScreenDisplayMenuState,
+	OnScreenDisplayMenuState,
 	OnScreenDisplayNavigate,
 	OnScreenDisplayToggle,
-	type OSDNavigateDirection,
+	OSDNavigateDirection,
 } from '../camera/osd.js'
 import { OnScreenDisplayInquiry } from '../camera/osd.js'
 import type { PtzOpticsInstance } from '../instance.js'
@@ -26,16 +26,16 @@ export const OnScreenDisplayMenuStateId = 'state'
 
 const osdMenuStateToOption = optionNullConversions<OnScreenDisplayMenuState, typeof OnScreenDisplayMenuStateId>(
 	OnScreenDisplayMenuStateId,
-	['open', 'close'],
-	'open',
+	[OnScreenDisplayMenuState.Open, OnScreenDisplayMenuState.Close],
+	OnScreenDisplayMenuState.Open,
 )[1]
 
 export const OSDNavigateDirectionId = 'direction'
 
 const [getOSDNavigateDirection] = optionNullConversions<OSDNavigateDirection, typeof OSDNavigateDirectionId>(
 	OSDNavigateDirectionId,
-	['up', 'down', 'left', 'right'],
-	'down',
+	[OSDNavigateDirection.Up, OSDNavigateDirection.Down, OSDNavigateDirection.Left, OSDNavigateDirection.Right],
+	OSDNavigateDirection.Down,
 )
 
 export function osdActions(instance: PtzOpticsInstance): ActionDefinitions<OSDActionId> {

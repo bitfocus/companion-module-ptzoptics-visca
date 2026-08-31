@@ -1,7 +1,12 @@
 import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 
-export type CameraPowerState = 'standby' | 'on'
+export const CameraPowerState = {
+	Standby: 'standby',
+	On: 'on',
+} as const
+
+export type CameraPowerState = (typeof CameraPowerState)[keyof typeof CameraPowerState]
 
 export const CameraPower = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x00, 0x00, 0xff], {
 	state: {

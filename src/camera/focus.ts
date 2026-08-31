@@ -6,7 +6,12 @@ export const FocusStop = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x00,
 export const FocusNearStandard = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x03, 0xff])
 export const FocusFarStandard = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x08, 0x02, 0xff])
 
-export type FocusMode = 'auto' | 'manual'
+export const FocusMode = {
+	Auto: 'auto',
+	Manual: 'manual',
+} as const
+
+export type FocusMode = (typeof FocusMode)[keyof typeof FocusMode]
 
 export const FocusModeInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x38, 0xff], {
 	bytes: [0x90, 0x50, 0x00, 0xff],
@@ -26,7 +31,7 @@ export const FocusModeInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x04, 0x38
 	},
 })
 
-export const FocusMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x38, 0x00, 0xff], {
+export const SetFocusMode = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x38, 0x00, 0xff], {
 	mode: {
 		nibbles: [9],
 		convert: (mode: FocusMode): number => {

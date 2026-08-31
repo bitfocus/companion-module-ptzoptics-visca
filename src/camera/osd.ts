@@ -2,7 +2,12 @@ import type { Expect, IsNever } from 'type-testing'
 import { ModuleDefinedCommand } from '../visca/command.js'
 import { ModuleDefinedInquiry } from '../visca/inquiry.js'
 
-export type OnScreenDisplayMenuState = 'open' | 'close'
+export const OnScreenDisplayMenuState = {
+	Open: 'open',
+	Close: 'close',
+} as const
+
+export type OnScreenDisplayMenuState = (typeof OnScreenDisplayMenuState)[keyof typeof OnScreenDisplayMenuState]
 
 export const OnScreenDisplayInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x06, 0x06, 0xff], {
 	bytes: [0x90, 0x50, 0x00, 0xff],
@@ -25,7 +30,14 @@ export const OnScreenDisplayInquiry = new ModuleDefinedInquiry([0x81, 0x09, 0x06
 export const OnScreenDisplayToggle = new ModuleDefinedCommand([0x81, 0x01, 0x04, 0x3f, 0x02, 0x5f, 0xff])
 export const OnScreenDisplayClose = new ModuleDefinedCommand([0x81, 0x01, 0x06, 0x06, 0x03, 0xff])
 
-export type OSDNavigateDirection = 'up' | 'right' | 'down' | 'left'
+export const OSDNavigateDirection = {
+	Up: 'up',
+	Right: 'right',
+	Down: 'down',
+	Left: 'left',
+} as const
+
+export type OSDNavigateDirection = (typeof OSDNavigateDirection)[keyof typeof OSDNavigateDirection]
 
 export const OnScreenDisplayNavigate = new ModuleDefinedCommand(
 	[0x81, 0x01, 0x06, 0x01, 0x0e, 0x0e, 0x00, 0x00, 0xff],
